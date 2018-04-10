@@ -1,20 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="c644a2f6-fefc-4284-a949-6544d71b5248" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/pkg/darwin_amd64/webserver.a" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/pkg/darwin_amd64/webserver/config.a" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/pkg/darwin_amd64/webserver/dbx.a" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/pkg/darwin_amd64/webserver/errorx.a" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/pkg/darwin_amd64/webserver/handler.a" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/pkg/darwin_amd64/webserver/jsonx.a" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/pkg/darwin_amd64/webserver/logger.a" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/pkg/darwin_amd64/webserver/permission.a" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/pkg/darwin_amd64/webserver/server.a" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/pkg/darwin_amd64/webserver/session.a" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/pkg/darwin_amd64/webserver/utilsx.a" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/server-debug.log" afterPath="" />
-    </list>
+    <list default="true" id="c644a2f6-fefc-4284-a949-6544d71b5248" name="Default" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
