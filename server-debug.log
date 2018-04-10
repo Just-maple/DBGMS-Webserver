@@ -1,1 +1,0 @@
-[35m18:46:01 new.go:14 NewWebServerFromHandler ▶ [CRIT:001[0m] Init TableConfig FromFiles Error =  open : no such file or directory

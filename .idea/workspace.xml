@@ -2,26 +2,18 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="c644a2f6-fefc-4284-a949-6544d71b5248" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/webserver/config/config.go" afterPath="$PROJECT_DIR$/src/webserver/config/config.go" />
-      <change beforePath="$PROJECT_DIR$/webserver/dbx/ajax.go" afterPath="$PROJECT_DIR$/src/webserver/dbx/ajax.go" />
-      <change beforePath="$PROJECT_DIR$/webserver/dbx/collection.go" afterPath="$PROJECT_DIR$/src/webserver/dbx/collection.go" />
-      <change beforePath="$PROJECT_DIR$/webserver/dbx/const.go" afterPath="$PROJECT_DIR$/src/webserver/dbx/const.go" />
-      <change beforePath="$PROJECT_DIR$/webserver/dbx/init.go" afterPath="$PROJECT_DIR$/src/webserver/dbx/init.go" />
-      <change beforePath="$PROJECT_DIR$/webserver/errorx/errors.go" afterPath="$PROJECT_DIR$/src/webserver/errorx/errors.go" />
-      <change beforePath="$PROJECT_DIR$/webserver/handler/ajax.go" afterPath="$PROJECT_DIR$/src/webserver/handler/ajax.go" />
-      <change beforePath="$PROJECT_DIR$/webserver/handler/config.go" afterPath="$PROJECT_DIR$/src/webserver/handler/config.go" />
-      <change beforePath="$PROJECT_DIR$/webserver/handler/default.go" afterPath="$PROJECT_DIR$/src/webserver/handler/default.go" />
-      <change beforePath="$PROJECT_DIR$/webserver/handler/permission.go" afterPath="$PROJECT_DIR$/src/webserver/handler/permission.go" />
-      <change beforePath="$PROJECT_DIR$/webserver/jsonx/const.go" afterPath="$PROJECT_DIR$/src/webserver/jsonx/const.go" />
-      <change beforePath="$PROJECT_DIR$/webserver/jsonx/jsonx.go" afterPath="$PROJECT_DIR$/src/webserver/jsonx/jsonx.go" />
-      <change beforePath="$PROJECT_DIR$/webserver/logger/logger.go" afterPath="$PROJECT_DIR$/src/webserver/logger/logger.go" />
-      <change beforePath="$PROJECT_DIR$/webserver/new.go" afterPath="$PROJECT_DIR$/src/webserver/new.go" />
-      <change beforePath="$PROJECT_DIR$/webserver/permission/permission.go" afterPath="$PROJECT_DIR$/src/webserver/permission/permission.go" />
-      <change beforePath="$PROJECT_DIR$/webserver/server/api.go" afterPath="$PROJECT_DIR$/src/webserver/server/api.go" />
-      <change beforePath="$PROJECT_DIR$/webserver/server/init.go" afterPath="$PROJECT_DIR$/src/webserver/server/init.go" />
-      <change beforePath="$PROJECT_DIR$/webserver/server/interface.go" afterPath="$PROJECT_DIR$/src/webserver/server/interface.go" />
-      <change beforePath="$PROJECT_DIR$/webserver/session/session.go" afterPath="$PROJECT_DIR$/src/webserver/session/session.go" />
-      <change beforePath="$PROJECT_DIR$/webserver/utilsx/utils.go" afterPath="$PROJECT_DIR$/src/webserver/utilsx/utils.go" />
+      <change beforePath="$PROJECT_DIR$/pkg/darwin_amd64/webserver.a" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/pkg/darwin_amd64/webserver/config.a" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/pkg/darwin_amd64/webserver/dbx.a" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/pkg/darwin_amd64/webserver/errorx.a" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/pkg/darwin_amd64/webserver/handler.a" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/pkg/darwin_amd64/webserver/jsonx.a" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/pkg/darwin_amd64/webserver/logger.a" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/pkg/darwin_amd64/webserver/permission.a" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/pkg/darwin_amd64/webserver/server.a" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/pkg/darwin_amd64/webserver/session.a" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/pkg/darwin_amd64/webserver/utilsx.a" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/server-debug.log" afterPath="" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -36,27 +28,17 @@
         <entry file="file://$PROJECT_DIR$/src/webserver/new.go">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="330">
-              <caret line="15" column="31" lean-forward="true" selection-start-line="15" selection-start-column="31" selection-end-line="15" selection-end-column="31" />
+              <caret line="15" column="31" lean-forward="false" selection-start-line="15" selection-start-column="31" selection-end-line="15" selection-end-column="31" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="main.go" pinned="false" current-in-tab="false">
+      <file leaf-file-name="main.go" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/main.go">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="308">
               <caret line="14" column="24" lean-forward="false" selection-start-line="14" selection-start-column="24" selection-end-line="14" selection-end-column="24" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="server-debug.log" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/server-debug.log">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="0">
-              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -396,15 +378,7 @@
     <entry file="file://$PROJECT_DIR$/src/webserver/new.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="330">
-          <caret line="15" column="31" lean-forward="true" selection-start-line="15" selection-start-column="31" selection-end-line="15" selection-end-column="31" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/main.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="308">
-          <caret line="14" column="24" lean-forward="false" selection-start-line="14" selection-start-column="24" selection-end-line="14" selection-end-column="24" />
+          <caret line="15" column="31" lean-forward="false" selection-start-line="15" selection-start-column="31" selection-end-line="15" selection-end-column="31" />
           <folding />
         </state>
       </provider>
@@ -413,6 +387,14 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/main.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="308">
+          <caret line="14" column="24" lean-forward="false" selection-start-line="14" selection-start-column="24" selection-end-line="14" selection-end-column="24" />
           <folding />
         </state>
       </provider>
