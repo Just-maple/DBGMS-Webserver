@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"github.com/bitly/go-simplejson"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"reflect"
@@ -21,30 +22,51 @@ type ApiHandlerConfig interface {
 	GetMgoDBUrl() string
 }
 
+type ExtendApiHandler interface {
+	ws.ApiHandlers
+	RegisterAPI()
+	NewDataBase() DB
+}
+
+type DB interface {
+	AuthAdminUser(string) bool
+	AuthSuperAdminUser(string) (bool, bool)
+}
+
 type DefaultApiHandler struct {
-	apiHandlers     ws.ApiHandlers
+	apiHandlers     ExtendApiHandler
 	router          *gin.Engine
-	ApiGetHandlers  ws.JsonAPIFuncRoute
-	ApiPostHandlers ws.JsonAPIFuncRoute
-	db              ws.DB
+	ApiGetHandlers  JsonAPIFuncRoute
+	ApiPostHandlers JsonAPIFuncRoute
+	db              DB
 	Config          ApiHandlerConfig
 	TableConfig     permission.TableConfigMap
 }
 
-func NewDefaultHandlerFromConfig(config ApiHandlerConfig, ah ws.ApiHandlers) {
+func (h JsonAPIFuncRoute) RegisterDefaultAPI(name string, api DefaultAPI) {
+	h.RegisterAPI(name, func(context *gin.Context, json *jsonx.Json, userSession *session.UserSession) (i interface{}, e error) {
+		return api(DefaultAPIArgs{
+			context, json, userSession,
+		})
+	})
+}
+
+func NewDefaultHandlerFromConfig(config ApiHandlerConfig, ah ExtendApiHandler) {
 	h := &DefaultApiHandler{
 		Config:          config,
-		ApiGetHandlers:  ws.NewJsonAPIFuncRoute(),
-		ApiPostHandlers: ws.NewJsonAPIFuncRoute(),
+		ApiGetHandlers:  NewJsonAPIFuncRoute(),
+		ApiPostHandlers: NewJsonAPIFuncRoute(),
 		apiHandlers:     ah,
 	}
 	ptrC := reflect.ValueOf(ah).Elem().FieldByName("Config")
-	if ptrC.IsValid() && ptrC.CanSet() {
-		ptrC.Set(reflect.ValueOf(config).Elem())
+	if ptrC.IsValid() && ptrC.CanSet() && ptrC.Type() == reflect.TypeOf(config) {
+		ptrC.Set(reflect.ValueOf(config))
+	} else {
+		panic("Invalid Config")
 	}
 	ptrH := reflect.ValueOf(ah).Elem().FieldByName("DefaultApiHandler")
-	if ptrH.IsValid() && ptrH.CanSet() && ptrH.Type() == reflect.TypeOf(h).Elem() {
-		ptrH.Set(reflect.ValueOf(h).Elem())
+	if ptrH.IsValid() && ptrH.CanSet() && ptrH.Type() == reflect.TypeOf(h) {
+		ptrH.Set(reflect.ValueOf(h))
 	} else {
 		panic("Invalid ApiHandler")
 	}
@@ -62,22 +84,90 @@ func (h *DefaultApiHandler) RegisterRouter(method, path string, function gin.Han
 	case http.MethodPost:
 		h.router.POST(path, function)
 	}
-
+	
 }
 
 func (h *DefaultApiHandler) SetRouter(r *gin.Engine) {
 	h.router = r
 }
 
-func (h *DefaultApiHandler) RegisterDefaultAPI(api gin.HandlerFunc) {
-	h.router.GET("/api/:api", api)
-	h.router.POST("/api/:api", api)
+func (h *DefaultApiHandler) RegisterJsonAPI() {
+	h.router.GET("/api/:api", h.JsonAPI)
+	h.router.POST("/api/:api", h.JsonAPI)
 	h.ApiPostHandlers.RegisterAPI("test", h.Test)
 	h.ApiGetHandlers.RegisterAPI("test", h.Test)
 	h.apiHandlers.RegisterAPI()
 }
 
-func (h *DefaultApiHandler) GetApiFunc(method, apiName string) (function ws.JsonAPIFunc, exists bool) {
+func (h *DefaultApiHandler) JsonAPI(c *gin.Context) {
+	var ok bool
+	var ret interface{}
+	var err error
+	var function JsonAPIFunc
+	var exists bool
+	userSession := h.GetSession(c)
+	apiName := c.Param("api")
+	function, exists = h.GetApiFunc(c.Request.Method, apiName)
+	if exists == true {
+		var jsonData = new(jsonx.Json)
+		if c.Request.Method == http.MethodPost {
+			jsonData.Json, err = simplejson.NewFromReader(c.Request.Body)
+		} else {
+			jsonData.Json = simplejson.New()
+		}
+		if err == nil {
+			ret, err = function(c, jsonData, userSession)
+			if err == nil {
+				ok = true
+			}
+		}
+		
+	}
+	if h.CheckDataBaseConnection(err); err == nil {
+		ret = h.RenderPermission(c, userSession, ret)
+	} else {
+		log.Errorf("JsonAPI(%s) err = %v", apiName, err)
+	}
+	RenderJson(c, ok, ret, err)
+}
+
+type JsonAPIFuncRoute map[string]JsonAPIFunc
+
+func NewJsonAPIFuncRoute() JsonAPIFuncRoute {
+	return make(JsonAPIFuncRoute)
+}
+
+func (h JsonAPIFuncRoute) RegisterAPI(name string, function JsonAPIFunc) {
+	h[name] = function
+}
+
+func RenderJson(c *gin.Context, ok bool, data interface{}, err error) {
+	c.Header("Access-Control-Allow-Origin", "*")
+	if ok == true {
+		c.JSON(http.StatusOK, map[string]interface{}{
+			"ok":   ok,
+			"data": data,
+		})
+	} else {
+		if err != nil {
+			c.IndentedJSON(http.StatusInternalServerError, map[string]interface{}{
+				"ok":   ok,
+				"data": data,
+				"err":  err.Error(),
+			})
+			
+		} else {
+			c.IndentedJSON(http.StatusInternalServerError, map[string]interface{}{
+				"ok":   ok,
+				"data": data,
+			})
+		}
+	}
+}
+
+type JsonAPIFunc func(*gin.Context, *jsonx.Json, *session.UserSession) (interface{}, error)
+
+func (h *DefaultApiHandler) GetApiFunc(method, apiName string) (function JsonAPIFunc, exists bool) {
 	switch method {
 	case http.MethodGet:
 		function, exists = h.ApiGetHandlers[apiName]

@@ -1,14 +1,13 @@
 package handler
 
 import (
-	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"reflect"
 	. "webserver/session"
 )
 
 func (h *DefaultApiHandler) GetSession(c *gin.Context) (us *UserSession) {
-	s := sessions.Default(c)
+	s := Default(c)
 	us = &UserSession{Session: s}
 	return
 }

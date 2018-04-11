@@ -6,7 +6,6 @@ import (
 	"time"
 	"webserver/dbx"
 	"webserver/jsonx"
-	. "webserver/server"
 	"webserver/session"
 	. "webserver/utilsx"
 )

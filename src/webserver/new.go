@@ -10,7 +10,7 @@ type Config interface {
 	ServerConfig
 }
 
-func NewWebServerFromHandler(config Config, apiHandler ApiHandlers) (svr *WebServer) {
+func NewWebServerFromHandler(config Config, apiHandler ExtendApiHandler) (svr *WebServer) {
 	NewDefaultHandlerFromConfig(config, apiHandler)
 	svr = NewWebServer(config)
 	svr.InitHandler(apiHandler)

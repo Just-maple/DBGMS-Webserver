@@ -1,4 +1,4 @@
-package server
+package handler
 
 import (
 	"github.com/bitly/go-simplejson"
@@ -13,14 +13,6 @@ type DefaultAPIArgs struct {
 	context *gin.Context
 	json    *jsonx.Json
 	session *session.UserSession
-}
-
-func (h JsonAPIFuncRoute) RegisterDefaultAPI(name string, api DefaultAPI) {
-	h.RegisterAPI(name, func(context *gin.Context, json *jsonx.Json, userSession *session.UserSession) (i interface{}, e error) {
-		return api(DefaultAPIArgs{
-			context, json, userSession,
-		})
-	})
 }
 
 func (arg *DefaultAPIArgs) GetQuery(key string) string {

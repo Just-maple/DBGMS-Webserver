@@ -4,7 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"net"
 	"net/http"
-	"webserver/session"
 )
 
 type ServerConfig interface {
@@ -13,24 +12,15 @@ type ServerConfig interface {
 	GetSessionSecretKey() string
 }
 
-type DB interface {
-	AuthAdminUser(string) bool
-	AuthSuperAdminUser(string) (bool, bool)
-}
+
 
 type ApiHandlers interface {
-	GetApiFunc(string, string) (JsonAPIFunc, bool)
-
-	RegisterDefaultAPI(gin.HandlerFunc)
-	RegisterAPI()
-
+	RegisterJsonAPI()
+	
 	InitDataBase()
-	NewDataBase() DB
 	InitMetaConfig()
-	CheckDataBaseConnection(err error)
-	RenderPermission(c *gin.Context, session *session.UserSession, in interface{}) (out interface{})
+	
 	SetRouter(r *gin.Engine)
-	GetSession(c *gin.Context) (us *session.UserSession)
 }
 
 type WebServer struct {

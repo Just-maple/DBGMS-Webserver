@@ -3,6 +3,7 @@ package session
 import (
 	"github.com/gin-contrib/sessions"
 	"gopkg.in/mgo.v2/bson"
+	"github.com/gin-gonic/gin"
 )
 
 const (
@@ -23,4 +24,8 @@ func (us *UserSession) AuthUserSession() (bool, string) {
 		return false, ""
 	}
 	return bson.IsObjectIdHex(userId.(string)), userId.(string)
+}
+
+func Default(c *gin.Context) UserSession {
+	return UserSession{sessions.Default(c)}
 }

@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 	"webserver/logger"
-	"webserver/server"
 )
 
 var log = logger.Log
@@ -36,7 +35,7 @@ func NewMgoDataBase(mgoURL, dbName string) (db *mgo.Database, err error) {
 	return
 }
 
-func NewMgoDB(mgoURL string, db server.DB) (err error) {
+func NewMgoDB(mgoURL string, db interface{}) (err error) {
 	log.Debugf("Start Init MgoDB ,Url =  [ %v ]", mgoURL)
 	if err != nil {
 		return
