@@ -18,34 +18,6 @@ func (h JsonAPIFuncRoute) RegisterAPI(name string, function JsonAPIFunc) {
 	h[name] = function
 }
 
-type DefaultAPI func(args DefaultAPIArgs) (ret interface{}, err error)
-
-type DefaultAPIArgs struct {
-	context *gin.Context
-	json    *jsonx.Json
-	session *session.UserSession
-}
-
-func (arg *DefaultAPIArgs) GetQuery(key string) (string) {
-	return arg.context.Query(key)
-}
-
-func (arg *DefaultAPIArgs) GetUserId() (valid bool, userId string) {
-	return arg.session.AuthUserSession()
-}
-
-func (arg *DefaultAPIArgs) GetJsonKey(key string) (*simplejson.Json) {
-	return arg.json.Get(key)
-}
-
-func (h JsonAPIFuncRoute) RegisterDefaultAPI(name string, api DefaultAPI) {
-	h.RegisterAPI(name, func(context *gin.Context, json *jsonx.Json, userSession *session.UserSession) (i interface{}, e error) {
-		return api(DefaultAPIArgs{
-			context, json, userSession,
-		})
-	})
-}
-
 func RenderJson(c *gin.Context, ok bool, data interface{}, err error) {
 	c.Header("Access-Control-Allow-Origin", "*")
 	if ok == true {
@@ -60,7 +32,7 @@ func RenderJson(c *gin.Context, ok bool, data interface{}, err error) {
 				"data": data,
 				"err":  err.Error(),
 			})
-			
+
 		} else {
 			c.IndentedJSON(http.StatusInternalServerError, map[string]interface{}{
 				"ok":   ok,
@@ -94,7 +66,7 @@ func (svr *WebServer) JsonAPI(c *gin.Context) {
 				ok = true
 			}
 		}
-		
+
 	}
 	if svr.ApiHandlers.CheckDataBaseConnection(err); err == nil {
 		ret = svr.ApiHandlers.RenderPermission(c, userSession, ret)

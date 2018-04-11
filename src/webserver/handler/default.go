@@ -40,11 +40,11 @@ func NewDefaultHandlerFromConfig(config ApiHandlerConfig, ah ws.ApiHandlers) {
 	}
 	ptrC := reflect.ValueOf(ah).Elem().FieldByName("Config")
 	if ptrC.IsValid() && ptrC.CanSet() {
-		ptrC.Set(reflect.ValueOf(config))
+		ptrC.Set(reflect.ValueOf(config).Elem())
 	}
 	ptrH := reflect.ValueOf(ah).Elem().FieldByName("DefaultApiHandler")
-	if ptrH.IsValid() && ptrH.CanSet() && ptrH.Type() == reflect.TypeOf(h) {
-		ptrH.Set(reflect.ValueOf(h))
+	if ptrH.IsValid() && ptrH.CanSet() && ptrH.Type() == reflect.TypeOf(h).Elem() {
+		ptrH.Set(reflect.ValueOf(h).Elem())
 	} else {
 		panic("Invalid ApiHandler")
 	}
@@ -62,7 +62,7 @@ func (h *DefaultApiHandler) RegisterRouter(method, path string, function gin.Han
 	case http.MethodPost:
 		h.router.POST(path, function)
 	}
-	
+
 }
 
 func (h *DefaultApiHandler) SetRouter(r *gin.Engine) {

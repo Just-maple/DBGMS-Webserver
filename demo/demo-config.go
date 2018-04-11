@@ -7,11 +7,11 @@ type Config struct {
 	//implement default config
 }
 
-func NewConfig()(*Config){
-	return 	&Config{
+func NewConfig() *Config {
+	return &Config{
 		config.DefaultConfig{
 			MgoDBUrl:         "mongodb://wx2.asoapp.com:27777/wx",
-			ServerAddr:       "0.0.0.0:8888",
+			ServerAddr:       "0.0.0.0:8388",
 			TablePath:        "./",
 			SessionSecretKey: "secret",
 			SessionKey:       "session",

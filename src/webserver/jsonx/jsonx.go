@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/bitly/go-simplejson"
 	"reflect"
+	"webserver/errorx"
 )
 
 type Json struct {
@@ -12,7 +13,7 @@ type Json struct {
 
 func (j *Json) CallMethodByInstance(method interface{}, intf interface{}) (err error) {
 	if reflect.TypeOf(method).Kind() != reflect.Func || reflect.TypeOf(method).In(0) != reflect.TypeOf(intf) {
-		err = ErrMethodInvalid
+		err = errorx.ErrMethodInvalid
 		return
 	}
 	if err = j.Unmarshal(intf); err != nil {

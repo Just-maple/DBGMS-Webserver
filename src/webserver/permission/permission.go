@@ -23,12 +23,11 @@ type StructFieldConfig struct {
 }
 
 type ApiPermissionConfig struct {
-	Admin      bool   `json:"admin"`
-	SuperAdmin bool   `json:"superAdmin"`
+	Admin      bool `json:"admin"`
+	SuperAdmin bool `json:"superAdmin"`
 }
 
 type ApiConfigMap map[string]ApiPermissionConfig
-
 
 type TableConfig struct {
 	FilesName      string

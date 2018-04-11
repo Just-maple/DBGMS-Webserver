@@ -2,24 +2,31 @@ package main
 
 import (
 	"webserver/handler"
-	"webserver/server"
 	"webserver/logger"
+	"webserver/server"
 )
 
 var log = logger.Log
 
 type ApiHandler struct {
 	//your custom handler
-	*Config
+	Config
 	//must contain Config that implement default config and named Config
-	*handler.DefaultApiHandler
+	handler.DefaultApiHandler
 	//implement default handler and named DefaultApiHandler
-	db *DataBase
+	db DataBase
 	//implement singleton DataBase
 	
-	MetaData struct {
-		//you can define any extend data
-	}
+	MetaData
+	//you can define any extend data
+}
+
+type MetaData struct {
+	String    string
+	Int       int
+	Bool      bool
+	Interface interface{}
+	Error     error
 }
 
 func (h *ApiHandler) RegisterAPI() {
@@ -27,10 +34,10 @@ func (h *ApiHandler) RegisterAPI() {
 	
 	//this method provide Api register
 	//and will execute before server start
-	h.ApiGetHandlers.RegisterDefaultAPI("test", h.Test)
+	h.ApiGetHandlers.RegisterDefaultAPI("test", h.ApiTest)
 }
 
-func (h *ApiHandler) Test(args server.DefaultAPIArgs) (ret interface{}, err error) {
+func (h *ApiHandler) ApiTest(args server.DefaultAPIArgs) (ret interface{}, err error) {
 	queryString := args.GetQuery("get query key from url")
 	//return type string
 	log.Debug(queryString)
@@ -42,23 +49,20 @@ func (h *ApiHandler) Test(args server.DefaultAPIArgs) (ret interface{}, err erro
 	isValidUser, userId := args.GetUserId() //get user Id from session
 	//return bool(is user valid) and string(user Id,must be bson.ObjectId.Hex string)
 	log.Debug(isValidUser, userId)
-	ret = h.db.AnyCollection.Name
 	return
 }
 
 func (h *ApiHandler) InitMetaConfig() {
 	//implement method InitMetaConfig
-	h.MetaData = struct{}{
 	
-	}
 	//you can handle your extend data here
 	//this method will execute after database init
 }
 
 func (h *ApiHandler) NewDataBase() server.DB {
 	//implement method NewDataBase
-	h.db = new(DataBase)
+	
 	//init your DataBase
-	return h.db
+	return &h.db
 	//should return interface implement server.DB
 }
