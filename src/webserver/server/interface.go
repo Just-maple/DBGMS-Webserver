@@ -21,10 +21,8 @@ type DB interface {
 type ApiHandlers interface {
 	GetApiFunc(string, string) (JsonAPIFunc, bool)
 
-	RegisterAPI(gin.HandlerFunc)
-	RegisterGETAPI()
-	RegisterPOSTAPI()
-	RegisterSpecificAPI()
+	RegisterDefaultAPI(gin.HandlerFunc)
+	RegisterAPI()
 
 	InitDataBase()
 	NewDataBase() DB

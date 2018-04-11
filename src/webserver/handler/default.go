@@ -69,17 +69,12 @@ func (h *DefaultApiHandler) SetRouter(r *gin.Engine) {
 	h.router = r
 }
 
-func (h *DefaultApiHandler) RegisterAPI(api gin.HandlerFunc) {
+func (h *DefaultApiHandler) RegisterDefaultAPI(api gin.HandlerFunc) {
 	h.router.GET("/api/:api", api)
 	h.router.POST("/api/:api", api)
 	h.ApiPostHandlers.RegisterAPI("test", h.Test)
 	h.ApiGetHandlers.RegisterAPI("test", h.Test)
-	h.apiHandlers.RegisterGETAPI()
-	h.apiHandlers.RegisterPOSTAPI()
-	h.apiHandlers.RegisterSpecificAPI()
-	//for _,v:=range h.ApiGetHandlers{
-	//	log.Debug(strings.Split(runtime.FuncForPC(reflect.ValueOf(v).Pointer()).Name(),"."))
-	//}
+	h.apiHandlers.RegisterAPI()
 }
 
 func (h *DefaultApiHandler) GetApiFunc(method, apiName string) (function ws.JsonAPIFunc, exists bool) {

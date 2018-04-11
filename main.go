@@ -17,18 +17,19 @@ type ApiHandler struct {
 	*handler.DefaultApiHandler
 }
 
-func (h *ApiHandler) RegisterGETAPI() {
-
+func (h *ApiHandler) RegisterAPI() {
+	h.ApiGetHandlers.RegisterDefaultAPI("test",h.Test)
 }
-func (h *ApiHandler) RegisterPOSTAPI() {
 
+func (h *ApiHandler)Test(args server.DefaultAPIArgs)(ret interface{},err error){
+	return
 }
-func (h *ApiHandler) RegisterSpecificAPI() {
 
-}
+
 func (h *ApiHandler) InitMetaConfig() {
 
 }
+
 func (h *ApiHandler) NewDataBase() server.DB {
 	return new(DataBase)
 }
@@ -46,5 +47,6 @@ func (db *DataBase) AuthAdminUser(userId string) bool {
 }
 
 func main() {
-	webserver.NewWebServerFromHandler(new(Config), new(ApiHandler))
+	svr := webserver.NewWebServerFromHandler(new(Config), new(ApiHandler))
+	svr.Start()
 }

@@ -54,6 +54,6 @@ func (svr *WebServer) InitHandler(handler ApiHandlers) {
 	r := svr.InitRouter()
 	r.Use(svr.InitSession())
 	svr.ApiHandlers.InitDataBase()
-	svr.ApiHandlers.RegisterAPI(svr.JsonAPI)
+	svr.ApiHandlers.RegisterDefaultAPI(svr.JsonAPI)
 	svr.ApiHandlers.InitMetaConfig()
 }
