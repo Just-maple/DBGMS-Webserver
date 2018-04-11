@@ -21,7 +21,7 @@ func NewMgoDataBase(mgoURL, dbName string) (db *mgo.Database, err error) {
 		log.Fatalf("Parse MgoDB Url err(%v)", err)
 		return
 	}
-
+	
 	dbSession, err := mgo.DialWithTimeout(mgoURL, time.Second*60)
 	if err != nil {
 		log.Errorf("Connect MgoDB Error = (%v)", err)
@@ -57,7 +57,9 @@ func NewMgoDB(mgoURL string, db server.DB) (err error) {
 		if s.FieldByName(fieldName).CanSet() {
 			var fieldCollection = &Collection{newDB.C(strings.ToLower(fieldName))}
 			s.FieldByName(fieldName).Set(reflect.ValueOf(fieldCollection))
+			//log.Debugf("Success Init Collection [ %v ]", fieldName)
 		}
 	}
+	log.Debugf("Success Init MgoDB")
 	return
 }

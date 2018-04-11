@@ -32,6 +32,7 @@ func (svr *WebServer) Start() (err error) {
 		log.Fatalf("WebServer::Start net.ListenTCP err(%v)", err)
 		return
 	}
+	log.Debugf("WebServer Start At Addr [ %v ]", svr.Addr)
 	svr.server.Serve(listener)
 	return
 }

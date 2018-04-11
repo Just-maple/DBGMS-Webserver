@@ -4,9 +4,12 @@ import (
 	"webserver"
 	"webserver/config"
 	"webserver/handler"
-	"gopkg.in/mgo.v2"
 	"webserver/server"
+	"webserver/logger"
+	"webserver/dbx"
 )
+
+var log = logger.Log
 
 type Config struct {
 	config.DefaultConfig
@@ -34,12 +37,17 @@ func (h *ApiHandler) RegisterAPI() {
 }
 
 func (h *ApiHandler) Test(args server.DefaultAPIArgs) (ret interface{}, err error) {
-	args.GetQuery("get query key from url")
+	queryString := args.GetQuery("get query key from url")
 	//return type string
-	args.GetJsonKey("get Json Key from Post Context")
+	log.Debug(queryString)
+	
+	jsonValue := args.GetJsonKey("get Json Key from Post Context")
 	//return type *simplejson.Json
-	args.GetUserId() //get user Id from session
+	log.Debug(jsonValue)
+	
+	isValidUser, userId := args.GetUserId() //get user Id from session
 	//return bool(is user valid) and string(user Id,must be bson.ObjectId.Hex string)
+	log.Debug(isValidUser, userId)
 	return
 }
 
@@ -60,7 +68,7 @@ func (h *ApiHandler) NewDataBase() server.DB {
 
 type DataBase struct {
 	//database struct interface implement server.DB
-	AnyCollection *mgo.Collection
+	AnyCollection *dbx.Collection
 	//any public *mgo.Collection will init when database init
 	//collection will init from Collection name in lower case like "anycollection"
 }
@@ -78,7 +86,16 @@ func (db *DataBase) AuthAdminUser(userId string) bool {
 }
 
 func main() {
+	demoConfg := &Config{
+		config.DefaultConfig{
+			MgoDBUrl:         "mongodb://wx2.asoapp.com:27777/wx",
+			ServerAddr:       "0.0.0.0:8888",
+			TablePath:        "./",
+			SessionSecretKey: "secret",
+			SessionKey:       "session",
+		},
+	}
 	//get new web-server container from your handler and your config
-	svr := webserver.NewWebServerFromHandler(new(Config), new(ApiHandler))
+	svr := webserver.NewWebServerFromHandler(demoConfg, new(ApiHandler))
 	svr.Start()
 }
