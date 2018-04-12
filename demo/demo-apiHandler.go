@@ -10,9 +10,9 @@ var log = logger.Log
 type ApiHandler struct {
 	//your custom handler
 	*Config
-	//must contain Config that implement default config and named Config
+	//must contain Config that implement default config
 	*handler.DefaultApiHandler
-	//implement default handler and named DefaultApiHandler
+	//must implement default handler
 	db *DataBase
 	//implement singleton DataBase
 
