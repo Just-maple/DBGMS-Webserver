@@ -206,6 +206,5 @@ func isMiddleWareValid(mw interface{}, inType reflect.Type) bool {
 	return reflect.TypeOf(mw).In(0) != inType &&
 		reflect.TypeOf(mw).In(0).Kind() == reflect.Ptr &&
 		reflect.TypeOf(mw).In(0).Elem().Kind() == reflect.Slice &&
-		reflect.TypeOf(mw).Out(0).Kind() == reflect.Slice &&
 		reflect.TypeOf(mw).Out(1).Kind() == reflect.Interface
 }
