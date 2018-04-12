@@ -34,7 +34,7 @@ func TransAjaxQuery(c *gin.Context, j *jsonx.Json) (matcherMap map[string]interf
 
 func (h DefaultApiHandler) GetAjaxQuery(c *gin.Context, j *jsonx.Json) (res *dbx.AjaxQuery, err error) {
 	matcherMap, keys, skipCnt, limitCnt, sortKey, reverse, tSTime, tETime, err := TransAjaxQuery(c, j)
-	pmConfig, _ := h.TableConfig.GetConfigTableFromContext(c)
+	pmConfig, _ := h.PermissionConfig.GetConfigTableFromContext(c)
 	res = &dbx.AjaxQuery{
 		MatcherMap:       matcherMap,
 		SortKey:          sortKey,

@@ -37,18 +37,33 @@ func LoadConfiguration() (config *DefaultConfig) {
 }
 
 func (cfg *DefaultConfig) GetSessionSecretKey() string {
+	if cfg.SessionSecretKey==""{
+		cfg.SessionSecretKey="secret-key"
+	}
 	return cfg.SessionSecretKey
 }
 func (cfg *DefaultConfig) GetSessionKey() string {
+	if cfg.SessionKey==""{
+		cfg.SessionKey="session"
+	}
 	return cfg.SessionKey
 }
 
 func (cfg *DefaultConfig) GetMgoDBUrl() string {
+	if cfg.MgoDBUrl==""{
+		cfg.MgoDBUrl="0.0.0.0:27017"
+	}
 	return cfg.MgoDBUrl
 }
 func (cfg *DefaultConfig) GetTablePath() string {
+	if cfg.TablePath==""{
+		cfg.TablePath="./"
+	}
 	return cfg.TablePath
 }
 func (cfg *DefaultConfig) GetServerAddr() string {
+	if cfg.ServerAddr==""{
+		cfg.ServerAddr="0.0.0.0:8388"
+	}
 	return cfg.ServerAddr
 }

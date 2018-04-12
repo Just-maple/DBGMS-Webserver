@@ -34,18 +34,18 @@ type DB interface {
 }
 
 type DefaultApiHandler struct {
-	apiHandlers     ExtendApiHandler
-	router          *gin.Engine
-	ApiGetHandlers  JsonAPIFuncRoute
-	ApiPostHandlers JsonAPIFuncRoute
-	db              DB
-	Config          ApiHandlerConfig
-	TableConfig     permission.TableConfigMap
+	apiHandlers      ExtendApiHandler
+	router           *gin.Engine
+	ApiGetHandlers   JsonAPIFuncRoute
+	ApiPostHandlers  JsonAPIFuncRoute
+	db               DB
+	config           ApiHandlerConfig
+	PermissionConfig permission.TableConfigMap
 }
 
 func NewDefaultHandlerFromConfig(config ApiHandlerConfig, ah ExtendApiHandler) {
 	h := &DefaultApiHandler{
-		Config:          config,
+		config:          config,
 		ApiGetHandlers:  NewJsonAPIFuncRoute(),
 		ApiPostHandlers: NewJsonAPIFuncRoute(),
 		apiHandlers:     ah,
@@ -60,7 +60,7 @@ func NewDefaultHandlerFromConfig(config ApiHandlerConfig, ah ExtendApiHandler) {
 
 func (h *DefaultApiHandler) SetDefaultApiHandlerAndMountConfig() {
 	vi := reflect.ValueOf(h.apiHandlers).Elem()
-	tc := reflect.ValueOf(h.Config)
+	tc := reflect.ValueOf(h.config)
 	fi := vi.NumField()
 	ht := reflect.TypeOf(h)
 	var flag bool
@@ -226,7 +226,7 @@ func (h *DefaultApiHandler) InitDataBase() {
 	var err error
 	db := h.apiHandlers.NewDataBase()
 	h.db = db
-	err = dbx.NewMgoDB(h.Config.GetMgoDBUrl(), db)
+	err = dbx.NewMgoDB(h.config.GetMgoDBUrl(), db)
 	if err != nil {
 		log.Fatal("Init MgoDataBase Error = ", err)
 		return

@@ -2,7 +2,6 @@ package server
 
 import (
 	"github.com/gin-gonic/gin"
-	"net"
 	"net/http"
 )
 
@@ -14,17 +13,14 @@ type ServerConfig interface {
 
 type ApiHandlers interface {
 	RegisterJsonAPI()
-
 	InitDataBase()
 	InitMetaConfig()
-
 	SetRouter(r *gin.Engine)
 }
 
 type WebServer struct {
-	Addr         string
+	addr         string
 	server       *http.Server
-	listener     *net.TCPListener
-	ApiHandlers  ApiHandlers
-	ServerConfig ServerConfig
+	apiHandlers  ApiHandlers
+	serverConfig ServerConfig
 }

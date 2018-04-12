@@ -28,7 +28,7 @@ func (h *DefaultApiHandler) AuthSuperAdminUserSession(us *UserSession) (isAdmin,
 
 func (h *DefaultApiHandler) RenderPermission(c *gin.Context, session *UserSession, in interface{}) (out interface{}) {
 	if reflect.ValueOf(in).Kind() == reflect.Slice {
-		config, has := h.TableConfig.GetConfigTableFromContext(c)
+		config, has := h.PermissionConfig.GetConfigTableFromContext(c)
 		if has {
 			isAdmin, isSuper := h.AuthSuperAdminUserSession(session)
 			out = config.InitTablePermission(in, isAdmin, isSuper)

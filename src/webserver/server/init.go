@@ -13,8 +13,8 @@ var log = logger.Log
 
 func NewWebServer(config ServerConfig) (svr *WebServer) {
 	svr = &WebServer{
-		ServerConfig: config,
-		Addr:         config.GetServerAddr(),
+		serverConfig: config,
+		addr:         config.GetServerAddr(),
 		server:       &http.Server{ReadHeaderTimeout: time.Second * 30, WriteTimeout: time.Second * 30},
 	}
 	return
@@ -22,7 +22,7 @@ func NewWebServer(config ServerConfig) (svr *WebServer) {
 
 func (svr *WebServer) Start() (err error) {
 	svr.server.SetKeepAlivesEnabled(true)
-	addr, err := net.ResolveTCPAddr("tcp4", svr.Addr)
+	addr, err := net.ResolveTCPAddr("tcp4", svr.addr)
 	if err != nil {
 		log.Fatalf("WebServer::Start net.ResolveTCPAddr err(%v)", err)
 		return
@@ -32,29 +32,29 @@ func (svr *WebServer) Start() (err error) {
 		log.Fatalf("WebServer::Start net.ListenTCP err(%v)", err)
 		return
 	}
-	log.Debugf("WebServer Start At Addr [ %v ]", svr.Addr)
+	log.Debugf("WebServer Start At Addr [ %v ]", svr.addr)
 	svr.server.Serve(listener)
 	return
 }
 
-func (svr *WebServer) InitSession() gin.HandlerFunc {
-	store := sessions.NewCookieStore([]byte(svr.ServerConfig.GetSessionSecretKey()))
+func (svr *WebServer) initSession() gin.HandlerFunc {
+	store := sessions.NewCookieStore([]byte(svr.serverConfig.GetSessionSecretKey()))
 	store.Options(sessions.Options{MaxAge: 60 * 60 * 24 * 2})
-	return sessions.Sessions(svr.ServerConfig.GetSessionKey(), store)
+	return sessions.Sessions(svr.serverConfig.GetSessionKey(), store)
 }
 
-func (svr *WebServer) InitRouter() *gin.Engine {
+func (svr *WebServer) initRouter() *gin.Engine {
 	r := gin.Default()
 	svr.server.Handler = r
-	svr.ApiHandlers.SetRouter(r)
+	svr.apiHandlers.SetRouter(r)
 	return r
 }
 
 func (svr *WebServer) InitHandler(handler ApiHandlers) {
-	svr.ApiHandlers = handler
-	r := svr.InitRouter()
-	r.Use(svr.InitSession())
-	svr.ApiHandlers.InitDataBase()
-	svr.ApiHandlers.RegisterJsonAPI()
-	svr.ApiHandlers.InitMetaConfig()
+	svr.apiHandlers = handler
+	r := svr.initRouter()
+	r.Use(svr.initSession())
+	svr.apiHandlers.InitDataBase()
+	svr.apiHandlers.RegisterJsonAPI()
+	svr.apiHandlers.InitMetaConfig()
 }

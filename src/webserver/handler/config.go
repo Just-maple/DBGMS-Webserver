@@ -34,12 +34,12 @@ func (h *DefaultApiHandler) SaveAllTableConfig(c *gin.Context, j *jsonx.Json, us
 }
 
 func (h *DefaultApiHandler) WriteTableAndUpdateServerConfig(tableName, data string) (err error) {
-	file := h.Config.GetTablePath() + tableName + extensionJson
+	file := h.config.GetTablePath() + tableName + extensionJson
 	err = ioutil.WriteFile(file, []byte(data), 0600)
 	if err != nil {
 		return
 	}
-	err = h.TableConfig.InitTableConfig([]byte(data), tableName)
+	err = h.PermissionConfig.InitTableConfig([]byte(data), tableName)
 	return
 }
 
@@ -82,15 +82,15 @@ func (h *DefaultApiHandler) ReadAllConfigTableFromServerTableConfig(encode bool,
 	if encode {
 		isAdmin, isSuperAdmin = h.db.AuthSuperAdminUser(userId)
 	}
-	for key := range h.TableConfig {
+	for key := range h.PermissionConfig {
 		if encode {
-			if h.TableConfig[key].AuthPermission(isAdmin, isSuperAdmin) {
+			if h.PermissionConfig[key].AuthPermission(isAdmin, isSuperAdmin) {
 				encodeKey := base64.StdEncoding.EncodeToString([]byte(key))
-				encodeData := BytesToMd5String(h.TableConfig[key].TableData) + XdEncode(h.TableConfig[key].TableData)
+				encodeData := BytesToMd5String(h.PermissionConfig[key].TableData) + XdEncode(h.PermissionConfig[key].TableData)
 				ret[encodeKey] = encodeData
 			}
 		} else {
-			ret[key] = string(h.TableConfig[key].TableData)
+			ret[key] = string(h.PermissionConfig[key].TableData)
 		}
 
 	}
@@ -112,20 +112,20 @@ func (h *DefaultApiHandler) InitTableConfigFromFileInfo(file *os.FileInfo) (err 
 		return
 	}
 	tableName := strings.Replace((*file).Name(), extensionJson, "", 1)
-	err = h.TableConfig.InitTableConfig(data, tableName)
+	err = h.PermissionConfig.InitTableConfig(data, tableName)
 	return
 }
 
 func (h *DefaultApiHandler) ReadTableConfigFromFile(fileName string) (data []byte, err error) {
-	return ioutil.ReadFile(h.Config.GetTablePath() + fileName)
+	return ioutil.ReadFile(h.config.GetTablePath() + fileName)
 }
 
 func (h *DefaultApiHandler) InitAllConfigTableFromFiles() (err error) {
-	tableFiles, err := ioutil.ReadDir(h.Config.GetTablePath())
+	tableFiles, err := ioutil.ReadDir(h.config.GetTablePath())
 	if err != nil {
 		return
 	}
-	h.TableConfig = make(map[string]*pm.TableConfig, len(tableFiles))
+	h.PermissionConfig = make(map[string]*pm.TableConfig, len(tableFiles))
 	for i := range tableFiles {
 		err = h.InitTableConfigFromFileInfo(&(tableFiles[i]))
 		if err != nil {

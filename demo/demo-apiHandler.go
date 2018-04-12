@@ -15,7 +15,7 @@ type ApiHandler struct {
 	//must implement default handler
 	db *DataBase
 	//implement singleton DataBase
-
+	
 	MetaData
 	//you can define any extend data
 }
@@ -30,22 +30,21 @@ type MetaData struct {
 
 func (h *ApiHandler) RegisterAPI() {
 	//implement method RegisterAPI
-
+	
 	//this method provide Api register
 	//and will execute before server start
 	h.ApiGetHandlers.RegisterAPI("test", h.ApiTest)
-
+	
 }
 
 func (h *ApiHandler) ApiTest(args handler.APIArgs) (ret interface{}, err error) {
 	queryString := args.Query("get query key from url")
 	//return type string
 	log.Debug(queryString)
-
 	jsonValue := args.JsonKey("get Json Key from Post Context")
 	//return type *simplejson.Json
 	log.Debug(jsonValue)
-
+	
 	isValidUser, userId := args.UserId() //get user Id from session
 	//return bool(is user valid) and string(user Id,must be bson.ObjectId.Hex string)
 	log.Debug(isValidUser, userId)
@@ -54,14 +53,14 @@ func (h *ApiHandler) ApiTest(args handler.APIArgs) (ret interface{}, err error) 
 
 func (h *ApiHandler) InitMetaConfig() {
 	//implement method InitMetaConfig
-
+	
 	//you can handle your extend data here
 	//this method will execute after database init
 }
 
 func (h *ApiHandler) NewDataBase() handler.DB {
 	//implement method NewDataBase
-
+	
 	//init your DataBase
 	h.db = new(DataBase)
 	return h.db

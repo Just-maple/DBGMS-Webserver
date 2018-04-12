@@ -23,7 +23,7 @@ func NewMgoDataBase(mgoURL, dbName string) (db *mgo.Database, err error) {
 
 	dbSession, err := mgo.DialWithTimeout(mgoURL, time.Second*60)
 	if err != nil {
-		log.Errorf("Connect MgoDB Error = (%v)", err)
+		log.Fatalf("Connect MgoDB Error = (%v)", err)
 		return
 	}
 	dbSession.SetSafe(&mgo.Safe{})
