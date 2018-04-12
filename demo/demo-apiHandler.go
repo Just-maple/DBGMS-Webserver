@@ -33,19 +33,20 @@ func (h *ApiHandler) RegisterAPI() {
 
 	//this method provide Api register
 	//and will execute before server start
-	h.ApiGetHandlers.RegisterDefaultAPI("test", h.ApiTest)
+	h.ApiGetHandlers.RegisterAPI("test", h.ApiTest)
+
 }
 
-func (h *ApiHandler) ApiTest(args handler.DefaultAPIArgs) (ret interface{}, err error) {
-	queryString := args.GetQuery("get query key from url")
+func (h *ApiHandler) ApiTest(args handler.APIArgs) (ret interface{}, err error) {
+	queryString := args.Query("get query key from url")
 	//return type string
 	log.Debug(queryString)
 
-	jsonValue := args.GetJsonKey("get Json Key from Post Context")
+	jsonValue := args.JsonKey("get Json Key from Post Context")
 	//return type *simplejson.Json
 	log.Debug(jsonValue)
 
-	isValidUser, userId := args.GetUserId() //get user Id from session
+	isValidUser, userId := args.UserId() //get user Id from session
 	//return bool(is user valid) and string(user Id,must be bson.ObjectId.Hex string)
 	log.Debug(isValidUser, userId)
 	return

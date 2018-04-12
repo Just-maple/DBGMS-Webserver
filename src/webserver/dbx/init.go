@@ -20,7 +20,7 @@ func NewMgoDataBase(mgoURL, dbName string) (db *mgo.Database, err error) {
 		log.Fatalf("Parse MgoDB Url err(%v)", err)
 		return
 	}
-	
+
 	dbSession, err := mgo.DialWithTimeout(mgoURL, time.Second*60)
 	if err != nil {
 		log.Errorf("Connect MgoDB Error = (%v)", err)

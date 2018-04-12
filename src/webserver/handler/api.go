@@ -3,30 +3,36 @@ package handler
 import (
 	"github.com/bitly/go-simplejson"
 	"github.com/gin-gonic/gin"
+	"time"
 	"webserver/jsonx"
 	"webserver/session"
+	"webserver/utilsx"
 )
 
-type DefaultAPI func(args DefaultAPIArgs) (ret interface{}, err error)
+type DefaultAPI func(args APIArgs) (ret interface{}, err error)
 
-type DefaultAPIArgs struct {
+type APIArgs struct {
 	context *gin.Context
 	json    *jsonx.Json
 	session *session.UserSession
 }
 
-func (arg *DefaultAPIArgs) GetQuery(key string) string {
+func (arg *APIArgs) Time() (st, et time.Time) {
+	return utilsx.TransTime(arg.context)
+}
+
+func (arg *APIArgs) Query(key string) string {
 	return arg.context.Query(key)
 }
 
-func (arg *DefaultAPIArgs) GetUserId() (valid bool, userId string) {
+func (arg *APIArgs) UserId() (valid bool, userId string) {
 	return arg.session.AuthUserSession()
 }
 
-func (arg *DefaultAPIArgs) GetJsonKeyId() string {
+func (arg *APIArgs) JsonKeyId() string {
 	return arg.json.GetStringId()
 }
 
-func (arg *DefaultAPIArgs) GetJsonKey(key string) *simplejson.Json {
+func (arg *APIArgs) JsonKey(key string) *simplejson.Json {
 	return arg.json.Get(key)
 }

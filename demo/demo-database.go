@@ -4,7 +4,7 @@ import "webserver/dbx"
 
 type DataBase struct {
 	//database struct interface implement server.DB
-	AnyCollection *dbx.Collection
+	AnyCollection *dbx.Collection		`collection:"your_collection_name"`
 	//any public *mgo.Collection will init when database init
 	//collection will init from Collection name in lower case like "anycollection"
 }

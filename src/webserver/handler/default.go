@@ -43,14 +43,6 @@ type DefaultApiHandler struct {
 	TableConfig     permission.TableConfigMap
 }
 
-func (h JsonAPIFuncRoute) RegisterDefaultAPI(name string, api DefaultAPI) {
-	h.RegisterAPI(name, func(context *gin.Context, json *jsonx.Json, userSession *session.UserSession) (i interface{}, e error) {
-		return api(DefaultAPIArgs{
-			context, json, userSession,
-		})
-	})
-}
-
 func NewDefaultHandlerFromConfig(config ApiHandlerConfig, ah ExtendApiHandler) {
 	h := &DefaultApiHandler{
 		Config:          config,
@@ -58,21 +50,51 @@ func NewDefaultHandlerFromConfig(config ApiHandlerConfig, ah ExtendApiHandler) {
 		ApiPostHandlers: NewJsonAPIFuncRoute(),
 		apiHandlers:     ah,
 	}
-	ptrC := reflect.ValueOf(ah).Elem().FieldByName("Config")
-	if ptrC.IsValid() && ptrC.CanSet() && ptrC.Type() == reflect.TypeOf(config) {
-		ptrC.Set(reflect.ValueOf(config))
-	} else {
-		panic("Invalid Config")
-	}
-	ptrH := reflect.ValueOf(ah).Elem().FieldByName("DefaultApiHandler")
-	if ptrH.IsValid() && ptrH.CanSet() && ptrH.Type() == reflect.TypeOf(h) {
-		ptrH.Set(reflect.ValueOf(h))
-	} else {
-		panic("Invalid ApiHandler")
-	}
+	h.SetDefaultApiHandlerAndMountConfig()
 	err := h.InitAllConfigTableFromFiles()
 	if err != nil {
 		log.Fatal("Init TableConfig FromFiles Error = ", err)
+	}
+	return
+}
+
+func (h *DefaultApiHandler) SetDefaultApiHandlerAndMountConfig() {
+	vi := reflect.ValueOf(h.apiHandlers).Elem()
+	tc := reflect.ValueOf(h.Config)
+	fi := vi.NumField()
+	ht := reflect.TypeOf(h)
+	var flag bool
+	for i := 0; i < fi; i++ {
+		if !vi.Field(i).CanSet() {
+			continue
+		}
+		switch vi.Field(i).Type() {
+		case tc.Type():
+			vi.Field(i).Set(tc)
+		case ht:
+			if !flag {
+				vi.Field(i).Set(reflect.ValueOf(h))
+				flag = true
+			} else {
+				panic("Found More than One Default ApiHandler")
+			}
+			
+		}
+	}
+	if !flag {
+		panic("Not Found Default ApiHandler")
+	}
+	return
+}
+
+func (h *DefaultApiHandler) SetDefaultConfig(in interface{}) {
+	vi := reflect.ValueOf(in).Elem()
+	fi := vi.NumField()
+	for i := 0; i < fi; i++ {
+		switch vi.Field(i).Interface().(type) {
+		case ApiHandlerConfig:
+			vi.Field(i).Set(reflect.ValueOf(h))
+		}
 	}
 	return
 }
@@ -137,8 +159,31 @@ func NewJsonAPIFuncRoute() JsonAPIFuncRoute {
 	return make(JsonAPIFuncRoute)
 }
 
-func (h JsonAPIFuncRoute) RegisterAPI(name string, function JsonAPIFunc) {
-	h[name] = function
+func (j JsonAPIFuncRoute) RegisterAPI(name string, function interface{}) {
+	switch function := function.(type) {
+	case JsonAPIFunc:
+		j.RegisterJsonAPI(name, function)
+	case func(*gin.Context, *jsonx.Json, *session.UserSession) (interface{}, error):
+		j.RegisterJsonAPI(name, function)
+	case DefaultAPI:
+		j.RegisterDefaultAPI(name, function)
+	case func(args APIArgs) (ret interface{}, err error):
+		j.RegisterDefaultAPI(name, function)
+	default:
+		panic(function)
+	}
+}
+
+func (j JsonAPIFuncRoute) RegisterJsonAPI(name string, function JsonAPIFunc) {
+	j[name] = function
+}
+
+func (j JsonAPIFuncRoute) RegisterDefaultAPI(name string, api DefaultAPI) {
+	j.RegisterAPI(name, func(context *gin.Context, json *jsonx.Json, userSession *session.UserSession) (i interface{}, e error) {
+		return api(APIArgs{
+			context, json, userSession,
+		})
+	})
 }
 
 func RenderJson(c *gin.Context, ok bool, data interface{}, err error) {
@@ -165,7 +210,7 @@ func RenderJson(c *gin.Context, ok bool, data interface{}, err error) {
 	}
 }
 
-type JsonAPIFunc func(*gin.Context, *jsonx.Json, *session.UserSession) (interface{}, error)
+type JsonAPIFunc func(g *gin.Context, j *jsonx.Json, s *session.UserSession) (interface{}, error)
 
 func (h *DefaultApiHandler) GetApiFunc(method, apiName string) (function JsonAPIFunc, exists bool) {
 	switch method {

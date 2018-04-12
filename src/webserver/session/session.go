@@ -2,8 +2,8 @@ package session
 
 import (
 	"github.com/gin-contrib/sessions"
-	"gopkg.in/mgo.v2/bson"
 	"github.com/gin-gonic/gin"
+	"gopkg.in/mgo.v2/bson"
 )
 
 const (

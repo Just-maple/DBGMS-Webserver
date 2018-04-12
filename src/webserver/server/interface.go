@@ -12,14 +12,12 @@ type ServerConfig interface {
 	GetSessionSecretKey() string
 }
 
-
-
 type ApiHandlers interface {
 	RegisterJsonAPI()
-	
+
 	InitDataBase()
 	InitMetaConfig()
-	
+
 	SetRouter(r *gin.Engine)
 }
 
