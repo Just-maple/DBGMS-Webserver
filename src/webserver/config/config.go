@@ -2,7 +2,6 @@ package config
 
 import (
 	"encoding/json"
-	"flag"
 	"io/ioutil"
 	"log"
 )
@@ -29,41 +28,41 @@ func LoadConfigurationFromFile(filename string, config interface{}) {
 	return
 }
 
-func LoadConfiguration() (config *DefaultConfig) {
-	var configPath = flag.String("f", "./config/config-dev.json", "config path")
+func LoadConfiguration(configPath string) (config *DefaultConfig) {
+	//var configPath = flag.String("f", "./config/config-dev.json", "config path")
 	config = new(DefaultConfig)
-	LoadConfigurationFromFile(*configPath, &config)
+	LoadConfigurationFromFile(configPath, &config)
 	return
 }
 
 func (cfg *DefaultConfig) GetSessionSecretKey() string {
-	if cfg.SessionSecretKey==""{
-		cfg.SessionSecretKey="secret-key"
+	if cfg.SessionSecretKey == "" {
+		cfg.SessionSecretKey = "secret-key"
 	}
 	return cfg.SessionSecretKey
 }
 func (cfg *DefaultConfig) GetSessionKey() string {
-	if cfg.SessionKey==""{
-		cfg.SessionKey="session"
+	if cfg.SessionKey == "" {
+		cfg.SessionKey = "session"
 	}
 	return cfg.SessionKey
 }
 
 func (cfg *DefaultConfig) GetMgoDBUrl() string {
-	if cfg.MgoDBUrl==""{
-		cfg.MgoDBUrl="0.0.0.0:27017"
+	if cfg.MgoDBUrl == "" {
+		cfg.MgoDBUrl = "0.0.0.0:27017"
 	}
 	return cfg.MgoDBUrl
 }
 func (cfg *DefaultConfig) GetTablePath() string {
-	if cfg.TablePath==""{
-		cfg.TablePath="./"
+	if cfg.TablePath == "" {
+		cfg.TablePath = "./"
 	}
 	return cfg.TablePath
 }
 func (cfg *DefaultConfig) GetServerAddr() string {
-	if cfg.ServerAddr==""{
-		cfg.ServerAddr="0.0.0.0:8388"
+	if cfg.ServerAddr == "" {
+		cfg.ServerAddr = "0.0.0.0:8388"
 	}
 	return cfg.ServerAddr
 }

@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"reflect"
 	. "webserver/session"
+	"webserver/permission"
 )
 
 func (h *DefaultApiHandler) GetSession(c *gin.Context) (us *UserSession) {
@@ -12,17 +13,13 @@ func (h *DefaultApiHandler) GetSession(c *gin.Context) (us *UserSession) {
 	return
 }
 
-func (h *DefaultApiHandler) AuthAdminUserSession(us *UserSession) bool {
-	isValidId, userId := us.AuthUserSession()
-	return isValidId && h.db.AuthAdminUser(userId)
-}
 
-func (h *DefaultApiHandler) AuthSuperAdminUserSession(us *UserSession) (isAdmin, isSuper bool) {
+func (h *DefaultApiHandler) AuthUserSession(us *UserSession) (access permission.AccessConfig) {
 	isValidId, userId := us.AuthUserSession()
 	if isValidId {
-		return h.db.AuthSuperAdminUser(userId)
+		return h.db.GetAccessConfig(userId)
 	} else {
-		return
+		return nil
 	}
 }
 
@@ -30,8 +27,8 @@ func (h *DefaultApiHandler) RenderPermission(c *gin.Context, session *UserSessio
 	if reflect.ValueOf(in).Kind() == reflect.Slice {
 		config, has := h.PermissionConfig.GetConfigTableFromContext(c)
 		if has {
-			isAdmin, isSuper := h.AuthSuperAdminUserSession(session)
-			out = config.InitTablePermission(in, isAdmin, isSuper)
+			access := h.AuthUserSession(session)
+			out = config.InitTablePermission(in, access)
 		} else {
 			out = in
 		}

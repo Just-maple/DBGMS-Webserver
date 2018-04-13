@@ -19,8 +19,8 @@ const (
 )
 
 func (h *DefaultApiHandler) SaveAllTableConfig(c *gin.Context, j *jsonx.Json, us *session.UserSession) (ret interface{}, err error) {
-	_, isSuper := h.AuthSuperAdminUserSession(us)
-	if !isSuper {
+	access := h.AuthUserSession(us)
+	if !access.AuthAllPermission() {
 		return nil, ErrAuthFailed
 	}
 	tableMap := j.MustMap()
@@ -44,8 +44,8 @@ func (h *DefaultApiHandler) WriteTableAndUpdateServerConfig(tableName, data stri
 }
 
 func (h *DefaultApiHandler) EditTable(c *gin.Context, j *jsonx.Json, us *session.UserSession) (ret interface{}, err error) {
-	_, isSuper := h.AuthSuperAdminUserSession(us)
-	if !isSuper {
+	access := h.AuthUserSession(us)
+	if !access.AuthAllPermission() {
 		return nil, ErrAuthFailed
 	}
 	tableName := j.Get("name").MustString()
@@ -78,13 +78,13 @@ func (h *DefaultApiHandler) GetConfigTableFromMString(m, UserId string) (tableCo
 
 func (h *DefaultApiHandler) ReadAllConfigTableFromServerTableConfig(encode bool, userId string) (ret map[string]string) {
 	ret = make(map[string]string)
-	var isAdmin, isSuperAdmin bool
+	var access pm.AccessConfig
 	if encode {
-		isAdmin, isSuperAdmin = h.db.AuthSuperAdminUser(userId)
+		access = h.db.GetAccessConfig(userId)
 	}
 	for key := range h.PermissionConfig {
 		if encode {
-			if h.PermissionConfig[key].AuthPermission(isAdmin, isSuperAdmin) {
+			if access.AuthTablePermission(h.PermissionConfig[key]) {
 				encodeKey := base64.StdEncoding.EncodeToString([]byte(key))
 				encodeData := BytesToMd5String(h.PermissionConfig[key].TableData) + XdEncode(h.PermissionConfig[key].TableData)
 				ret[encodeKey] = encodeData
@@ -92,7 +92,7 @@ func (h *DefaultApiHandler) ReadAllConfigTableFromServerTableConfig(encode bool,
 		} else {
 			ret[key] = string(h.PermissionConfig[key].TableData)
 		}
-
+		
 	}
 	return
 }
@@ -136,8 +136,8 @@ func (h *DefaultApiHandler) InitAllConfigTableFromFiles() (err error) {
 }
 
 func (h *DefaultApiHandler) GetAllConfigTable(c *gin.Context, j *jsonx.Json, us *session.UserSession) (ret interface{}, err error) {
-	_, isSuper := h.AuthSuperAdminUserSession(us)
-	if !isSuper {
+	access := h.AuthUserSession(us)
+	if !access.AuthAllPermission() {
 		return nil, ErrAuthFailed
 	}
 	ret = h.ReadAllConfigTableFromServerTableConfig(false, "")

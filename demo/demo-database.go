@@ -1,6 +1,9 @@
 package main
 
-import "webserver/dbx"
+import (
+	"webserver/dbx"
+	"webserver/permission"
+)
 
 type DataBase struct {
 	//database struct interface implement server.DB
@@ -9,14 +12,24 @@ type DataBase struct {
 	//collection will init from Collection name in lower case like "anycollection" or tag collection
 }
 
-func (db *DataBase) AuthSuperAdminUser(userId string) (bool, bool) {
+func (db *DataBase) GetAccessConfig(userId string) (permission.AccessConfig) {
 	//database struct implement auth super admin user
 	//define your logic here
-	return userId == "User is Admin", userId == "User is Super"
+	return &SuperAdminAccesss{userId == "User is Admin", userId == "User is Super"}
 }
 
-func (db *DataBase) AuthAdminUser(userId string) bool {
-	//database struct implement auth  admin user
-	//define your logic here
-	return userId == "User is Admin"
+func (access *SuperAdminAccesss) AuthTablePermission(config *permission.TableConfig) bool {
+	return (!config.NeedAdmin || access.isAdmin) && (!config.NeedSuperAmind || access.isSuper)
+}
+
+type SuperAdminAccesss struct {
+	isAdmin bool
+	isSuper bool
+}
+
+func (access *SuperAdminAccesss) AuthAllPermission() bool {
+	return access.isSuper
+}
+func (access *SuperAdminAccesss) AuthPermission(config *permission.StructFieldConfig) bool {
+	return (!config.SuperAdmin || access.isSuper) && (!config.Admin || access.isAdmin)
 }

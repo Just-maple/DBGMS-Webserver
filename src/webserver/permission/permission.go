@@ -104,15 +104,20 @@ func BytesToMd5String(data []byte) string {
 	return hex.EncodeToString(md5Ctx.Sum(nil))
 }
 
-func (config *TableConfig) AuthPermission(isAdmin, isSuper bool) bool {
-	return (!config.NeedAdmin || isAdmin) && (!config.NeedSuperAmind || isSuper)
-}
+
 
 type StructConfig map[string]StructFieldConfig
 type StructFieldList []string
 
-func (config *StructFieldConfig) AuthPermission(isAdmin, isSuper bool) bool {
-	return (!config.SuperAdmin || isSuper) && (!config.Admin || isAdmin)
+type AccessConfig interface {
+	AuthPermission(*StructFieldConfig) bool
+	AuthTablePermission(*TableConfig) bool
+	AuthAllPermission() bool
+}
+
+
+func (config *StructFieldConfig) AuthPermission(access AccessConfig) bool {
+	return access.AuthPermission(config)
 }
 
 func GetAllFieldNameFromStruct(retType reflect.Type) (list []string) {
@@ -130,7 +135,7 @@ func GetAllFieldNameFromStruct(retType reflect.Type) (list []string) {
 	return
 }
 
-func (structConfig *StructConfig) InitTablePermissionFieldList(ret interface{}, isAdmin, isSuper bool) StructFieldList {
+func (structConfig *StructConfig) InitTablePermissionFieldList(ret interface{}, config AccessConfig) StructFieldList {
 	retType := reflect.TypeOf(ret).Elem()
 	for retType.Kind() == reflect.Ptr {
 		retType = retType.Elem()
@@ -138,21 +143,21 @@ func (structConfig *StructConfig) InitTablePermissionFieldList(ret interface{}, 
 	if retType.Kind() != reflect.Struct && retType.Kind() != reflect.Interface {
 		return StructFieldList{}
 	}
-	return structConfig.GetFieldList(retType, isAdmin, isSuper)
+	return structConfig.GetFieldList(retType, config)
 }
 
-func (structConfig *StructConfig) InitTablePermission(ret interface{}, isAdmin, isSuper bool) (res interface{}) {
-	return structConfig.InitTablePermissionFieldList(ret, isAdmin, isSuper).MakeFieldFilterReturnWithFieldList(ret)
+func (structConfig *StructConfig) InitTablePermission(ret interface{}, config AccessConfig) (res interface{}) {
+	return structConfig.InitTablePermissionFieldList(ret, config).MakeFieldFilterReturnWithFieldList(ret)
 }
 
-func (structConfig *StructConfig) GetFieldList(retType reflect.Type, isAdmin, isSuper bool) (fieldList StructFieldList) {
+func (structConfig *StructConfig) GetFieldList(retType reflect.Type, config AccessConfig) (fieldList StructFieldList) {
 	allField := GetAllFieldNameFromStruct(retType)
 	for _, fn := range allField {
 		_, valid := retType.FieldByName(fn)
 		if valid {
-			if isSuper {
+			if config.AuthAllPermission() {
 				fieldList = append(fieldList, fn)
-			} else if tmp, has := (*structConfig)[fn]; has && tmp.AuthPermission(isAdmin, isSuper) {
+			} else if tmp, has := (*structConfig)[fn]; has && tmp.AuthPermission(config) {
 				fieldList = append(fieldList, fn)
 			}
 		}

@@ -57,8 +57,8 @@ func (config *AjaxStructConfig) GetStructFieldDistinct(key string) (ret interfac
 	return
 }
 
-func (query *AjaxQuery) MakeAjaxReturnWithSelectKeysAndPermissionControl(in interface{}, ia, is bool) (res interface{}) {
-	fieldList := query.PermissionConfig.InitTablePermissionFieldList(in, ia, is)
+func (query *AjaxQuery) MakeAjaxReturnWithSelectKeysAndPermissionControl(in interface{}, config permission.AccessConfig) (res interface{}) {
+	fieldList := query.PermissionConfig.InitTablePermissionFieldList(in, config)
 	keys := query.SelectKeys
 	var tmp permission.StructFieldList
 	if len(keys) != 0 {

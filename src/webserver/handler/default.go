@@ -29,8 +29,7 @@ type ExtendApiHandler interface {
 }
 
 type DB interface {
-	AuthAdminUser(string) bool
-	AuthSuperAdminUser(string) (bool, bool)
+	GetAccessConfig(string) (permission.AccessConfig)
 }
 
 type DefaultApiHandler struct {

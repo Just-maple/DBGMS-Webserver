@@ -13,7 +13,7 @@ import (
 func TransAjaxQuery(c *gin.Context, j *jsonx.Json) (matcherMap map[string]interface{}, keys []string, skipCnt, limitCnt int, sortKey, reverse string, tSTime, tETime time.Time, err error) {
 	keys = j.Get("keys").MustStringArray()
 	matcherMap = j.Get("matcher").MustMap()
-
+	
 	skip := c.DefaultQuery("skip", "0")
 	skipCnt, err = strconv.Atoi(skip)
 	if err != nil {
@@ -54,13 +54,13 @@ func (h *DefaultApiHandler) GetDataByAjaxQuery(c *gin.Context, j *jsonx.Json, us
 	if err != nil {
 		return
 	}
-	ia, is := h.AuthSuperAdminUserSession(us)
+	access := h.AuthUserSession(us)
 	data, count, err := query.AjaxSearch(ajaxConfig)
 	if err != nil {
 		log.Error(err)
 		return
 	}
-	data = query.MakeAjaxReturnWithSelectKeysAndPermissionControl(data, ia, is)
+	data = query.MakeAjaxReturnWithSelectKeysAndPermissionControl(data, access)
 	res = map[string]interface{}{
 		"data": data,
 		"cnt":  count,
@@ -76,9 +76,6 @@ func (h *DefaultApiHandler) RegisterAjaxJsonApi(dataApiAddr, distinctApiAddr str
 
 func (h *DefaultApiHandler) GetAjaxDistinctApi(config *dbx.AjaxStructConfig) JsonAPIFunc {
 	return func(c *gin.Context, j *jsonx.Json, us *session.UserSession) (ret interface{}, err error) {
-		if !h.AuthAdminUserSession(us) {
-			return nil, ErrAuthFailed
-		}
 		key, e := c.GetQuery("key")
 		if !e {
 			return
@@ -90,9 +87,6 @@ func (h *DefaultApiHandler) GetAjaxDistinctApi(config *dbx.AjaxStructConfig) Jso
 
 func (h *DefaultApiHandler) GetAjaxApi(config *dbx.AjaxStructConfig) JsonAPIFunc {
 	return func(c *gin.Context, j *jsonx.Json, us *session.UserSession) (ret interface{}, err error) {
-		if !h.AuthAdminUserSession(us) {
-			return nil, ErrAuthFailed
-		}
 		ret, err = h.GetDataByAjaxQuery(c, j, us, config)
 		return
 	}
