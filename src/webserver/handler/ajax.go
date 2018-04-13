@@ -76,6 +76,11 @@ func (h *DefaultApiHandler) RegisterAjaxJsonApi(dataApiAddr, distinctApiAddr str
 
 func (h *DefaultApiHandler) GetAjaxDistinctApi(config *dbx.AjaxStructConfig) JsonAPIFunc {
 	return func(c *gin.Context, j *jsonx.Json, us *session.UserSession) (ret interface{}, err error) {
+		valid, userId := us.AuthUserSession()
+		if !valid || ( config.AuthCheck != nil && !config.AuthCheck(userId) ) {
+			err = ErrAuthFailed
+			return
+		}
 		key, e := c.GetQuery("key")
 		if !e {
 			return
@@ -87,6 +92,11 @@ func (h *DefaultApiHandler) GetAjaxDistinctApi(config *dbx.AjaxStructConfig) Jso
 
 func (h *DefaultApiHandler) GetAjaxApi(config *dbx.AjaxStructConfig) JsonAPIFunc {
 	return func(c *gin.Context, j *jsonx.Json, us *session.UserSession) (ret interface{}, err error) {
+		valid, userId := us.AuthUserSession()
+		if !valid || ( config.AuthCheck != nil && !config.AuthCheck(userId) ) {
+			err = ErrAuthFailed
+			return
+		}
 		ret, err = h.GetDataByAjaxQuery(c, j, us, config)
 		return
 	}

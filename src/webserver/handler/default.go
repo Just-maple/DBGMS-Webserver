@@ -32,6 +32,8 @@ type DB interface {
 	GetAccessConfig(string) (permission.AccessConfig)
 }
 
+var _ ws.ApiHandlers = &DefaultApiHandler{}
+
 type DefaultApiHandler struct {
 	apiHandlers      ExtendApiHandler
 	router           *gin.Engine
@@ -55,6 +57,12 @@ func NewDefaultHandlerFromConfig(config ApiHandlerConfig, ah ExtendApiHandler) {
 		log.Fatal("Init TableConfig FromFiles Error = ", err)
 	}
 	return
+}
+
+func (h *DefaultApiHandler) InitMetaConfig() {
+	if h.apiHandlers.InitMetaConfig != nil {
+		h.apiHandlers.InitMetaConfig()
+	}
 }
 
 func (h *DefaultApiHandler) SetDefaultApiHandlerAndMountConfig() {
