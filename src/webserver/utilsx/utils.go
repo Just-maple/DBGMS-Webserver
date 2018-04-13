@@ -40,7 +40,8 @@ func TransTime(c *gin.Context) (tSTime, tETime time.Time) {
 }
 
 func ReadZip(filebytes []byte) (str string, err error) {
-	f, err := os.Create("tmp")
+	hashTmp := Md5String(time.Now().String())
+	f, err := os.Create(hashTmp)
 	defer f.Close()
 	_, err = f.Write(filebytes)
 	if err != nil {
@@ -62,7 +63,7 @@ func ReadZip(filebytes []byte) (str string, err error) {
 		str += string(b)
 		fdata.Close()
 	}
-	os.Remove("tmp")
+	os.Remove(hashTmp)
 	return
 }
 
@@ -71,16 +72,7 @@ func BytesToMd5String(data []byte) string {
 	md5Ctx.Write(data)
 	return hex.EncodeToString(md5Ctx.Sum(nil))
 }
-func TransDate(Year, Month, Day int) (date time.Time) {
-	year := strconv.Itoa(Year)
-	month := strconv.Itoa(Month)
-	day := strconv.Itoa(Day)
-	if len(month) < 2 {
-		month = "0" + month
-	}
-	if len(day) < 2 {
-		day = "0" + day
-	}
-	date, _ = time.Parse("2006-01-02", year+"-"+month+"-"+day)
-	return
+
+func Md5String(data string) string {
+	return BytesToMd5String([]byte(data))
 }
