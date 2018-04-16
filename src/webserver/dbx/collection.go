@@ -74,7 +74,14 @@ func (c *Collection) FindId(id interface{}) *mgo.Query {
 		}})
 }
 
+func (c *Collection) FindAll(query interface{}, in interface{}) error {
+	return c.Find(query).All(in)
+}
+
 func (c *Collection) Find(query interface{}) *mgo.Query {
+	if query == nil {
+		query = bson.M{}
+	}
 	return c.Collection.Find(bson.M{
 		BsonSelectorAnd: []interface{}{
 			query,

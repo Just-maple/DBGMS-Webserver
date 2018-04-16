@@ -3,8 +3,10 @@ package config
 import (
 	"encoding/json"
 	"io/ioutil"
-	"log"
+	"webserver/logger"
 )
+
+var log = logger.Log
 
 type DefaultConfig struct {
 	MgoDBUrl         string
@@ -13,6 +15,14 @@ type DefaultConfig struct {
 	SessionSecretKey string
 	SessionKey       string
 }
+
+const (
+	defaultSecretKey  = "secret-key"
+	defaultSessionKey = "session"
+	defaultMgoUrl     = "mongodb://0.0.0.0:27017"
+	defaultTablePath  = "./"
+	defaultServerAddr = "0.0.0.0:8388"
+)
 
 func LoadConfigurationFromFile(filename string, config interface{}) {
 	data, err := ioutil.ReadFile(filename)
@@ -37,32 +47,40 @@ func LoadConfiguration(configPath string) (config *DefaultConfig) {
 
 func (cfg *DefaultConfig) GetSessionSecretKey() string {
 	if cfg.SessionSecretKey == "" {
-		cfg.SessionSecretKey = "secret-key"
+		cfg.SessionSecretKey = defaultSecretKey
+		log.Noticef("Undefined SessionSecretKey,use default [ %v ]", defaultSecretKey)
 	}
 	return cfg.SessionSecretKey
 }
+
 func (cfg *DefaultConfig) GetSessionKey() string {
 	if cfg.SessionKey == "" {
-		cfg.SessionKey = "session"
+		cfg.SessionKey = defaultSessionKey
+		log.Noticef("Undefined SessionKey,use default [ %v ]", defaultSessionKey)
 	}
 	return cfg.SessionKey
 }
 
 func (cfg *DefaultConfig) GetMgoDBUrl() string {
 	if cfg.MgoDBUrl == "" {
-		cfg.MgoDBUrl = "0.0.0.0:27017"
+		cfg.MgoDBUrl = defaultMgoUrl
+		log.Noticef("Undefined MgoDBUrl,use default [ %v ]", defaultMgoUrl)
 	}
 	return cfg.MgoDBUrl
 }
+
 func (cfg *DefaultConfig) GetTablePath() string {
 	if cfg.TablePath == "" {
-		cfg.TablePath = "./"
+		cfg.TablePath = defaultTablePath
+		log.Noticef("Undefined TablePath,use default [ %v ]", defaultTablePath)
 	}
 	return cfg.TablePath
 }
+
 func (cfg *DefaultConfig) GetServerAddr() string {
 	if cfg.ServerAddr == "" {
-		cfg.ServerAddr = "0.0.0.0:8388"
+		cfg.ServerAddr = defaultServerAddr
+		log.Noticef("Undefined ServerAddr,use default [ %v ]", defaultServerAddr)
 	}
 	return cfg.ServerAddr
 }

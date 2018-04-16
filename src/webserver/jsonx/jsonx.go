@@ -28,6 +28,10 @@ func (j *Json) GetString(key string) string {
 	return j.Get(key).MustString()
 }
 
+func (j *Json) Get(key string) *Json {
+	return &Json{j.Json.Get(key)}
+}
+
 func (j *Json) GetStringId() string {
 	return j.GetString(JsonKeyId)
 }

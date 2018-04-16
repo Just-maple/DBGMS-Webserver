@@ -3,6 +3,7 @@ package main
 import (
 	"webserver/handler"
 	"webserver/logger"
+	"gopkg.in/mgo.v2/bson"
 )
 
 var log = logger.Log
@@ -32,9 +33,22 @@ func (h *ApiHandler) RegisterAPI() {
 	//implement method RegisterAPI
 	//this method provide Api register
 	//and will execute before server start
+	
+	type test struct {
+		Id    bson.ObjectId `bson:"_id"`
+		Count int
+	}
+	//`{
+	//	"Test": 1,
+	//	"Test2": "string"
+	//}`
 	h.ApiGetHandlers.RegisterDefaultAPI("test2", h.ApiTest)
-	h.ApiGetHandlers.RegisterDefaultAPI("test3", func(args *handler.APIArgs) (ret interface{}, err error) {
-		return args.JsonKey("test").MustString() + h.String, nil
+	h.ApiPostHandlers.RegisterDefaultAPI("test3", func(args *handler.APIArgs) (ret interface{}, err error) {
+		var s = test{}
+		err = args.JsonKey("test").Unmarshal(&s)
+		var d []test
+		err = h.db.AnyCollection.FindAll(nil, &d)
+		return d, err
 	})
 }
 

@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"github.com/bitly/go-simplejson"
 	"github.com/gin-gonic/gin"
 	"time"
 	"webserver/jsonx"
@@ -17,6 +16,7 @@ type APIArgs struct {
 	json    *jsonx.Json
 	session *session.UserSession
 }
+
 
 func (j *JsonAPIFuncRoute) RegisterAPI(name string, function JsonAPIFunc) {
 	j.registerJsonAPI(name,
@@ -53,10 +53,14 @@ func (arg *APIArgs) UserId() (valid bool, userId string) {
 	return arg.session.AuthUserSession()
 }
 
+func (arg *APIArgs) JsonUnmarshal(in interface{}) error {
+	return arg.json.Unmarshal(in)
+}
+
 func (arg *APIArgs) JsonKeyId() string {
 	return arg.json.GetStringId()
 }
 
-func (arg *APIArgs) JsonKey(key string) *simplejson.Json {
+func (arg *APIArgs) JsonKey(key string) *jsonx.Json {
 	return arg.json.Get(key)
 }
