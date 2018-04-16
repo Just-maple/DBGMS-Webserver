@@ -9,6 +9,10 @@ import (
 	"os"
 	"strconv"
 	"time"
+	"strings"
+	"reflect"
+	"fmt"
+	"gopkg.in/mgo.v2/bson"
 )
 
 func TransTime(c *gin.Context) (tSTime, tETime time.Time) {
@@ -75,4 +79,76 @@ func BytesToMd5String(data []byte) string {
 
 func Md5String(data string) string {
 	return BytesToMd5String([]byte(data))
+}
+
+func CamelString(s string) string {
+	data := make([]byte, 0, len(s))
+	j := false
+	k := false
+	num := len(s) - 1
+	for i := 0; i <= num; i++ {
+		d := s[i]
+		if k == false && d >= 'A' && d <= 'Z' {
+			k = true
+		}
+		if d >= 'a' && d <= 'z' && (j || k == false) {
+			d = d - 32
+			j = false
+			k = true
+		}
+		if k && d == '_' && num > i && s[i+1] >= 'a' && s[i+1] <= 'z' {
+			j = true
+			continue
+		}
+		data = append(data, d)
+	}
+	return strings.Replace(string(data), "_", "", -1)
+}
+
+
+func SnakeString(s string) string {
+	data := make([]byte, 0, len(s)*2)
+	j := false
+	num := len(s)
+	for i := 0; i < num; i++ {
+		d := s[i]
+		if i > 0 && d >= 'A' && d <= 'Z' && j {
+			data = append(data, '_')
+		}
+		if d != '_' {
+			j = true
+		}
+		data = append(data, d)
+	}
+	return strings.ToLower(string(data[:]))
+}
+
+func GenerateMapStruct(d map[string]interface{}, name string) (structRaw string) {
+	structRaw = fmt.Sprintf("type %v struct { \n", CamelString(name))
+	var branch = ""
+	var fieldType = make(map[string]string, len(d))
+	for k := range d {
+		switch v := d[k].(type) {
+		case []interface{}:
+			fieldType[k] = "interface{}"
+		case map[string]interface{}:
+			branch += GenerateMapStruct(v, CamelString(k))
+			fieldType[k] = CamelString(k)
+		case bson.ObjectId:
+			fieldType[k] = "bson.ObjectId"
+		case time.Time:
+			fieldType[k] = "time.Time"
+		case error:
+			fieldType[k] = "error"
+		default:
+			if reflect.ValueOf(v).IsValid() {
+				fieldType[k] = reflect.ValueOf(v).Kind().String()
+			}
+		}
+		if fieldType[k] != "" {
+			structRaw += fmt.Sprintf("\t%-20v %-20v `bson:\"%v\"`\n", CamelString(k), fieldType[k], k)
+		}
+	}
+	structRaw = "\n" + structRaw + "}" + branch
+	return structRaw
 }

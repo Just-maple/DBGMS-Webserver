@@ -6,35 +6,73 @@ import (
 	"webserver/jsonx"
 	"webserver/session"
 	"webserver/utilsx"
+	"net/http"
+	"github.com/bitly/go-simplejson"
 )
 
 type JsonAPIFunc func(g *gin.Context, j *jsonx.Json, s *session.UserSession) (interface{}, error)
 
-type DefaultAPI func(args *APIArgs) (ret interface{}, err error)
+type DefaultAPIFunc func(args *APIArgs) (ret interface{}, err error)
+type PermissionAuth func(string) (bool)
+
+type DefaultAPI struct {
+	DefaultAPIFunc
+	PermissionAuth []PermissionAuth
+}
+
 type APIArgs struct {
 	context *gin.Context
 	json    *jsonx.Json
 	session *session.UserSession
 }
 
+func (api *DefaultAPI) Run(c *gin.Context, userSession *session.UserSession) (ret interface{}, err error) {
+	var jsonData = new(jsonx.Json)
+	if c.Request.Method == http.MethodPost {
+		jsonData.Json, err = simplejson.NewFromReader(c.Request.Body)
+	} else {
+		jsonData.Json = simplejson.New()
+	}
+	if err == nil {
+		if len(api.PermissionAuth) > 0 {
+			valid, userId := userSession.AuthUserSession()
+			if !valid {
+				err = ErrAuthFailed
+				return
+			} else {
+				for i := range api.PermissionAuth {
+					valid = api.PermissionAuth[i](userId)
+					if !valid {
+						err = ErrAuthFailed
+						return
+					}
+				}
+			}
+		}
+		ret, err = api.DefaultAPIFunc(&APIArgs{c, jsonData, userSession})
+	}
+	return
+}
 
-func (j *JsonAPIFuncRoute) RegisterAPI(name string, function JsonAPIFunc) {
+func (j *JsonAPIFuncRoute) RegisterAPI(name string, function JsonAPIFunc, pm ...PermissionAuth) {
 	j.registerJsonAPI(name,
 		func(args *APIArgs) (i interface{}, e error) {
 			return function(args.context, args.json, args.session)
-		})
+		}, pm)
 }
 
-func (j JsonAPIFuncRoute) registerJsonAPI(name string, function DefaultAPI) {
+func (j JsonAPIFuncRoute) registerJsonAPI(name string, function DefaultAPIFunc, pm []PermissionAuth) {
 	if j[name] != nil {
 		panic("route already existed")
 	} else {
-		j[name] = function
+		j[name] = &DefaultAPI{
+			function, pm,
+		}
 	}
 }
 
-func (j *JsonAPIFuncRoute) RegisterDefaultAPI(name string, api DefaultAPI) {
-	j.registerJsonAPI(name, api)
+func (j *JsonAPIFuncRoute) RegisterDefaultAPI(name string, api DefaultAPIFunc, pm ...PermissionAuth) {
+	j.registerJsonAPI(name, api, pm)
 }
 
 func (arg *APIArgs) Time() (st, et time.Time) {

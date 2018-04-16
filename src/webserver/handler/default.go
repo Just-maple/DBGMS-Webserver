@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"github.com/bitly/go-simplejson"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"reflect"
@@ -136,35 +135,22 @@ func (h *DefaultApiHandler) JsonAPI(c *gin.Context) {
 	var ok bool
 	var ret interface{}
 	var err error
-	var function DefaultAPI
-	var exists bool
-	userSession := h.GetSession(c)
-	apiName := c.Param("api")
-	function, exists = h.GetApiFunc(c.Request.Method, apiName)
-	if exists == true {
-		var jsonData = new(jsonx.Json)
-		if c.Request.Method == http.MethodPost {
-			jsonData.Json, err = simplejson.NewFromReader(c.Request.Body)
+	var userSession = h.GetSession(c)
+	var apiName = c.Param("api")
+	function, exists := h.GetApiFunc(c.Request.Method, apiName)
+	if exists {
+		ret, err = function.Run(c, userSession)
+		if h.CheckDataBaseConnection(err); err == nil {
+			ret = h.RenderPermission(c, userSession, ret)
+			ok = true
 		} else {
-			jsonData.Json = simplejson.New()
+			log.Errorf("JsonAPI(%s) err = %v", apiName, err)
 		}
-		if err == nil {
-			ret, err = function(&APIArgs{c, jsonData, userSession})
-			if err == nil {
-				ok = true
-			}
-		}
-		
-	}
-	if h.CheckDataBaseConnection(err); err == nil {
-		ret = h.RenderPermission(c, userSession, ret)
-	} else {
-		log.Errorf("JsonAPI(%s) err = %v", apiName, err)
 	}
 	RenderJson(c, ok, ret, err)
 }
 
-type JsonAPIFuncRoute map[string]DefaultAPI
+type JsonAPIFuncRoute map[string]*DefaultAPI
 
 func NewJsonAPIFuncRoute() JsonAPIFuncRoute {
 	return make(JsonAPIFuncRoute)
@@ -172,7 +158,7 @@ func NewJsonAPIFuncRoute() JsonAPIFuncRoute {
 
 func RenderJson(c *gin.Context, ok bool, data interface{}, err error) {
 	c.Header("Access-Control-Allow-Origin", "*")
-	if ok == true {
+	if ok {
 		c.JSON(http.StatusOK, map[string]interface{}{
 			"ok":   ok,
 			"data": data,
@@ -194,7 +180,7 @@ func RenderJson(c *gin.Context, ok bool, data interface{}, err error) {
 	}
 }
 
-func (h *DefaultApiHandler) GetApiFunc(method, apiName string) (function DefaultAPI, exists bool) {
+func (h *DefaultApiHandler) GetApiFunc(method, apiName string) (function *DefaultAPI, exists bool) {
 	switch method {
 	case http.MethodGet:
 		function, exists = h.ApiGetHandlers[apiName]

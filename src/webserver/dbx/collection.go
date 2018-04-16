@@ -4,6 +4,7 @@ import (
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"reflect"
+	"webserver/utilsx"
 )
 
 type Collection struct {
@@ -97,4 +98,14 @@ func (c *Collection) RemoveId(id interface{}) (err error) {
 func (c *Collection) Remove(selector interface{}) (err error) {
 	err = c.Collection.Update(selector, BsonSetDeleted)
 	return
+}
+
+func (c *Collection) GenerateRawStruct() (structRaw string, err error) {
+	var d map[string]interface{}
+	err = c.Find(nil).Sort("-t_create").One(&d)
+	if err != nil {
+		return
+	}
+	structRaw = utilsx.GenerateMapStruct(d, c.Name)
+	return structRaw, err
 }
