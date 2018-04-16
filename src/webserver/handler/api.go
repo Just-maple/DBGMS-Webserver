@@ -9,16 +9,40 @@ import (
 	"webserver/utilsx"
 )
 
-type DefaultAPI func(args APIArgs) (ret interface{}, err error)
+type JsonAPIFunc func(g *gin.Context, j *jsonx.Json, s *session.UserSession) (interface{}, error)
 
+type DefaultAPI func(args *APIArgs) (ret interface{}, err error)
 type APIArgs struct {
 	context *gin.Context
 	json    *jsonx.Json
 	session *session.UserSession
 }
 
+func (j *JsonAPIFuncRoute) RegisterAPI(name string, function JsonAPIFunc) {
+	j.registerJsonAPI(name,
+		func(args *APIArgs) (i interface{}, e error) {
+			return function(args.context, args.json, args.session)
+		})
+}
+
+func (j JsonAPIFuncRoute) registerJsonAPI(name string, function DefaultAPI) {
+	if j[name] != nil {
+		panic("route already existed")
+	} else {
+		j[name] = function
+	}
+}
+
+func (j *JsonAPIFuncRoute) RegisterDefaultAPI(name string, api DefaultAPI) {
+	j.registerJsonAPI(name, api)
+}
+
 func (arg *APIArgs) Time() (st, et time.Time) {
 	return utilsx.TransTime(arg.context)
+}
+
+func (arg *APIArgs) IP() string {
+	return arg.context.ClientIP()
 }
 
 func (arg *APIArgs) Query(key string) string {

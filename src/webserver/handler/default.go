@@ -60,9 +60,9 @@ func NewDefaultHandlerFromConfig(config ApiHandlerConfig, ah ExtendApiHandler) {
 }
 
 func (h *DefaultApiHandler) InitMetaConfig() {
-	if h.apiHandlers.InitMetaConfig != nil {
-		h.apiHandlers.InitMetaConfig()
-	}
+	//if h.apiHandlers.InitMetaConfig != nil {
+	//	h.apiHandlers.InitMetaConfig()
+	//}
 }
 
 func (h *DefaultApiHandler) SetDefaultApiHandlerAndMountConfig() {
@@ -120,6 +120,10 @@ func (h *DefaultApiHandler) SetRouter(r *gin.Engine) {
 	h.router = r
 }
 
+func (h *DefaultApiHandler) RegisterAPI() {
+	log.Info("you had not register any API,register your custom API by rewrite method RegisterAPI")
+}
+
 func (h *DefaultApiHandler) RegisterJsonAPI() {
 	h.router.GET("/api/:api", h.JsonAPI)
 	h.router.POST("/api/:api", h.JsonAPI)
@@ -132,7 +136,7 @@ func (h *DefaultApiHandler) JsonAPI(c *gin.Context) {
 	var ok bool
 	var ret interface{}
 	var err error
-	var function JsonAPIFunc
+	var function DefaultAPI
 	var exists bool
 	userSession := h.GetSession(c)
 	apiName := c.Param("api")
@@ -145,7 +149,7 @@ func (h *DefaultApiHandler) JsonAPI(c *gin.Context) {
 			jsonData.Json = simplejson.New()
 		}
 		if err == nil {
-			ret, err = function(c, jsonData, userSession)
+			ret, err = function(&APIArgs{c, jsonData, userSession})
 			if err == nil {
 				ok = true
 			}
@@ -160,37 +164,10 @@ func (h *DefaultApiHandler) JsonAPI(c *gin.Context) {
 	RenderJson(c, ok, ret, err)
 }
 
-type JsonAPIFuncRoute map[string]JsonAPIFunc
+type JsonAPIFuncRoute map[string]DefaultAPI
 
 func NewJsonAPIFuncRoute() JsonAPIFuncRoute {
 	return make(JsonAPIFuncRoute)
-}
-
-func (j JsonAPIFuncRoute) RegisterAPI(name string, function interface{}) {
-	switch function := function.(type) {
-	case JsonAPIFunc:
-		j.RegisterJsonAPI(name, function)
-	case func(*gin.Context, *jsonx.Json, *session.UserSession) (interface{}, error):
-		j.RegisterJsonAPI(name, function)
-	case DefaultAPI:
-		j.RegisterDefaultAPI(name, function)
-	case func(args APIArgs) (ret interface{}, err error):
-		j.RegisterDefaultAPI(name, function)
-	default:
-		panic(function)
-	}
-}
-
-func (j JsonAPIFuncRoute) RegisterJsonAPI(name string, function JsonAPIFunc) {
-	j[name] = function
-}
-
-func (j JsonAPIFuncRoute) RegisterDefaultAPI(name string, api DefaultAPI) {
-	j.RegisterAPI(name, func(context *gin.Context, json *jsonx.Json, userSession *session.UserSession) (i interface{}, e error) {
-		return api(APIArgs{
-			context, json, userSession,
-		})
-	})
 }
 
 func RenderJson(c *gin.Context, ok bool, data interface{}, err error) {
@@ -217,9 +194,7 @@ func RenderJson(c *gin.Context, ok bool, data interface{}, err error) {
 	}
 }
 
-type JsonAPIFunc func(g *gin.Context, j *jsonx.Json, s *session.UserSession) (interface{}, error)
-
-func (h *DefaultApiHandler) GetApiFunc(method, apiName string) (function JsonAPIFunc, exists bool) {
+func (h *DefaultApiHandler) GetApiFunc(method, apiName string) (function DefaultAPI, exists bool) {
 	switch method {
 	case http.MethodGet:
 		function, exists = h.ApiGetHandlers[apiName]
@@ -227,6 +202,11 @@ func (h *DefaultApiHandler) GetApiFunc(method, apiName string) (function JsonAPI
 		function, exists = h.ApiPostHandlers[apiName]
 	}
 	return
+}
+
+func (h *DefaultApiHandler) NewDataBase() DB {
+	panic("you should provide a custom DB with AccessControl Config")
+	return *new(DB)
 }
 
 func (h *DefaultApiHandler) InitDataBase() {

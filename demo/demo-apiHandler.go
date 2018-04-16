@@ -30,24 +30,25 @@ type MetaData struct {
 
 func (h *ApiHandler) RegisterAPI() {
 	//implement method RegisterAPI
-	
 	//this method provide Api register
 	//and will execute before server start
-	h.ApiGetHandlers.RegisterAPI("test", h.ApiTest)
-	
+	h.ApiGetHandlers.RegisterDefaultAPI("test2", h.ApiTest)
+	h.ApiGetHandlers.RegisterDefaultAPI("test3", func(args *handler.APIArgs) (ret interface{}, err error) {
+		return args.JsonKey("test").MustString() + h.String, nil
+	})
 }
 
-func (h *ApiHandler) ApiTest(args handler.APIArgs) (ret interface{}, err error) {
+func (h *ApiHandler) ApiTest(args *handler.APIArgs) (ret interface{}, err error) {
 	queryString := args.Query("get query key from url")
 	//return type string
 	log.Debug(queryString)
 	jsonValue := args.JsonKey("get Json Key from Post Context")
 	//return type *simplejson.Json
 	log.Debug(jsonValue)
-	
 	isValidUser, userId := args.UserId() //get user Id from session
 	//return bool(is user valid) and string(user Id,must be bson.ObjectId.Hex string)
 	log.Debug(isValidUser, userId)
+	
 	return
 }
 

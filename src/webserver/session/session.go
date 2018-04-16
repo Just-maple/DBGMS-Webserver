@@ -19,11 +19,11 @@ func (us *UserSession) SetUserId(userId string) {
 }
 
 func (us *UserSession) AuthUserSession() (bool, string) {
-	userId := us.Get(SessionKeyUserId)
-	if userId == nil {
+	userId, valid := us.Get(SessionKeyUserId).(string)
+	if !valid {
 		return false, ""
 	}
-	return bson.IsObjectIdHex(userId.(string)), userId.(string)
+	return bson.IsObjectIdHex(userId), userId
 }
 
 func Default(c *gin.Context) UserSession {

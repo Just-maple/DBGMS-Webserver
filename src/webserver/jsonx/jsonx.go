@@ -11,15 +11,15 @@ type Json struct {
 	*simplejson.Json
 }
 
-func (j *Json) CallMethodByInstance(method interface{}, intf interface{}) (err error) {
-	if reflect.TypeOf(method).Kind() != reflect.Func || reflect.TypeOf(method).In(0) != reflect.TypeOf(intf) {
+func (j *Json) CallMethodByInstance(method interface{}, in interface{}) (err error) {
+	if reflect.TypeOf(method).Kind() != reflect.Func || reflect.TypeOf(method).In(0) != reflect.TypeOf(in) {
 		err = errorx.ErrMethodInvalid
 		return
 	}
-	if err = j.Unmarshal(intf); err != nil {
+	if err = j.Unmarshal(in); err != nil {
 		return
 	}
-	res := reflect.ValueOf(method).Call([]reflect.Value{reflect.ValueOf(intf)})
+	res := reflect.ValueOf(method).Call([]reflect.Value{reflect.ValueOf(in)})
 	reflect.ValueOf(&err).Elem().Set(res[0])
 	return
 }
@@ -32,11 +32,11 @@ func (j *Json) GetStringId() string {
 	return j.GetString(JsonKeyId)
 }
 
-func (j *Json) Unmarshal(intf interface{}) (err error) {
+func (j *Json) Unmarshal(in interface{}) (err error) {
 	tmpB, err := json.Marshal(j)
 	if err != nil {
 		return
 	}
-	err = json.Unmarshal(tmpB, intf)
+	err = json.Unmarshal(tmpB, in)
 	return
 }
