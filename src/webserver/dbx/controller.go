@@ -11,11 +11,11 @@ import (
 type CollectionController struct {
 	collection   *Collection
 	model        reflect.Type
-	IdKeyField   string
-	FieldBsonMap map[string]string
+	idKeyField   string
+	json2BsonMap map[string]string
 }
 
-const FiledTCreate = "t_create"
+const FieldTCreate = "t_create"
 
 func (c *Collection) CreateController(in interface{}) (*CollectionController) {
 	var newIn = reflect.TypeOf(in)
@@ -27,15 +27,15 @@ func (c *Collection) CreateController(in interface{}) (*CollectionController) {
 	}
 	fi := newIn.NumField()
 	var MatchIdKeyField bool
-	var IdKeyField string
-	var FieldMap = make(map[string]string, fi)
+	var idKeyField string
+	var json2BsonMap = make(map[string]string, fi)
 	for i := 0; i < fi; i++ {
 		if newIn.Field(i).Tag.Get("bson") == "_id" {
 			if !MatchIdKeyField {
 				MatchIdKeyField = true
-				IdKeyField = newIn.Field(i).Name
+				idKeyField = newIn.Field(i).Name
 			} else {
-				panic(fmt.Sprintf("IdKey repeat error ,match %v and %v", newIn.Field(i).Name, IdKeyField))
+				panic(fmt.Sprintf("IdKey repeat error ,match %v and %v", newIn.Field(i).Name, idKeyField))
 			}
 		}
 		var FieldKey = newIn.Field(i).Name
@@ -43,7 +43,7 @@ func (c *Collection) CreateController(in interface{}) (*CollectionController) {
 		if JsonKey != "" {
 			FieldKey = JsonKey
 		}
-		FieldMap[FieldKey] = newIn.Field(i).Tag.Get("bson")
+		json2BsonMap[FieldKey] = newIn.Field(i).Tag.Get("bson")
 	}
 	if !MatchIdKeyField {
 		panic("IdKey match error,ensure model has field with tag bson")
@@ -51,8 +51,8 @@ func (c *Collection) CreateController(in interface{}) (*CollectionController) {
 	return &CollectionController{
 		collection:   c,
 		model:        newIn,
-		IdKeyField:   IdKeyField,
-		FieldBsonMap: FieldMap,
+		idKeyField:   idKeyField,
+		json2BsonMap: json2BsonMap,
 	}
 }
 
@@ -60,6 +60,9 @@ func (c *CollectionController) NewModelSlice() (ret interface{}) {
 	return reflect.New(reflect.SliceOf(c.model)).Interface()
 }
 
+func (c *CollectionController) GetIdString(json *jsonx.Json) (Id string) {
+	return json.Get(c.idKeyField).MustString()
+}
 func (c *CollectionController) NewModel() (ret interface{}) {
 	return reflect.New(c.model).Interface()
 }
@@ -67,7 +70,8 @@ func (c *CollectionController) NewModel() (ret interface{}) {
 func (c *CollectionController) UpdateByJson(json *jsonx.Json) (err error) {
 	var jmap = json.MustMap()
 	var updator = c.NewModel()
-	if !bson.IsObjectIdHex(json.GetStringId()) {
+	var Id = c.GetIdString(json)
+	if !bson.IsObjectIdHex(Id) {
 		return errorx.ErrIdInvalid
 	}
 	err = json.Unmarshal(updator)
@@ -77,14 +81,14 @@ func (c *CollectionController) UpdateByJson(json *jsonx.Json) (err error) {
 	}
 	var bmap = make(bson.M, len(jmap))
 	for key := range jmap {
-		bmap[c.FieldBsonMap[key]] = uv.FieldByName(key).Interface()
+		bmap[c.json2BsonMap[key]] = uv.FieldByName(key).Interface()
 	}
-	err = c.collection.UpdateId(bson.ObjectIdHex(json.GetStringId()), bson.M{"$set": bmap})
+	err = c.collection.UpdateId(bson.ObjectIdHex(Id), bson.M{"$set": bmap})
 	return
 }
 
 func (c *CollectionController) RemoveByJson(json *jsonx.Json) (err error) {
-	Id := json.Get(c.IdKeyField).MustString()
+	Id := c.GetIdString(json)
 	if !bson.IsObjectIdHex(Id) {
 		return errorx.ErrIdInvalid
 	}
@@ -119,12 +123,12 @@ func (c *CollectionController) NewFromJson(json *jsonx.Json) (err error) {
 	if err != nil {
 		return
 	}
-	newModel.FieldByName(c.IdKeyField).Set(reflect.ValueOf(bson.NewObjectId()))
+	newModel.FieldByName(c.idKeyField).Set(reflect.ValueOf(bson.NewObjectId()))
 	newBson, err := StructToBson(newModel.Interface())
 	if err != nil {
 		return
 	}
-	newBson[FiledTCreate] = bson.NewObjectId()
+	newBson[FieldTCreate] = bson.NewObjectId()
 	err = c.collection.Insert(newBson)
 	return
 }
