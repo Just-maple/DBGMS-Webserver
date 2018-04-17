@@ -15,21 +15,21 @@ type DataBase struct {
 func (db *DataBase) GetAccessConfig(userId string) (permission.AccessConfig) {
 	//database struct implement auth super admin user
 	//define your logic here
-	return &SuperAdminAccesss{userId == "User is Admin", userId == "User is Super"}
+	return &SuperAdminAccess{userId == "User is Admin", userId == "User is Super"}
 }
 
-func (access *SuperAdminAccesss) AuthTablePermission(config *permission.TableConfig) bool {
+func (access *SuperAdminAccess) AuthTablePermission(config *permission.TableConfig) bool {
 	return (!config.NeedAdmin || access.isAdmin) && (!config.NeedSuperAdmin || access.isSuper)
 }
 
-type SuperAdminAccesss struct {
+type SuperAdminAccess struct {
 	isAdmin bool
 	isSuper bool
 }
 
-func (access *SuperAdminAccesss) AuthAllPermission() bool {
+func (access *SuperAdminAccess) AuthAllPermission() bool {
 	return access.isSuper
 }
-func (access *SuperAdminAccesss) AuthPermission(config *permission.StructFieldConfig) bool {
+func (access *SuperAdminAccess) AuthPermission(config *permission.StructFieldConfig) bool {
 	return (!config.SuperAdmin || access.isSuper) && (!config.Admin || access.isAdmin)
 }

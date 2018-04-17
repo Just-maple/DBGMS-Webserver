@@ -5,7 +5,6 @@ import (
 	"webserver/jsonx"
 	"webserver/session"
 	"net/http"
-	"github.com/bitly/go-simplejson"
 )
 
 type JsonAPIFunc func(g *gin.Context, j *jsonx.Json, s *session.UserSession) (interface{}, error)
@@ -19,11 +18,11 @@ type DefaultAPI struct {
 }
 
 func (api *DefaultAPI) Run(c *gin.Context, userSession *session.UserSession) (ret interface{}, err error) {
-	var jsonData = new(jsonx.Json)
+	var jsonData *jsonx.Json
 	if c.Request.Method == http.MethodPost {
-		jsonData.Json, err = simplejson.NewFromReader(c.Request.Body)
+		jsonData, err = jsonx.NewFromReader(c.Request.Body)
 	} else {
-		jsonData.Json = simplejson.New()
+		jsonData = jsonx.New()
 	}
 	if err == nil {
 		if len(api.PermissionAuth) > 0 {

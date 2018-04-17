@@ -224,3 +224,4 @@ func (h *DefaultApiHandler) CheckDataBaseConnection(err error) {
 		h.apiHandlers.InitDataBase()
 	}
 }
+
