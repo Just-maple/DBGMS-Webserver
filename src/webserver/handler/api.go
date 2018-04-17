@@ -13,7 +13,7 @@ import (
 type JsonAPIFunc func(g *gin.Context, j *jsonx.Json, s *session.UserSession) (interface{}, error)
 
 type DefaultAPIFunc func(args *APIArgs) (ret interface{}, err error)
-type PermissionAuth func(string) (bool)
+type PermissionAuth func(*session.UserSession) (bool)
 
 type DefaultAPI struct {
 	DefaultAPIFunc
@@ -35,23 +35,33 @@ func (api *DefaultAPI) Run(c *gin.Context, userSession *session.UserSession) (re
 	}
 	if err == nil {
 		if len(api.PermissionAuth) > 0 {
-			valid, userId := userSession.AuthUserSession()
-			if !valid {
-				err = ErrAuthFailed
-				return
-			} else {
-				for i := range api.PermissionAuth {
-					valid = api.PermissionAuth[i](userId)
-					if !valid {
-						err = ErrAuthFailed
-						return
-					}
+			for i := range api.PermissionAuth {
+				valid := api.PermissionAuth[i](userSession)
+				if !valid {
+					err = ErrAuthFailed
+					return
 				}
 			}
 		}
 		ret, err = api.DefaultAPIFunc(&APIArgs{c, jsonData, userSession})
 	}
 	return
+}
+
+type RegisterGroup struct {
+	Route *JsonAPIFuncRoute
+	pm    *[]PermissionAuth
+}
+
+func (r *RegisterGroup) RegisterDefaultAPI(name string, function DefaultAPIFunc) {
+	r.Route.RegisterDefaultAPI(name, function, *r.pm...)
+}
+func (r *RegisterGroup) RegisterAPI(name string, function JsonAPIFunc) {
+	r.Route.RegisterAPI(name, function, *r.pm...)
+}
+
+func (j *JsonAPIFuncRoute) MakeRegisterGroup(pm ...PermissionAuth) *RegisterGroup {
+	return &RegisterGroup{j, &pm}
 }
 
 func (j *JsonAPIFuncRoute) RegisterAPI(name string, function JsonAPIFunc, pm ...PermissionAuth) {
