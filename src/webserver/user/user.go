@@ -13,24 +13,12 @@ type DefaultUser struct {
 	TProcess     time.Time     `bson:"t_process"`
 	Level        Level         `bson:"lvl"`
 	SuperiorUser bson.ObjectId `bson:"sp_user"`
+	IP           string        `bson:"ip"`
 }
-
-const (
-	FieldNickName    = "nickname"
-	FieldPassword    = "pwd"
-	FieldTimeCreate  = "t_create"
-	FieldTimeProcess = "t_process"
-	FieldLevel       = "lvl"
-	FieldId          = "_id"
-	
-	AllPermissionLevel = Level(10)
-)
 
 type Level int
 
-const SecretSalt = "User-Secret-Salt"
-
-func NewUserFromNicknameAndPwd(nickname, hashPassword string, level Level, SuperiorUserId bson.ObjectId) (*DefaultUser) {
+func newUserFromNicknameAndPwd(nickname, hashPassword string, level Level, SuperiorUserId bson.ObjectId) (*DefaultUser) {
 	return &DefaultUser{
 		Id:           bson.NewObjectId(),
 		NickName:     nickname,
@@ -41,10 +29,10 @@ func NewUserFromNicknameAndPwd(nickname, hashPassword string, level Level, Super
 	}
 }
 
-func (user *DefaultUser) GetUserLevel() Level {
+func (user *DefaultUser) getUserLevel() Level {
 	return user.Level
 }
 
-func (user *DefaultUser) HaveAllPermission() bool {
-	return user.GetUserLevel() >= AllPermissionLevel
+func (user *DefaultUser) haveAllPermission() bool {
+	return user.getUserLevel() >= AllPermissionLevel
 }

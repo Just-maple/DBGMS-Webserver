@@ -100,7 +100,6 @@ func (c *Collection) Remove(selector interface{}) (err error) {
 	return
 }
 
-
 func (c *Collection) GenerateRawStruct() (structRaw string, err error) {
 	var d map[string]interface{}
 	err = c.Find(nil).Sort("-t_create").One(&d)
@@ -110,5 +109,3 @@ func (c *Collection) GenerateRawStruct() (structRaw string, err error) {
 	structRaw = utilsx.GenerateMapStruct(d, c.Name)
 	return structRaw, err
 }
-
-

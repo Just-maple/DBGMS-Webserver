@@ -11,10 +11,10 @@ func InitController(collection *dbx.Collection) (controller *Controller) {
 
 func (c *Controller) InjectHandler(handler *handler.DefaultApiHandler) () {
 	c.handler = handler
-	c.RegisterUserPwdLoginApi()
-	c.RegisterNewUserApi()
-	c.RegisterSetUserLevelApi()
-	c.RegisterUserSessionLoginApi()
-	c.RegisterChangeUserPasswordApi()
-	c.RegisterGetAllUsersApi()
+	c.registerUserPwdLoginApi()
+	c.registerNewUserApi()
+	c.registerSetUserLevelApi()
+	c.registerUserSessionLoginApi()
+	c.registerChangeUserPasswordApi()
+	c.registerGetAllUsersApi()
 }

@@ -14,7 +14,7 @@ type Controller struct {
 	handler    *handler.DefaultApiHandler
 }
 
-func (c *Controller) UserLogin(nickname, password string) (user DefaultUser, err error) {
+func (c *Controller) userLogin(nickname, password string) (user DefaultUser, err error) {
 	password = Md5EncodePassword(password)
 	err = c.collection.Find(bson.M{FieldNickName: nickname, FieldPassword: password}).One(&user)
 	if errorx.IsErrorNotFound(err) {
@@ -23,37 +23,42 @@ func (c *Controller) UserLogin(nickname, password string) (user DefaultUser, err
 	return
 }
 
-func (c *Controller) ChangeUserPassword(Id bson.ObjectId, oldPWD, newPWD string) (err error) {
+func (c *Controller) changeUserPassword(Id bson.ObjectId, oldPWD, newPWD string) (err error) {
 	oldPWD = Md5EncodePassword(oldPWD)
 	newPWD = Md5EncodePassword(newPWD)
-	err = c.collection.Update(bson.M{FieldId: Id, FieldPassword: oldPWD}, bson.M{"$set": bson.M{FieldPassword: newPWD}})
+	err = c.collection.Update(bson.M{
+		FieldId:       Id,
+		FieldPassword: oldPWD,
+	}, bson.M{
+		dbx.BsonSelectorSet: bson.M{FieldPassword: newPWD,
+		}})
 	if errorx.IsErrorNotFound(err) {
 		err = errorx.ErrAuthFailed
 	}
 	return
 }
 
-func (c *Controller) GetUserLevelById(Id bson.ObjectId) (level Level) {
-	user, err := c.GetUserById(Id)
+func (c *Controller) etUserLevelById(Id bson.ObjectId) (level Level) {
+	user, err := c.getUserById(Id)
 	if err != nil {
 		return
 	}
-	return user.GetUserLevel()
+	return user.getUserLevel()
 }
 
-func (c *Controller) RemoveUserById(Id bson.ObjectId) (err error) {
+func (c *Controller) removeUserById(Id bson.ObjectId) (err error) {
 	return c.collection.RemoveId(Id)
 }
 
-func (c *Controller) GetUserById(Id bson.ObjectId) (user DefaultUser, err error) {
+func (c *Controller) getUserById(Id bson.ObjectId) (user DefaultUser, err error) {
 	err = c.collection.FindId(Id).One(&user)
 	return
 }
 
-func (c *Controller) NewUserFromNicknameAndPwd(nickname, password string, level Level, SuperiorUserId bson.ObjectId) (err error) {
+func (c *Controller) newUserFromNicknameAndPwd(nickname, password string, level Level, superiorUserId bson.ObjectId) (err error) {
 	if c.checkUserNickNameValid(nickname) {
 		password = Md5EncodePassword(password)
-		var user = NewUserFromNicknameAndPwd(nickname, password, level, SuperiorUserId)
+		var user = newUserFromNicknameAndPwd(nickname, password, level, superiorUserId)
 		user.TCreate = time.Now()
 		err = c.insertUser(user)
 	} else {
@@ -73,10 +78,14 @@ func (c *Controller) insertUser(user *DefaultUser) (err error) {
 }
 
 func (c *Controller) setUserLevel(Id bson.ObjectId, level Level) (err error) {
-	return c.collection.UpdateId(Id, bson.M{"$set": bson.M{FieldLevel: level}})
+	return c.collection.UpdateId(Id, bson.M{dbx.BsonSelectorSet: bson.M{FieldLevel: level}})
 }
 
-func (c *Controller) GetAllUsers() (users []DefaultUser, err error) {
+func (c *Controller) updateUserLogin(userId bson.ObjectId, ip string) (err error) {
+	return c.collection.UpdateId(userId, bson.M{dbx.BsonSelectorSet: bson.M{FieldIP: ip, FieldTimeProcess: time.Now()}})
+}
+
+func (c *Controller) getAllUsers() (users []DefaultUser, err error) {
 	err = c.collection.FindAll(nil, &users)
 	return
 }
