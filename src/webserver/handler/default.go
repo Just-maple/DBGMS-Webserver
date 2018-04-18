@@ -2,15 +2,12 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
-	"net/http"
 	"reflect"
 	"webserver/dbx"
 	"webserver/errorx"
-	"webserver/jsonx"
 	"webserver/logger"
 	"webserver/permission"
 	ws "webserver/server"
-	"webserver/session"
 )
 
 var log = logger.Log
@@ -59,9 +56,6 @@ func NewDefaultHandlerFromConfig(config ApiHandlerConfig, ah ExtendApiHandler) {
 }
 
 func (h *DefaultApiHandler) InitMetaConfig() {
-	//if h.apiHandlers.InitMetaConfig != nil {
-	//	h.apiHandlers.InitMetaConfig()
-	//}
 }
 
 func (h *DefaultApiHandler) SetDefaultApiHandlerAndMountConfig() {
@@ -105,89 +99,8 @@ func (h *DefaultApiHandler) SetDefaultConfig(in interface{}) {
 	return
 }
 
-func (h *DefaultApiHandler) RegisterRouter(method, path string, function gin.HandlerFunc) {
-	h.router.Handle(method, path, function)
-}
-
-func (h *DefaultApiHandler) SetRouter(r *gin.Engine) {
-	h.router = r
-}
-
 func (h *DefaultApiHandler) RegisterAPI() {
 	log.Info("you had not register any API,register your custom API by rewrite method RegisterAPI")
-}
-
-func (h *DefaultApiHandler) RegisterJsonAPI() {
-	h.router.GET("/api/:api", h.JsonAPI)
-	h.router.POST("/api/:api", h.JsonAPI)
-	h.ApiPostHandlers.RegisterAPI("test", h.Test)
-	h.ApiGetHandlers.RegisterAPI("test", h.Test)
-	h.apiHandlers.RegisterAPI()
-}
-
-func (h *DefaultApiHandler) JsonAPI(c *gin.Context) {
-	var ok bool
-	var ret interface{}
-	var err error
-	var userSession = h.GetSession(c)
-	var apiName = c.Param("api")
-	function, exists := h.GetApiFunc(c.Request.Method, apiName)
-	if exists {
-		ret, err = function.Run(c, userSession)
-		if h.CheckDataBaseConnection(err); err == nil {
-			ret = h.RenderPermission(c, userSession, ret)
-			ok = true
-		} else {
-			log.Errorf("JsonAPI(%s) err = %v", apiName, err)
-		}
-	}
-	RenderJson(c, ok, ret, err)
-}
-
-type JsonAPIFuncRoute map[string]*DefaultAPI
-
-func NewJsonAPIFuncRoute() JsonAPIFuncRoute {
-	return make(JsonAPIFuncRoute)
-}
-
-func RenderJson(c *gin.Context, ok bool, data interface{}, err error) {
-	c.Header("Access-Control-Allow-Origin", "*")
-	if ok {
-		c.JSON(http.StatusOK, map[string]interface{}{
-			"ok":   ok,
-			"data": data,
-		})
-	} else {
-		if err != nil {
-			c.IndentedJSON(http.StatusInternalServerError, map[string]interface{}{
-				"ok":   ok,
-				"data": data,
-				"err":  err.Error(),
-			})
-			
-		} else {
-			c.IndentedJSON(http.StatusInternalServerError, map[string]interface{}{
-				"ok":   ok,
-				"data": data,
-			})
-		}
-	}
-}
-
-func (h *DefaultApiHandler) GetApiHandlersFromMethod(method string) (handler JsonAPIFuncRoute) {
-	switch method {
-	case http.MethodGet:
-		return h.ApiGetHandlers
-	case http.MethodPost:
-		return h.ApiPostHandlers
-	default:
-		panic("method invalid " + method)
-		return
-	}
-}
-func (h *DefaultApiHandler) GetApiFunc(method, apiName string) (function *DefaultAPI, exists bool) {
-	function, exists = h.GetApiHandlersFromMethod(method)[apiName]
-	return
 }
 
 func (h *DefaultApiHandler) NewDataBase() DB {
@@ -203,14 +116,6 @@ func (h *DefaultApiHandler) InitDataBase() {
 	if err != nil {
 		log.Fatal("Init MgoDataBase Error = ", err)
 		return
-	}
-	return
-}
-
-func (h *DefaultApiHandler) Test(c *gin.Context, j *jsonx.Json, us *session.UserSession) (ret interface{}, err error) {
-	ret = j.Get("test").MustString()
-	if ret == "" {
-		ret = "test success"
 	}
 	return
 }

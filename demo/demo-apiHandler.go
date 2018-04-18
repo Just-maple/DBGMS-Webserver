@@ -61,7 +61,8 @@ func (h *ApiHandler) InitMetaConfig() {
 	
 	//you can handle your extend data here
 	//this method will execute after database init
-	user.InitController(h.db.WXUser).InjectHandler(h.DefaultApiHandler)
+	var userController = user.InitController(h.db.WXUser)
+	h.DefaultApiHandler.InjectController(userController)
 }
 
 func (h *ApiHandler) NewDataBase() handler.DB {

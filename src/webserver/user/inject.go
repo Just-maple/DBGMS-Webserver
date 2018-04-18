@@ -2,15 +2,13 @@ package user
 
 import (
 	"webserver/dbx"
-	"webserver/handler"
 )
 
 func InitController(collection *dbx.Collection) (controller *Controller) {
 	return &Controller{collection: collection}
 }
 
-func (c *Controller) InjectHandler(handler *handler.DefaultApiHandler) () {
-	c.handler = handler
+func (c *Controller) Init(){
 	c.registerUserPwdLoginApi()
 	c.registerNewUserApi()
 	c.registerSetUserLevelApi()

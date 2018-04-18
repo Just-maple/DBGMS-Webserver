@@ -6,12 +6,12 @@ import (
 	"time"
 	"gopkg.in/mgo.v2/bson"
 	"webserver/utilsx"
-	"webserver/handler"
+	"webserver/handler/controller"
 )
 
 type Controller struct {
+	controller.DefaultController
 	collection *dbx.Collection
-	handler    *handler.DefaultApiHandler
 }
 
 func (c *Controller) userLogin(nickname, password string) (user DefaultUser, err error) {
