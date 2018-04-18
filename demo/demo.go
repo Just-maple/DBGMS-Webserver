@@ -5,6 +5,7 @@ import (
 )
 
 func main() {
-	svr := webserver.NewWebServerFromHandler(NewConfig(), new(ApiHandler))
+	h := new(ApiHandler)
+	svr := webserver.NewWebServerFromHandler(NewConfig(), h)
 	svr.Start()
 }

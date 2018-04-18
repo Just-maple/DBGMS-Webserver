@@ -40,6 +40,9 @@ func (h *ApiHandler) RegisterAPI() {
 		log.Debug(d)
 		return d, err
 	})
+	
+	var userController = user.InitController(h.db.WXUser)
+	h.DefaultApiHandler.InjectController(userController)
 }
 
 func (h *ApiHandler) ApiTest(args *handler.APIArgs) (ret interface{}, err error) {
@@ -61,8 +64,6 @@ func (h *ApiHandler) InitMetaConfig() {
 	
 	//you can handle your extend data here
 	//this method will execute after database init
-	var userController = user.InitController(h.db.WXUser)
-	h.DefaultApiHandler.InjectController(userController)
 }
 
 func (h *ApiHandler) NewDataBase() handler.DB {

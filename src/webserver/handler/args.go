@@ -11,7 +11,7 @@ import (
 
 type APIArgs struct {
 	context *gin.Context
-	json    *jsonx.Json
+	Json    *jsonx.Json
 	session *session.UserSession
 }
 
@@ -32,11 +32,11 @@ func (arg *APIArgs) UserId() (valid bool, userId string) {
 }
 
 func (arg *APIArgs) JsonUnmarshal(in interface{}) error {
-	return arg.json.Unmarshal(in)
+	return arg.Json.Unmarshal(in)
 }
 
 func (arg *APIArgs) JsonKeyId() string {
-	return arg.json.GetStringId()
+	return arg.Json.GetStringId()
 }
 
 func (arg *APIArgs) SetUserId(userId bson.ObjectId) {
@@ -44,5 +44,5 @@ func (arg *APIArgs) SetUserId(userId bson.ObjectId) {
 }
 
 func (arg *APIArgs) JsonKey(key string) *jsonx.Json {
-	return arg.json.Get(key)
+	return arg.Json.Get(key)
 }

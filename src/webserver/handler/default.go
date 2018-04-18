@@ -31,21 +31,26 @@ type DB interface {
 var _ ws.ApiHandlers = &DefaultApiHandler{}
 
 type DefaultApiHandler struct {
-	apiHandlers      ExtendApiHandler
-	router           *gin.Engine
-	ApiGetHandlers   JsonAPIFuncRoute
-	ApiPostHandlers  JsonAPIFuncRoute
-	db               DB
-	config           ApiHandlerConfig
-	PermissionConfig permission.TableConfigMap
+	apiHandlers       ExtendApiHandler
+	router            *gin.Engine
+	ApiGetHandlers    JsonAPIFuncRoute
+	ApiPostHandlers   JsonAPIFuncRoute
+	ApiPutHandlers    JsonAPIFuncRoute
+	ApiDeleteHandlers JsonAPIFuncRoute
+	db                DB
+	config            ApiHandlerConfig
+	PermissionConfig  permission.TableConfigMap
 }
+
 
 func NewDefaultHandlerFromConfig(config ApiHandlerConfig, ah ExtendApiHandler) {
 	h := &DefaultApiHandler{
-		config:          config,
-		ApiGetHandlers:  NewJsonAPIFuncRoute(),
-		ApiPostHandlers: NewJsonAPIFuncRoute(),
-		apiHandlers:     ah,
+		config:            config,
+		ApiGetHandlers:    NewJsonAPIFuncRoute(),
+		ApiPostHandlers:   NewJsonAPIFuncRoute(),
+		ApiPutHandlers:    NewJsonAPIFuncRoute(),
+		ApiDeleteHandlers: NewJsonAPIFuncRoute(),
+		apiHandlers:       ah,
 	}
 	h.SetDefaultApiHandlerAndMountConfig()
 	err := h.InitAllConfigTableFromFiles()
@@ -78,8 +83,8 @@ func (h *DefaultApiHandler) SetDefaultApiHandlerAndMountConfig() {
 			} else {
 				panic("Found More than One Default ApiHandler")
 			}
-			
 		}
+		
 	}
 	if !flag {
 		panic("Not Found Default ApiHandler")

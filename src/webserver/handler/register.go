@@ -1,6 +1,5 @@
 package handler
 
-
 type RegisterGroup struct {
 	Route *JsonAPIFuncRoute
 	pm    *[]PermissionAuth
@@ -20,7 +19,7 @@ func (j *JsonAPIFuncRoute) MakeRegisterGroup(pm ...PermissionAuth) *RegisterGrou
 func (j *JsonAPIFuncRoute) RegisterAPI(name string, function JsonAPIFunc, pm ...PermissionAuth) {
 	j.registerJsonAPI(name,
 		func(args *APIArgs) (i interface{}, e error) {
-			return function(args.context, args.json, args.session)
+			return function(args.context, args.Json, args.session)
 		}, pm)
 }
 
@@ -34,8 +33,6 @@ func (j JsonAPIFuncRoute) registerJsonAPI(name string, function DefaultAPIFunc, 
 	}
 }
 
-func (j *JsonAPIFuncRoute) RegisterDefaultAPI(name string, api DefaultAPIFunc, pm ...PermissionAuth) {
-	j.registerJsonAPI(name, api, pm)
+func (j *JsonAPIFuncRoute) RegisterDefaultAPI(name string, function DefaultAPIFunc, pm ...PermissionAuth) {
+	j.registerJsonAPI(name, function, pm)
 }
-
-

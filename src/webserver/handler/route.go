@@ -9,7 +9,6 @@ import (
 
 type JsonAPIFuncRoute map[string]*DefaultAPI
 
-
 func (h *DefaultApiHandler) RegisterRouter(method, path string, function gin.HandlerFunc) {
 	h.router.Handle(method, path, function)
 }
@@ -36,6 +35,10 @@ func (h *DefaultApiHandler) GetApiHandlersFromMethod(method string) (handler Jso
 		return h.ApiGetHandlers
 	case http.MethodPost:
 		return h.ApiPostHandlers
+	case http.MethodPut:
+		return h.ApiPutHandlers
+	case http.MethodDelete:
+		return h.ApiDeleteHandlers
 	default:
 		panic("method invalid " + method)
 		return
@@ -55,6 +58,7 @@ func (h *DefaultApiHandler) Test(c *gin.Context, j *jsonx.Json, us *session.User
 
 type HandlerGetter interface {
 	GetApiHandlersFromMethod(method string) (handler JsonAPIFuncRoute)
+	InjectController(c HandlerController)
 }
 
 type HandlerController interface {

@@ -17,17 +17,19 @@ type DefaultAPI struct {
 	PermissionAuth []PermissionAuth
 }
 
+
 func (api *DefaultAPI) Run(c *gin.Context, userSession *session.UserSession) (ret interface{}, err error) {
 	var jsonData *jsonx.Json
-	if c.Request.Method == http.MethodPost {
-		jsonData, err = jsonx.NewFromReader(c.Request.Body)
-	} else {
+	switch c.Request.Method {
+	case http.MethodGet:
 		jsonData = jsonx.New()
+	default:
+		jsonData, err = jsonx.NewFromReader(c.Request.Body)
 	}
 	if err == nil {
 		if len(api.PermissionAuth) > 0 {
 			for i := range api.PermissionAuth {
-				valid := api.PermissionAuth[i](&APIArgs{c,jsonData,userSession})
+				valid := api.PermissionAuth[i](&APIArgs{c, jsonData, userSession})
 				if !valid {
 					err = ErrAuthFailed
 					return

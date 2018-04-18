@@ -11,7 +11,7 @@ func (c *Controller) checkValidUser(args *handler.APIArgs) bool {
 }
 
 func (c *Controller) registerUserPwdLoginApi() {
-	c.RegisterApi(MethodPost, ApiAddrLogin, func(args *handler.APIArgs) (ret interface{}, err error) {
+	c.RegisterPostApi(ApiAddrLogin, func(args *handler.APIArgs) (ret interface{}, err error) {
 		nickname := args.JsonKey(JsonKeyNickname).MustString()
 		password := args.JsonKey(JsonKeyPassword).MustString()
 		user, err := c.userLogin(nickname, password)
@@ -24,7 +24,7 @@ func (c *Controller) registerUserPwdLoginApi() {
 }
 
 func (c *Controller) registerNewUserApi() {
-	c.RegisterApi(MethodPost, ApiAddrUser, func(args *handler.APIArgs) (ret interface{}, err error) {
+	c.RegisterPostApi(ApiAddrUser, func(args *handler.APIArgs) (ret interface{}, err error) {
 		_, userId := args.UserId()
 		nickname := args.JsonKey(JsonKeyNickname).MustString()
 		password := args.JsonKey(JsonKeyPassword).MustString()
@@ -35,7 +35,7 @@ func (c *Controller) registerNewUserApi() {
 }
 
 func (c *Controller) registerSetUserLevelApi() {
-	c.RegisterApi(MethodPost, ApiAddrUserLevel, func(args *handler.APIArgs) (ret interface{}, err error) {
+	c.RegisterPostApi(ApiAddrUserLevel, func(args *handler.APIArgs) (ret interface{}, err error) {
 		userId := args.JsonKey(JsonKeyId).MustString()
 		level := args.JsonKey(JsonKeyLevel).MustInt()
 		err = c.setUserLevel(bson.ObjectIdHex(userId), Level(level))
@@ -44,7 +44,7 @@ func (c *Controller) registerSetUserLevelApi() {
 }
 
 func (c *Controller) registerChangeUserPasswordApi() {
-	c.RegisterApi(MethodPost, ApiAddrPassword, func(args *handler.APIArgs) (ret interface{}, err error) {
+	c.RegisterPostApi(ApiAddrPassword, func(args *handler.APIArgs) (ret interface{}, err error) {
 		_, userId := args.UserId()
 		oldPassword := args.JsonKey(JsonKeyOldPassword).MustString()
 		newPassword := args.JsonKey(JsonKeyNewPassword).MustString()
@@ -54,14 +54,14 @@ func (c *Controller) registerChangeUserPasswordApi() {
 }
 
 func (c *Controller) registerGetAllUsersApi() {
-	c.RegisterApi(MethodGet, ApiAddrAllUsers, func(args *handler.APIArgs) (ret interface{}, err error) {
+	c.RegisterGetApi(ApiAddrAllUsers, func(args *handler.APIArgs) (ret interface{}, err error) {
 		ret, err = c.getAllUsers()
 		return
 	}, c.checkValidUser)
 }
 
 func (c *Controller) registerUserSessionLoginApi() {
-	c.RegisterApi(MethodGet, ApiAddrLogin, func(args *handler.APIArgs) (ret interface{}, err error) {
+	c.RegisterGetApi(ApiAddrLogin, func(args *handler.APIArgs) (ret interface{}, err error) {
 		_, userId := args.UserId()
 		user, err := c.getUserById(bson.ObjectIdHex(userId))
 		if err != nil {
