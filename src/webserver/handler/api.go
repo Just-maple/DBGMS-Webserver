@@ -10,7 +10,7 @@ import (
 type JsonAPIFunc func(g *gin.Context, j *jsonx.Json, s *session.UserSession) (interface{}, error)
 
 type DefaultAPIFunc func(args *APIArgs) (ret interface{}, err error)
-type PermissionAuth func(*session.UserSession) (bool)
+type PermissionAuth func(*APIArgs) (bool)
 
 type DefaultAPI struct {
 	DefaultAPIFunc
@@ -27,7 +27,7 @@ func (api *DefaultAPI) Run(c *gin.Context, userSession *session.UserSession) (re
 	if err == nil {
 		if len(api.PermissionAuth) > 0 {
 			for i := range api.PermissionAuth {
-				valid := api.PermissionAuth[i](userSession)
+				valid := api.PermissionAuth[i](&APIArgs{c,jsonData,userSession})
 				if !valid {
 					err = ErrAuthFailed
 					return

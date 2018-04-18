@@ -50,10 +50,10 @@ func (c *Controller) GetUserById(Id bson.ObjectId) (user DefaultUser, err error)
 	return
 }
 
-func (c *Controller) NewUserFromNicknameAndPwd(nickname, password string, level Level) (err error) {
+func (c *Controller) NewUserFromNicknameAndPwd(nickname, password string, level Level, SuperiorUserId bson.ObjectId) (err error) {
 	if c.checkUserNickNameValid(nickname) {
 		password = Md5EncodePassword(password)
-		var user = NewUserFromNicknameAndPwd(nickname, password, level)
+		var user = NewUserFromNicknameAndPwd(nickname, password, level, SuperiorUserId)
 		user.TCreate = time.Now()
 		err = c.insertUser(user)
 	} else {

@@ -6,12 +6,13 @@ import (
 )
 
 type DefaultUser struct {
-	Id       bson.ObjectId `bson:"_id"`
-	NickName string        `bson:"nickname"`
-	Password string        `bson:"pwd"`
-	TCreate  time.Time     `bson:"t_create"`
-	TProcess time.Time     `bson:"t_process"`
-	Level    Level         `bson:"lvl"`
+	Id           bson.ObjectId `bson:"_id"`
+	NickName     string        `bson:"nickname"`
+	Password     string        `bson:"pwd"`
+	TCreate      time.Time     `bson:"t_create"`
+	TProcess     time.Time     `bson:"t_process"`
+	Level        Level         `bson:"lvl"`
+	SuperiorUser bson.ObjectId `bson:"sp_user"`
 }
 
 const (
@@ -29,13 +30,14 @@ type Level int
 
 const SecretSalt = "User-Secret-Salt"
 
-func NewUserFromNicknameAndPwd(nickname, hashPassword string, level Level) (*DefaultUser) {
+func NewUserFromNicknameAndPwd(nickname, hashPassword string, level Level, SuperiorUserId bson.ObjectId) (*DefaultUser) {
 	return &DefaultUser{
-		Id:       bson.NewObjectId(),
-		NickName: nickname,
-		Password: hashPassword,
-		TCreate:  time.Now(),
-		Level:    level,
+		Id:           bson.NewObjectId(),
+		NickName:     nickname,
+		Password:     hashPassword,
+		TCreate:      time.Now(),
+		Level:        level,
+		SuperiorUser: SuperiorUserId,
 	}
 }
 

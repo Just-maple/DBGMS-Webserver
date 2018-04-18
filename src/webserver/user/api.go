@@ -3,7 +3,6 @@ package user
 import (
 	"webserver/handler"
 	"net/http"
-	"webserver/errorx"
 	"gopkg.in/mgo.v2/bson"
 )
 
@@ -30,6 +29,11 @@ func (c *Controller) registerApi(method, api string, function handler.DefaultAPI
 	h.RegisterDefaultAPI(api, function, pm...)
 }
 
+func (c *Controller) CheckValidUser(args *handler.APIArgs) bool {
+	valid, _ := args.UserId()
+	return valid
+}
+
 func (c *Controller) RegisterUserPwdLoginApi() {
 	c.registerApi(MethodPost, ApiAddrLogin, func(args *handler.APIArgs) (ret interface{}, err error) {
 		nickname := args.JsonKey(JsonKeyNickname).MustString()
@@ -45,12 +49,13 @@ func (c *Controller) RegisterUserPwdLoginApi() {
 
 func (c *Controller) RegisterNewUserApi() {
 	c.registerApi(MethodPost, ApiAddrUser, func(args *handler.APIArgs) (ret interface{}, err error) {
+		_, userId := args.UserId()
 		nickname := args.JsonKey(JsonKeyNickname).MustString()
 		password := args.JsonKey(JsonKeyPassword).MustString()
 		level := args.JsonKey(JsonKeyLevel).MustInt()
-		err = c.NewUserFromNicknameAndPwd(nickname, password, Level(level))
+		err = c.NewUserFromNicknameAndPwd(nickname, password, Level(level), bson.ObjectIdHex(userId))
 		return
-	})
+	}, c.CheckValidUser)
 }
 
 func (c *Controller) RegisterSetUserLevelApi() {
@@ -59,40 +64,32 @@ func (c *Controller) RegisterSetUserLevelApi() {
 		level := args.JsonKey(JsonKeyLevel).MustInt()
 		err = c.setUserLevel(bson.ObjectIdHex(userId), Level(level))
 		return
-	})
+	}, c.CheckValidUser)
 }
 
 func (c *Controller) RegisterChangeUserPasswordApi() {
 	c.registerApi(MethodPost, ApiAddrPassword, func(args *handler.APIArgs) (ret interface{}, err error) {
-		valid, userId := args.UserId()
-		if !valid {
-			err = errorx.ErrAuthFailed
-			return
-		}
+		_, userId := args.UserId()
 		oldPassword := args.JsonKey(JsonKeyOldPassword).MustString()
 		newPassword := args.JsonKey(JsonKeyNewPassword).MustString()
 		err = c.ChangeUserPassword(bson.ObjectIdHex(userId), oldPassword, newPassword)
 		return
-	})
+	}, c.CheckValidUser)
 }
 
 func (c *Controller) RegisterGetAllUsersApi() {
 	c.registerApi(MethodGet, ApiAddrAllUsers, func(args *handler.APIArgs) (ret interface{}, err error) {
 		ret, err = c.GetAllUsers()
 		return
-	})
+	}, c.CheckValidUser)
 }
 
 func (c *Controller) RegisterUserSessionLoginApi() {
 	c.registerApi(MethodGet, ApiAddrLogin, func(args *handler.APIArgs) (ret interface{}, err error) {
-		valid, userId := args.UserId()
-		if !valid {
-			err = errorx.ErrAuthFailed
-			return
-		}
+		_, userId := args.UserId()
 		user, err := c.GetUserById(bson.ObjectIdHex(userId))
 		user.Password = ""
 		ret = user
 		return
-	})
+	}, c.CheckValidUser)
 }
