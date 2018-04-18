@@ -3,6 +3,7 @@ package main
 import (
 	"webserver/handler"
 	"webserver/logger"
+	"webserver/user"
 )
 
 var log = logger.Log
@@ -60,6 +61,7 @@ func (h *ApiHandler) InitMetaConfig() {
 	
 	//you can handle your extend data here
 	//this method will execute after database init
+	user.InitController(h.db.WXUser).InjectHandler(h.DefaultApiHandler)
 }
 
 func (h *ApiHandler) NewDataBase() handler.DB {
@@ -67,6 +69,7 @@ func (h *ApiHandler) NewDataBase() handler.DB {
 	
 	//init your DataBase
 	h.db = new(DataBase)
+	
 	return h.db
 	//should return interface implement server.DB
 }

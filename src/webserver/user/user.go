@@ -3,7 +3,6 @@ package user
 import (
 	"gopkg.in/mgo.v2/bson"
 	"time"
-	"webserver/dbx"
 )
 
 type DefaultUser struct {
@@ -12,7 +11,7 @@ type DefaultUser struct {
 	Password string        `bson:"pwd"`
 	TCreate  time.Time     `bson:"t_create"`
 	TProcess time.Time     `bson:"t_process"`
-	Level    UserLevel     `bson:"lvl"`
+	Level    Level         `bson:"lvl"`
 }
 
 const (
@@ -23,44 +22,27 @@ const (
 	FieldLevel       = "lvl"
 	FieldId          = "_id"
 	
-	AllPermissionLevel = UserLevel(10)
+	AllPermissionLevel = Level(10)
 )
 
-type UserDBCollection struct {
-	*dbx.Collection
-}
+type Level int
 
-type UserLevel int
+const SecretSalt = "User-Secret-Salt"
 
-func NewDefaultUser(nickname, password string, level UserLevel) (*DefaultUser) {
+func NewUserFromNicknameAndPwd(nickname, hashPassword string, level Level) (*DefaultUser) {
 	return &DefaultUser{
 		Id:       bson.NewObjectId(),
 		NickName: nickname,
-		Password: password,
+		Password: hashPassword,
 		TCreate:  time.Now(),
 		Level:    level,
 	}
 }
 
+func (user *DefaultUser) GetUserLevel() Level {
+	return user.Level
+}
+
 func (user *DefaultUser) HaveAllPermission() bool {
-	return user.Level == AllPermissionLevel
-}
-
-func (c *UserDBCollection) UserLogin(nickname, password string) (user DefaultUser, err error) {
-	err = c.Find(bson.M{FieldNickName: nickname, FieldPassword: password}).One(&user)
-	return
-}
-
-func (c *UserDBCollection) GetUserData(Id bson.ObjectId) (user DefaultUser, err error) {
-	err = c.FindId(Id).One(&user)
-	return
-}
-
-func (c *UserDBCollection) NewUser(user *DefaultUser) (err error) {
-	err = c.Insert(user)
-	return
-}
-
-func (c *UserDBCollection) SetUserLevel(Id bson.ObjectId, level UserLevel) (err error) {
-	return c.UpdateId(Id, bson.M{"$set": bson.M{FieldLevel: level}})
+	return user.GetUserLevel() >= AllPermissionLevel
 }

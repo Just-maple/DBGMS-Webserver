@@ -16,6 +16,7 @@ type UserSession struct {
 
 func (us *UserSession) SetUserId(userId string) {
 	us.Set(SessionKeyUserId, userId)
+	us.Save()
 }
 
 func (us *UserSession) AuthUserSession() (bool, string) {

@@ -106,13 +106,7 @@ func (h *DefaultApiHandler) SetDefaultConfig(in interface{}) {
 }
 
 func (h *DefaultApiHandler) RegisterRouter(method, path string, function gin.HandlerFunc) {
-	switch method {
-	case http.MethodGet:
-		h.router.GET(path, function)
-	case http.MethodPost:
-		h.router.POST(path, function)
-	}
-	
+	h.router.Handle(method, path, function)
 }
 
 func (h *DefaultApiHandler) SetRouter(r *gin.Engine) {
@@ -180,13 +174,19 @@ func RenderJson(c *gin.Context, ok bool, data interface{}, err error) {
 	}
 }
 
-func (h *DefaultApiHandler) GetApiFunc(method, apiName string) (function *DefaultAPI, exists bool) {
+func (h *DefaultApiHandler) GetApiHandlersFromMethod(method string) (handler JsonAPIFuncRoute) {
 	switch method {
 	case http.MethodGet:
-		function, exists = h.ApiGetHandlers[apiName]
+		return h.ApiGetHandlers
 	case http.MethodPost:
-		function, exists = h.ApiPostHandlers[apiName]
+		return h.ApiPostHandlers
+	default:
+		panic("method invalid " + method)
+		return
 	}
+}
+func (h *DefaultApiHandler) GetApiFunc(method, apiName string) (function *DefaultAPI, exists bool) {
+	function, exists = h.GetApiHandlersFromMethod(method)[apiName]
 	return
 }
 
@@ -224,4 +224,3 @@ func (h *DefaultApiHandler) CheckDataBaseConnection(err error) {
 		h.apiHandlers.InitDataBase()
 	}
 }
-

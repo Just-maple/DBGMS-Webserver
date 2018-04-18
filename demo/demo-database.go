@@ -8,6 +8,7 @@ import (
 type DataBase struct {
 	//database struct interface implement server.DB
 	AnyCollection *dbx.Collection `collection:""`
+	WXUser        *dbx.Collection
 	//any public *mgo.Collection will init when database init
 	//collection will init from Collection name in lower case like "anycollection" or tag collection
 }

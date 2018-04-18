@@ -6,6 +6,7 @@ import (
 	"webserver/session"
 	"time"
 	"webserver/utilsx"
+	"gopkg.in/mgo.v2/bson"
 )
 
 type APIArgs struct {
@@ -38,7 +39,10 @@ func (arg *APIArgs) JsonKeyId() string {
 	return arg.json.GetStringId()
 }
 
+func (arg *APIArgs) SetUserId(userId bson.ObjectId) {
+	arg.session.SetUserId(userId.Hex())
+}
+
 func (arg *APIArgs) JsonKey(key string) *jsonx.Json {
 	return arg.json.Get(key)
 }
-

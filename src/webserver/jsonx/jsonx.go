@@ -17,7 +17,7 @@ func NewFromReader(r io.Reader) (*Json, error) {
 	return &Json{j}, err
 }
 func New() *Json {
-	return new(Json)
+	return &Json{simplejson.New()}
 }
 
 func (j *Json) CallMethodByInstance(method interface{}, in interface{}) (err error) {
