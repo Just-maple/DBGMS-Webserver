@@ -14,6 +14,8 @@ type Controller struct {
 	collection *dbx.Collection
 }
 
+const userHashSecret = false
+
 func (c *Controller) userLogin(nickname, password string) (user DefaultUser, err error) {
 	password = Md5EncodePassword(password)
 	err = c.collection.Find(bson.M{FieldNickName: nickname, FieldPassword: password}).One(&user)
@@ -38,7 +40,7 @@ func (c *Controller) changeUserPassword(Id bson.ObjectId, oldPWD, newPWD string)
 	return
 }
 
-func (c *Controller) etUserLevelById(Id bson.ObjectId) (level Level) {
+func (c *Controller) getUserLevelById(Id bson.ObjectId) (level Level) {
 	user, err := c.getUserById(Id)
 	if err != nil {
 		return
@@ -91,5 +93,9 @@ func (c *Controller) getAllUsers() (users []DefaultUser, err error) {
 }
 
 func Md5EncodePassword(password string) string {
-	return utilsx.Md5String(password + SecretSalt)
+	if userHashSecret {
+		return utilsx.Md5String(password + SecretSalt)
+	} else {
+		return password
+	}
 }

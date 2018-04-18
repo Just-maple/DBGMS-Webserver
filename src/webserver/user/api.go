@@ -5,6 +5,12 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
+func (c *Controller) CompareUserLevel(args *handler.APIArgs) bool {
+	valid, userId := args.UserId()
+	operatedId := args.JsonKeyId()
+	return !valid || bson.IsObjectIdHex(operatedId) || c.getUserLevelById(bson.ObjectIdHex(userId)) > c.getUserLevelById(bson.ObjectIdHex(operatedId))
+}
+
 func (c *Controller) checkValidUser(args *handler.APIArgs) bool {
 	valid, _ := args.UserId()
 	return valid
@@ -36,11 +42,11 @@ func (c *Controller) registerNewUserApi() {
 
 func (c *Controller) registerSetUserLevelApi() {
 	c.RegisterPostApi(ApiAddrUserLevel, func(args *handler.APIArgs) (ret interface{}, err error) {
-		userId := args.JsonKey(JsonKeyId).MustString()
+		userId := args.JsonKeyId()
 		level := args.JsonKey(JsonKeyLevel).MustInt()
 		err = c.setUserLevel(bson.ObjectIdHex(userId), Level(level))
 		return
-	}, c.checkValidUser)
+	}, c.CompareUserLevel)
 }
 
 func (c *Controller) registerChangeUserPasswordApi() {
