@@ -15,11 +15,12 @@ const (
 )
 
 type TableConfig struct {
-	FilesName        string
-	TableData        []byte
-	StructConfig     *StructConfig
-	Md5Hash          string
-	PermissionConfig PermissionConfig
+	FilesName    string
+	TableData    []byte
+	StructConfig *StructConfig
+	Md5Hash      string
+	TableConfig  interface{}
+	PermissionConfig
 }
 
 type TableMapConfig struct {
@@ -46,6 +47,12 @@ func (t *TableConfig) InitTableConfig() (err error) {
 	if err != nil {
 		return
 	}
+	var s = reflect.New(reflect.TypeOf(t.PermissionConfig.GetTableConfig())).Interface()
+	err = json.Unmarshal(t.TableData, s)
+	if err != nil {
+		return
+	}
+	t.TableConfig = reflect.ValueOf(s).Elem().Interface()
 	var tmp = make(StructConfig, len(structTable))
 	t.StructConfig = &tmp
 	for key := range structTable {
@@ -76,6 +83,7 @@ func (t TableMapConfig) InitTableConfig(data []byte, tableName string) (err erro
 		data,
 		nil,
 		utilsx.BytesToMd5String(data),
+		nil,
 		t.PermissionConfig,
 	}
 	if err = config.InitTableConfig(); err != nil {
