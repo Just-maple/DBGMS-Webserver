@@ -7,34 +7,33 @@ import (
 	"webserver/dbx"
 	"webserver/jsonx"
 	"webserver/session"
-	. "webserver/utilsx"
 )
 
-func TransAjaxQuery(c *gin.Context, j *jsonx.Json) (matcherMap map[string]interface{}, keys []string, skipCnt, limitCnt int, sortKey, reverse string, tSTime, tETime time.Time, err error) {
-	keys = j.Get("keys").MustStringArray()
-	matcherMap = j.Get("matcher").MustMap()
+func TransAjaxQuery(args *APIArgs) (matcherMap map[string]interface{}, keys []string, skipCnt, limitCnt int, sortKey, reverse string, tSTime, tETime time.Time, err error) {
+	keys = args.JsonKey("keys").MustStringArray()
+	matcherMap = args.JsonKey("matcher").MustMap()
 	
-	skip := c.DefaultQuery("skip", "0")
+	skip := args.context.DefaultQuery("skip", "0")
 	skipCnt, err = strconv.Atoi(skip)
 	if err != nil {
 		skipCnt = 0
 		err = nil
 	}
-	limit := c.DefaultQuery("limit", "10")
+	limit := args.context.DefaultQuery("limit", "10")
 	limitCnt, err = strconv.Atoi(limit)
 	if err != nil {
 		limitCnt = 0
 		err = nil
 	}
-	sortKey = c.DefaultQuery("sort", "")
-	reverse = c.DefaultQuery("reverse", "")
-	tSTime, tETime = TransTime(c)
+	sortKey = args.context.DefaultQuery("sort", "")
+	reverse = args.context.DefaultQuery("reverse", "")
+	tSTime, tETime = args.Time()
 	return
 }
 
-func (h DefaultApiHandler) GetAjaxQuery(c *gin.Context, j *jsonx.Json) (res *dbx.AjaxQuery, err error) {
-	matcherMap, keys, skipCnt, limitCnt, sortKey, reverse, tSTime, tETime, err := TransAjaxQuery(c, j)
-	pmConfig, _ := h.PermissionConfig.GetConfigTableFromContext(c)
+func (h DefaultApiHandler) GetAjaxQuery(args *APIArgs) (res *dbx.AjaxQuery, err error) {
+	matcherMap, keys, skipCnt, limitCnt, sortKey, reverse, tSTime, tETime, err := TransAjaxQuery(args)
+	pmConfig, _ := args.GetConfigTable(h.TableController.PermissionConfig)
 	res = &dbx.AjaxQuery{
 		MatcherMap:       matcherMap,
 		SortKey:          sortKey,
@@ -49,12 +48,12 @@ func (h DefaultApiHandler) GetAjaxQuery(c *gin.Context, j *jsonx.Json) (res *dbx
 	return
 }
 
-func (h *DefaultApiHandler) GetDataByAjaxQuery(c *gin.Context, j *jsonx.Json, us *session.UserSession, ajaxConfig *dbx.AjaxStructConfig) (res map[string]interface{}, err error) {
-	query, err := h.GetAjaxQuery(c, j)
+func (h *DefaultApiHandler) GetDataByAjaxQuery(args *APIArgs, ajaxConfig *dbx.AjaxStructConfig) (res map[string]interface{}, err error) {
+	query, err := h.GetAjaxQuery(args)
 	if err != nil {
 		return
 	}
-	access := h.AuthUserSession(us)
+	access := h.GetAccessConfigFromArgs(args)
 	data, count, err := query.AjaxSearch(ajaxConfig)
 	if err != nil {
 		log.Error(err)
@@ -70,14 +69,14 @@ func (h *DefaultApiHandler) GetDataByAjaxQuery(c *gin.Context, j *jsonx.Json, us
 
 func (h *DefaultApiHandler) RegisterAjaxJsonApi(dataApiAddr, distinctApiAddr string, configMaker func() dbx.AjaxStructConfig) {
 	config := configMaker()
-	h.ApiPostHandlers.RegisterAPI(dataApiAddr, h.GetAjaxApi(&config))
+	h.ApiPostHandlers.RegisterDefaultAPI(dataApiAddr, h.GetAjaxApi(&config))
 	h.ApiGetHandlers.RegisterAPI(distinctApiAddr, h.GetAjaxDistinctApi(&config))
 }
 
 func (h *DefaultApiHandler) GetAjaxDistinctApi(config *dbx.AjaxStructConfig) JsonAPIFunc {
 	return func(c *gin.Context, j *jsonx.Json, us *session.UserSession) (ret interface{}, err error) {
 		valid, userId := us.AuthUserSession()
-		if !valid || ( config.AuthCheck != nil && !config.AuthCheck(userId) ) {
+		if !valid || (config.AuthCheck != nil && !config.AuthCheck(userId)) {
 			err = ErrAuthFailed
 			return
 		}
@@ -90,14 +89,14 @@ func (h *DefaultApiHandler) GetAjaxDistinctApi(config *dbx.AjaxStructConfig) Jso
 	}
 }
 
-func (h *DefaultApiHandler) GetAjaxApi(config *dbx.AjaxStructConfig) JsonAPIFunc {
-	return func(c *gin.Context, j *jsonx.Json, us *session.UserSession) (ret interface{}, err error) {
-		valid, userId := us.AuthUserSession()
-		if !valid || ( config.AuthCheck != nil && !config.AuthCheck(userId) ) {
+func (h *DefaultApiHandler) GetAjaxApi(config *dbx.AjaxStructConfig) DefaultAPIFunc {
+	return func(args *APIArgs) (ret interface{}, err error) {
+		valid, userId := args.UserId()
+		if !valid || (config.AuthCheck != nil && !config.AuthCheck(userId)) {
 			err = ErrAuthFailed
 			return
 		}
-		ret, err = h.GetDataByAjaxQuery(c, j, us, config)
+		ret, err = h.GetDataByAjaxQuery(args, config)
 		return
 	}
 }

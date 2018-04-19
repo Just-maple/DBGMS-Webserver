@@ -4,13 +4,11 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
-	"github.com/gin-gonic/gin"
 	"io/ioutil"
+	"net/http"
 	"os"
 	"strings"
-	"webserver/jsonx"
 	pm "webserver/permission"
-	"webserver/session"
 	. "webserver/utilsx"
 )
 
@@ -18,14 +16,39 @@ const (
 	extensionJson = ".json"
 )
 
-func (h *DefaultApiHandler) SaveAllTableConfig(c *gin.Context, j *jsonx.Json, us *session.UserSession) (ret interface{}, err error) {
-	access := h.AuthUserSession(us)
-	if !access.AuthAllPermission() {
-		return nil, ErrAuthFailed
+type TableController struct {
+	handler          TableHandler
+	PermissionConfig pm.TableMapConfig
+	path             string
+}
+
+func InjectTableController(h TableHandler, PermissionConfig pm.PermissionConfig) (c *TableController, err error) {
+	c = &TableController{
+		handler: h,
+		path:    h.GetTablePath(),
 	}
-	tableMap := j.MustMap()
+	c.RegisterAPI()
+	return c, c.InitAllConfigTableFromFiles(PermissionConfig)
+}
+
+func (c *TableController) RegisterAPI() {
+	postRoute := c.handler.GetApiHandlersFromMethod(http.MethodPost)
+	getRoute := c.handler.GetApiHandlersFromMethod(http.MethodGet)
+	allPermissionApi := postRoute.MakeRegisterGroup(c.AuthAllPermission)
+	allPermissionApi.RegisterDefaultAPI("saveAllConfig", c.SaveAllTableConfig)
+	allPermissionApi.RegisterDefaultAPI("editTable", c.EditTable)
+	getRoute.RegisterDefaultAPI("table", c.GetAllConfigTable, c.AuthAllPermission)
+}
+
+func (c *TableController) AuthAllPermission(args *APIArgs) bool {
+	access := c.handler.GetAccessConfig(args)
+	return access.AuthAllPermission()
+}
+
+func (c *TableController) SaveAllTableConfig(args *APIArgs) (ret interface{}, err error) {
+	tableMap := args.Json.MustMap()
 	for key := range tableMap {
-		err = h.WriteTableAndUpdateServerConfig(key, tableMap[key].(string))
+		err = c.WriteTableAndUpdateServerConfig(key, tableMap[key].(string))
 		if err != nil {
 			break
 		}
@@ -33,32 +56,34 @@ func (h *DefaultApiHandler) SaveAllTableConfig(c *gin.Context, j *jsonx.Json, us
 	return
 }
 
-func (h *DefaultApiHandler) WriteTableAndUpdateServerConfig(tableName, data string) (err error) {
-	file := h.config.GetTablePath() + tableName + extensionJson
+func (c *TableController) GetAllConfigTable(args *APIArgs) (ret interface{}, err error) {
+	ret = c.ReadAllConfigTable()
+	return
+}
+
+func (c *TableController) EditTable(args *APIArgs) (ret interface{}, err error) {
+	tableName := args.JsonKey("name").MustString()
+	data := args.JsonKey("table").MustString()
+	err = c.WriteTableAndUpdateServerConfig(tableName, data)
+	return
+}
+
+func (c *TableController) WriteTableAndUpdateServerConfig(tableName, data string) (err error) {
+	file := c.path + tableName + extensionJson
 	err = ioutil.WriteFile(file, []byte(data), 0600)
 	if err != nil {
 		return
 	}
-	err = h.PermissionConfig.InitTableConfig([]byte(data), tableName)
+	err = c.PermissionConfig.InitTableConfig([]byte(data), tableName)
 	return
 }
 
-func (h *DefaultApiHandler) EditTable(c *gin.Context, j *jsonx.Json, us *session.UserSession) (ret interface{}, err error) {
-	access := h.AuthUserSession(us)
-	if !access.AuthAllPermission() {
-		return nil, ErrAuthFailed
-	}
-	tableName := j.Get("name").MustString()
-	data := j.Get("table").MustString()
-	err = h.WriteTableAndUpdateServerConfig(tableName, data)
-	return
-}
-
-func (h *DefaultApiHandler) GetConfigTableFromMString(m, UserId string) (tableConfig map[string]string, err error) {
+func (c *TableController) GetConfigTableFromMString(args *APIArgs) (tableConfig map[string]string, err error) {
 	var storeBytes []byte
 	var storeHash map[string]string
-	tableConfig = h.ReadAllConfigTableFromServerTableConfig(true, UserId)
-	storeBytes, err = base64.StdEncoding.DecodeString(m)
+	storeHashString := args.JsonKey("m").MustString("{}")
+	tableConfig = c.ReadAllConfigTableFromServerTableConfig(args)
+	storeBytes, err = base64.StdEncoding.DecodeString(storeHashString)
 	if err != nil {
 		log.Error(err)
 		return
@@ -76,21 +101,24 @@ func (h *DefaultApiHandler) GetConfigTableFromMString(m, UserId string) (tableCo
 	return
 }
 
-func (h *DefaultApiHandler) ReadAllConfigTableFromServerTableConfig(encode bool, userId string) (ret map[string]string) {
+func (c *TableController) ReadAllConfigTable() (ret map[string]string) {
 	ret = make(map[string]string)
-	var access pm.AccessConfig
-	if encode {
-		access = h.db.GetAccessConfig(userId)
+	pmConfig := c.PermissionConfig.TableMap
+	for key := range pmConfig {
+		ret[key] = string(pmConfig[key].TableData)
 	}
-	for key := range h.PermissionConfig {
-		if encode {
-			if access.AuthTablePermission(h.PermissionConfig[key]) {
-				encodeKey := base64.StdEncoding.EncodeToString([]byte(key))
-				encodeData := BytesToMd5String(h.PermissionConfig[key].TableData) + XdEncode(h.PermissionConfig[key].TableData)
-				ret[encodeKey] = encodeData
-			}
-		} else {
-			ret[key] = string(h.PermissionConfig[key].TableData)
+	return
+}
+
+func (c *TableController) ReadAllConfigTableFromServerTableConfig(args *APIArgs) (ret map[string]string) {
+	ret = make(map[string]string)
+	access := c.handler.GetAccessConfig(args)
+	pmConfig := c.PermissionConfig.TableMap
+	for key := range pmConfig {
+		if access.AuthTablePermission(pmConfig[key]) {
+			encodeKey := base64.StdEncoding.EncodeToString([]byte(key))
+			encodeData := BytesToMd5String(pmConfig[key].TableData) + XdEncode(pmConfig[key].TableData)
+			ret[encodeKey] = encodeData
 		}
 		
 	}
@@ -103,43 +131,35 @@ func XdEncode(data []byte) string {
 	return str
 }
 
-func (h *DefaultApiHandler) InitTableConfigFromFileInfo(file *os.FileInfo) (err error) {
+func (c *TableController) InitTableConfigFromFileInfo(file *os.FileInfo) (err error) {
 	if !strings.Contains((*file).Name(), extensionJson) {
 		return
 	}
-	data, err := h.ReadTableConfigFromFile((*file).Name())
+	data, err := c.ReadTableConfigFromFile((*file).Name())
 	if err != nil {
 		return
 	}
 	tableName := strings.Replace((*file).Name(), extensionJson, "", 1)
-	err = h.PermissionConfig.InitTableConfig(data, tableName)
+	err = c.PermissionConfig.InitTableConfig(data, tableName)
 	return
 }
 
-func (h *DefaultApiHandler) ReadTableConfigFromFile(fileName string) (data []byte, err error) {
-	return ioutil.ReadFile(h.config.GetTablePath() + fileName)
+func (c *TableController) ReadTableConfigFromFile(fileName string) (data []byte, err error) {
+	return ioutil.ReadFile(c.path + fileName)
 }
 
-func (h *DefaultApiHandler) InitAllConfigTableFromFiles() (err error) {
-	tableFiles, err := ioutil.ReadDir(h.config.GetTablePath())
+func (c *TableController) InitAllConfigTableFromFiles(PermissionConfig pm.PermissionConfig) (err error) {
+	tableFiles, err := ioutil.ReadDir(c.path)
 	if err != nil {
 		return
 	}
-	h.PermissionConfig = make(map[string]*pm.TableConfig, len(tableFiles))
+	c.PermissionConfig.PermissionConfig = PermissionConfig
+	c.PermissionConfig.TableMap = make(map[string]pm.TableConfig, len(tableFiles))
 	for i := range tableFiles {
-		err = h.InitTableConfigFromFileInfo(&(tableFiles[i]))
+		err = c.InitTableConfigFromFileInfo(&(tableFiles[i]))
 		if err != nil {
 			log.Fatal(err)
 		}
 	}
-	return
-}
-
-func (h *DefaultApiHandler) GetAllConfigTable(c *gin.Context, j *jsonx.Json, us *session.UserSession) (ret interface{}, err error) {
-	access := h.AuthUserSession(us)
-	if !access.AuthAllPermission() {
-		return nil, ErrAuthFailed
-	}
-	ret = h.ReadAllConfigTableFromServerTableConfig(false, "")
 	return
 }

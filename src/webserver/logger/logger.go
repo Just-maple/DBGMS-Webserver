@@ -1,9 +1,9 @@
 package logger
 
 import (
+	"fmt"
 	"github.com/op/go-logging"
 	"os"
-	"fmt"
 )
 
 const (
@@ -19,14 +19,14 @@ func init() {
 func GetLogger(module, logfile string, level logging.Level) (logger *logging.Logger) {
 	logger = logging.MustGetLogger(module)
 	var backends []logging.Backend
-	
+
 	format := logging.MustStringFormatter(DefaultLogFormat)
 	backendStd := logging.NewLogBackend(os.Stdout, fmt.Sprintf("[%s] ", module), 0)
 	backendFormatter := logging.NewBackendFormatter(backendStd, format)
 	backendLeveled := logging.AddModuleLevel(backendFormatter)
 	backendLeveled.SetLevel(level, "")
 	backends = append(backends, backendLeveled)
-	
+
 	if logfile != "" {
 		fd, err := os.OpenFile(logfile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 		if err != nil {
@@ -36,10 +36,10 @@ func GetLogger(module, logfile string, level logging.Level) (logger *logging.Log
 		backendFormatter2 := logging.NewBackendFormatter(backendFile, format)
 		backendLeveled2 := logging.AddModuleLevel(backendFormatter2)
 		backendLeveled.SetLevel(level, "")
-		
+
 		backends = append(backends, backendLeveled2)
 	}
-	
+
 	backendMulti := logging.MultiLogger(backends...)
 	logger.ExtraCalldepth += 1
 	logger.SetBackend(backendMulti)

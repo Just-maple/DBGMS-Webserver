@@ -13,7 +13,7 @@ type Collection struct {
 
 func (c *Collection) Insert(docs interface{}) (err error) {
 	return c.Collection.Insert(docs)
-	
+
 }
 
 func (c *Collection) Pipe(pipelines interface{}) *mgo.Pipe {

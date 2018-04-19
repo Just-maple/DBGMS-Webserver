@@ -18,7 +18,7 @@ type DefaultUser struct {
 
 type Level int
 
-func newUserFromNicknameAndPwd(nickname, hashPassword string, level Level, SuperiorUserId bson.ObjectId) (*DefaultUser) {
+func newUserFromNicknameAndPwd(nickname, hashPassword string, level Level, SuperiorUserId bson.ObjectId) *DefaultUser {
 	return &DefaultUser{
 		Id:           bson.NewObjectId(),
 		NickName:     nickname,

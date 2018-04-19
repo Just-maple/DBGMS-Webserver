@@ -4,39 +4,24 @@ import (
 	"github.com/gin-gonic/gin"
 	"webserver/jsonx"
 	"webserver/session"
-	"net/http"
 )
 
 type JsonAPIFunc func(g *gin.Context, j *jsonx.Json, s *session.UserSession) (interface{}, error)
 
 type DefaultAPIFunc func(args *APIArgs) (ret interface{}, err error)
-type PermissionAuth func(*APIArgs) (bool)
+type PermissionAuth func(*APIArgs) bool
 
 type DefaultAPI struct {
 	DefaultAPIFunc
 	PermissionAuth []PermissionAuth
 }
 
-
-func (api *DefaultAPI) Run(c *gin.Context, userSession *session.UserSession) (ret interface{}, err error) {
-	var jsonData *jsonx.Json
-	switch c.Request.Method {
-	case http.MethodGet:
-		jsonData = jsonx.New()
-	default:
-		jsonData, err = jsonx.NewFromReader(c.Request.Body)
-	}
-	if err == nil {
-		if len(api.PermissionAuth) > 0 {
-			for i := range api.PermissionAuth {
-				valid := api.PermissionAuth[i](&APIArgs{c, jsonData, userSession})
-				if !valid {
-					err = ErrAuthFailed
-					return
-				}
-			}
+func (api *DefaultAPI) Run(args *APIArgs) (ret interface{}, err error) {
+	for i := range api.PermissionAuth {
+		if !api.PermissionAuth[i](args) {
+			return false, ErrAuthFailed
 		}
-		ret, err = api.DefaultAPIFunc(&APIArgs{c, jsonData, userSession})
 	}
+	ret, err = api.DefaultAPIFunc(args)
 	return
 }

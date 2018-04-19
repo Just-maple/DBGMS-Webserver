@@ -4,15 +4,15 @@ import (
 	"archive/zip"
 	"crypto/md5"
 	"encoding/hex"
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"gopkg.in/mgo.v2/bson"
 	"io/ioutil"
 	"os"
-	"strconv"
-	"time"
-	"strings"
 	"reflect"
-	"fmt"
-	"gopkg.in/mgo.v2/bson"
+	"strconv"
+	"strings"
+	"time"
 )
 
 func TransTime(c *gin.Context) (tSTime, tETime time.Time) {
@@ -104,7 +104,6 @@ func CamelString(s string) string {
 	}
 	return strings.Replace(string(data), "_", "", -1)
 }
-
 
 func SnakeString(s string) string {
 	data := make([]byte, 0, len(s)*2)

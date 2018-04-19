@@ -1,8 +1,8 @@
 package user
 
 import (
-	"webserver/handler"
 	"gopkg.in/mgo.v2/bson"
+	"webserver/handler"
 )
 
 func (c *Controller) CompareUserLevel(args *handler.APIArgs) bool {

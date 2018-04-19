@@ -1,12 +1,12 @@
 package user
 
 import (
+	"gopkg.in/mgo.v2/bson"
+	"time"
 	"webserver/dbx"
 	"webserver/errorx"
-	"time"
-	"gopkg.in/mgo.v2/bson"
-	"webserver/utilsx"
 	"webserver/handler/controller"
+	"webserver/utilsx"
 )
 
 type Controller struct {
@@ -32,8 +32,7 @@ func (c *Controller) changeUserPassword(Id bson.ObjectId, oldPWD, newPWD string)
 		FieldId:       Id,
 		FieldPassword: oldPWD,
 	}, bson.M{
-		dbx.BsonSelectorSet: bson.M{FieldPassword: newPWD,
-		}})
+		dbx.BsonSelectorSet: bson.M{FieldPassword: newPWD}})
 	if errorx.IsErrorNotFound(err) {
 		err = errorx.ErrAuthFailed
 	}
@@ -69,7 +68,7 @@ func (c *Controller) newUserFromNicknameAndPwd(nickname, password string, level 
 	return
 }
 
-func (c *Controller) checkUserNickNameValid(nickname string) (bool) {
+func (c *Controller) checkUserNickNameValid(nickname string) bool {
 	err := c.collection.Find(bson.M{FieldNickName: nickname}).One(nil)
 	return errorx.IsErrorNotFound(err)
 }

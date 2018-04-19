@@ -1,7 +1,7 @@
 package permission
 
 type AccessConfig interface {
-	AuthPermission(*StructFieldConfig) bool
-	AuthTablePermission(*TableConfig) bool
+	AuthFieldPermission(FieldConfig) bool
+	AuthTablePermission(TableConfig) bool
 	AuthAllPermission() bool
 }

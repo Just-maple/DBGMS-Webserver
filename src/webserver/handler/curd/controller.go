@@ -9,14 +9,14 @@ import (
 type CurdController struct {
 	collection *dbx.CollectionController
 	controller.DefaultController
-	handler    HandlerGetter
+	handler HandlerGetter
 }
 
 func (c *CurdController) InjectHandler(h HandlerGetter) {
 	c.handler = h
 }
 
-func NewCurdController(c *dbx.Collection, in interface{}) (*CurdController) {
+func NewCurdController(c *dbx.Collection, in interface{}) *CurdController {
 	return &CurdController{
 		collection: c.CreateController(in),
 	}

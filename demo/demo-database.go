@@ -3,6 +3,7 @@ package main
 import (
 	"webserver/dbx"
 	"webserver/permission"
+	"webserver/handler"
 )
 
 type DataBase struct {
@@ -13,14 +14,14 @@ type DataBase struct {
 	//collection will init from Collection name in lower case like "anycollection" or tag collection
 }
 
-func (db *DataBase) GetAccessConfig(userId string) (permission.AccessConfig) {
+func (db *DataBase) GetAccessConfig(args *handler.APIArgs) permission.AccessConfig {
 	//database struct implement auth super admin user
 	//define your logic here
-	return &SuperAdminAccess{userId == "User is Admin", userId == "User is Super"}
+	return &SuperAdminAccess{args.Query("userid") == "User is Admin", args.Query("userid") == "User is Super"}
 }
 
-func (access *SuperAdminAccess) AuthTablePermission(config *permission.TableConfig) bool {
-	return (!config.NeedAdmin || access.isAdmin) && (!config.NeedSuperAdmin || access.isSuper)
+func (access *SuperAdminAccess) AuthTablePermission(config permission.TableConfig) bool {
+	return (!config.PermissionConfig.GetTableConfig().(AdminConfig).NeedAdmin || access.isAdmin) && (!config.PermissionConfig.GetTableConfig().(AdminConfig).NeedSuperAdmin || access.isSuper)
 }
 
 type SuperAdminAccess struct {
@@ -31,6 +32,6 @@ type SuperAdminAccess struct {
 func (access *SuperAdminAccess) AuthAllPermission() bool {
 	return access.isSuper
 }
-func (access *SuperAdminAccess) AuthPermission(config *permission.StructFieldConfig) bool {
-	return (!config.SuperAdmin || access.isSuper) && (!config.Admin || access.isAdmin)
+func (access *SuperAdminAccess) AuthFieldPermission(config permission.FieldConfig) bool {
+	return (!config.(AdminStructConfig).SuperAdmin || access.isSuper) && (!config.(AdminStructConfig).Admin || access.isAdmin)
 }

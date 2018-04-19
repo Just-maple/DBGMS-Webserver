@@ -1,33 +1,19 @@
 package handler
 
 import (
-	"github.com/gin-gonic/gin"
 	"reflect"
-	. "webserver/session"
 	"webserver/permission"
 )
 
-func (h *DefaultApiHandler) GetSession(c *gin.Context) (us *UserSession) {
-	s := Default(c)
-	us = &UserSession{Session: s}
-	return
+func (h *DefaultApiHandler) GetAccessConfigFromArgs(arg *APIArgs) (access permission.AccessConfig) {
+	return h.GetAccessConfig(arg)
 }
 
-
-func (h *DefaultApiHandler) AuthUserSession(us *UserSession) (access permission.AccessConfig) {
-	isValidId, userId := us.AuthUserSession()
-	if isValidId {
-		return h.db.GetAccessConfig(userId)
-	} else {
-		return nil
-	}
-}
-
-func (h *DefaultApiHandler) RenderPermission(c *gin.Context, session *UserSession, in interface{}) (out interface{}) {
+func (h *DefaultApiHandler) RenderPermission(args *APIArgs, in interface{}) (out interface{}) {
 	if reflect.ValueOf(in).Kind() == reflect.Slice {
-		config, has := h.PermissionConfig.GetConfigTableFromContext(c)
+		config, has := args.GetConfigTable(h.TableController.PermissionConfig)
 		if has {
-			access := h.AuthUserSession(session)
+			access := h.GetAccessConfigFromArgs(args)
 			out = config.InitTablePermission(in, access)
 		} else {
 			out = in

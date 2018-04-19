@@ -22,10 +22,12 @@ type ExtendApiHandler interface {
 	ws.ApiHandlers
 	RegisterAPI()
 	NewDataBase() DB
+	GetPermissionConfig() permission.PermissionConfig
+	GetAccessConfig(args *APIArgs) permission.AccessConfig
 }
 
 type DB interface {
-	GetAccessConfig(string) (permission.AccessConfig)
+
 }
 
 var _ ws.ApiHandlers = &DefaultApiHandler{}
@@ -39,9 +41,8 @@ type DefaultApiHandler struct {
 	ApiDeleteHandlers JsonAPIFuncRoute
 	db                DB
 	config            ApiHandlerConfig
-	PermissionConfig  permission.TableConfigMap
+	TableController   *TableController
 }
-
 
 func NewDefaultHandlerFromConfig(config ApiHandlerConfig, ah ExtendApiHandler) {
 	h := &DefaultApiHandler{
@@ -53,7 +54,8 @@ func NewDefaultHandlerFromConfig(config ApiHandlerConfig, ah ExtendApiHandler) {
 		apiHandlers:       ah,
 	}
 	h.SetDefaultApiHandlerAndMountConfig()
-	err := h.InitAllConfigTableFromFiles()
+	var err error
+	h.TableController, err = InjectTableController(h, ah.GetPermissionConfig())
 	if err != nil {
 		log.Fatal("Init TableConfig FromFiles Error = ", err)
 	}
@@ -90,27 +92,6 @@ func (h *DefaultApiHandler) SetDefaultApiHandlerAndMountConfig() {
 		panic("Not Found Default ApiHandler")
 	}
 	return
-}
-
-func (h *DefaultApiHandler) SetDefaultConfig(in interface{}) {
-	vi := reflect.ValueOf(in).Elem()
-	fi := vi.NumField()
-	for i := 0; i < fi; i++ {
-		switch vi.Field(i).Interface().(type) {
-		case ApiHandlerConfig:
-			vi.Field(i).Set(reflect.ValueOf(h))
-		}
-	}
-	return
-}
-
-func (h *DefaultApiHandler) RegisterAPI() {
-	log.Info("you had not register any API,register your custom API by rewrite method RegisterAPI")
-}
-
-func (h *DefaultApiHandler) NewDataBase() DB {
-	panic("you should provide a custom DB with AccessControl Config")
-	return *new(DB)
 }
 
 func (h *DefaultApiHandler) InitDataBase() {

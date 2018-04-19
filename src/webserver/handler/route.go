@@ -1,8 +1,8 @@
 package handler
 
 import (
-	"net/http"
 	"github.com/gin-gonic/gin"
+	"net/http"
 	"webserver/jsonx"
 	"webserver/session"
 )
@@ -44,7 +44,7 @@ func (h *DefaultApiHandler) GetApiHandlersFromMethod(method string) (handler Jso
 		return
 	}
 }
-func (h *DefaultApiHandler) GetApiFunc(method, apiName string) (function *DefaultAPI, exists bool) {
+func (h *DefaultApiHandler) getApiFunc(method, apiName string) (function *DefaultAPI, exists bool) {
 	function, exists = h.GetApiHandlersFromMethod(method)[apiName]
 	return
 }
@@ -54,20 +54,4 @@ func (h *DefaultApiHandler) Test(c *gin.Context, j *jsonx.Json, us *session.User
 		ret = "test success"
 	}
 	return
-}
-
-type HandlerGetter interface {
-	GetApiHandlersFromMethod(method string) (handler JsonAPIFuncRoute)
-	InjectController(c HandlerController)
-}
-
-type HandlerController interface {
-	GetDefaultController() (HandlerController)
-	InjectHandler(handler HandlerGetter)
-	Init()
-}
-
-func (h *DefaultApiHandler) InjectController(c HandlerController) {
-	c.GetDefaultController().InjectHandler(h)
-	c.Init()
 }

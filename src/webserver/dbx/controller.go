@@ -1,11 +1,11 @@
 package dbx
 
 import (
-	"reflect"
-	"gopkg.in/mgo.v2/bson"
-	"webserver/jsonx"
-	"webserver/errorx"
 	"fmt"
+	"gopkg.in/mgo.v2/bson"
+	"reflect"
+	"webserver/errorx"
+	"webserver/jsonx"
 )
 
 type CollectionController struct {
@@ -17,7 +17,7 @@ type CollectionController struct {
 
 const FieldTCreate = "t_create"
 
-func (c *Collection) CreateController(in interface{}) (*CollectionController) {
+func (c *Collection) CreateController(in interface{}) *CollectionController {
 	var newIn = reflect.TypeOf(in)
 	for newIn.Kind() == reflect.Ptr {
 		newIn = newIn.Elem()

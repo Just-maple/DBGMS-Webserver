@@ -3,19 +3,32 @@ package handler
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"webserver/jsonx"
+	"webserver/session"
 )
 
 func (h *DefaultApiHandler) JsonAPI(c *gin.Context) {
 	var ok bool
 	var ret interface{}
 	var err error
-	var userSession = h.GetSession(c)
+	var userSession = &session.UserSession{Session: session.Default(c)}
 	var apiName = c.Param("api")
-	function, exists := h.GetApiFunc(c.Request.Method, apiName)
+	function, exists := h.getApiFunc(c.Request.Method, apiName)
 	if exists {
-		ret, err = function.Run(c, userSession)
+		var jsonData *jsonx.Json
+		var args *APIArgs
+		switch c.Request.Method {
+		case http.MethodGet:
+			jsonData = jsonx.New()
+		default:
+			jsonData, err = jsonx.NewFromReader(c.Request.Body)
+		}
+		if err == nil {
+			args = &APIArgs{c, jsonData, userSession}
+			ret, err = function.Run(args)
+		}
 		if h.CheckDataBaseConnection(err); err == nil {
-			ret = h.RenderPermission(c, userSession, ret)
+			ret = h.RenderPermission(args, ret)
 			ok = true
 		} else {
 			log.Errorf("JsonAPI(%s) err = %v", apiName, err)
@@ -47,4 +60,3 @@ func RenderJson(c *gin.Context, ok bool, data interface{}, err error) {
 		}
 	}
 }
-

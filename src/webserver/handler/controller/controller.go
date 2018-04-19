@@ -1,15 +1,15 @@
 package controller
 
 import (
-	"webserver/handler"
 	"net/http"
+	"webserver/handler"
 )
 
 type DefaultController struct {
 	handler handler.HandlerGetter
 }
 
-func (c *DefaultController) GetDefaultController() (handler.HandlerController) {
+func (c *DefaultController) GetDefaultController() handler.HandlerController {
 	return c
 }
 
@@ -21,7 +21,8 @@ func (c *DefaultController) InjectHandler(h handler.HandlerGetter) {
 }
 
 func (c *DefaultController) MakeRegisterGroupByMethod(method string, pm ...handler.PermissionAuth) *handler.RegisterGroup {
-	return c.handler.GetApiHandlersFromMethod(method).MakeRegisterGroup(pm...)
+	h := c.handler.GetApiHandlersFromMethod(method)
+	return h.MakeRegisterGroup(pm...)
 }
 
 func (c *DefaultController) RegisterApi(method, api string, function handler.DefaultAPIFunc, pm ...handler.PermissionAuth) {

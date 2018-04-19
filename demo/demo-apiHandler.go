@@ -4,6 +4,7 @@ import (
 	"webserver/handler"
 	"webserver/logger"
 	"webserver/user"
+	"webserver/permission"
 )
 
 var log = logger.Log
@@ -59,6 +60,30 @@ func (h *ApiHandler) ApiTest(args *handler.APIArgs) (ret interface{}, err error)
 	return
 }
 
+type AdminConfig struct {
+	NeedAdmin      bool `json:"_admin"`
+	NeedSuperAdmin bool `json:"_superAdmin"`
+}
+
+type AdminStructConfig struct {
+	Admin      bool `json:"admin"`
+	SuperAdmin bool `json:"superAdmin"`
+}
+
+type AdminPermissionConfig struct {
+}
+
+func (c AdminPermissionConfig) GetTableConfig() (interface{}) {
+	return AdminConfig{}
+}
+
+func (c AdminPermissionConfig) GetFieldConfig() (interface{}) {
+	return AdminStructConfig{}
+}
+
+func (h *ApiHandler) GetPermissionConfig() permission.PermissionConfig {
+	return AdminPermissionConfig{}
+}
 func (h *ApiHandler) InitMetaConfig() {
 	//implement method InitMetaConfig
 	

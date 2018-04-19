@@ -5,14 +5,13 @@ import (
 	"sync"
 )
 
-type StructConfig map[string]StructFieldConfig
+type StructConfig map[string]FieldConfig
+
 type StructFieldList []string
 
-type StructFieldConfig struct {
-	Admin      bool   `json:"admin"`
-	SuperAdmin bool   `json:"superAdmin"`
-	Name       string `json:"name"`
-}
+type FieldConfig interface{}
+
+
 
 func (structConfig *StructConfig) InitTablePermissionFieldList(ret interface{}, config AccessConfig) StructFieldList {
 	retType := reflect.TypeOf(ret).Elem()
@@ -36,7 +35,7 @@ func (structConfig *StructConfig) GetFieldList(retType reflect.Type, config Acce
 		if valid {
 			if config.AuthAllPermission() {
 				fieldList = append(fieldList, fn)
-			} else if tmp, has := (*structConfig)[fn]; has && config.AuthPermission(&tmp) {
+			} else if tmp, has := (*structConfig)[fn]; has && config.AuthFieldPermission(&tmp) {
 				fieldList = append(fieldList, fn)
 			}
 		}

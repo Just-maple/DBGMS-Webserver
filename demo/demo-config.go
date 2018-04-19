@@ -10,7 +10,7 @@ type Config struct {
 func NewConfig() *Config {
 	return &Config{
 		config.DefaultConfig{
-			MgoDBUrl:         "mongodb://wx2.asoapp.com:27777/wx",
+			MgoDBUrl: "mongodb://wx2.asoapp.com:27777/wx",
 			//ServerAddr:       "0.0.0.0:8388",
 			//TablePath:        "./",
 			//SessionSecretKey: "secret",

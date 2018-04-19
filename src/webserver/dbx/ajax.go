@@ -46,7 +46,7 @@ type AjaxStructConfig struct {
 	StructSlice interface{}
 	Collection  MgoSearchCollection
 	MiddleWare  interface{}
-	AuthCheck       func(string) bool
+	AuthCheck   func(string) bool
 }
 
 func (config *AjaxStructConfig) GetStructFieldDistinct(key string) (ret interface{}, err error) {

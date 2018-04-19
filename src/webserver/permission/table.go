@@ -2,28 +2,35 @@ package permission
 
 import (
 	"encoding/json"
-	"github.com/gin-gonic/gin"
 	"reflect"
 	"webserver/utilsx"
+	"webserver/logger"
 )
 
+var log = logger.Log
+
 const (
-	extensionJson        = ".json"
-	privateKeyAdmin      = "_admin"
-	privateKeySuperAdmin = "_superAdmin"
-	privateKey           = "_"
+	extensionJson = ".json"
+	privateKey    = "_"
 )
 
 type TableConfig struct {
-	FilesName      string
-	TableData      []byte
-	StructConfig   *StructConfig
-	Md5Hash        string
-	NeedAdmin      bool
-	NeedSuperAdmin bool
+	FilesName        string
+	TableData        []byte
+	StructConfig     *StructConfig
+	Md5Hash          string
+	PermissionConfig PermissionConfig
 }
 
-type TableConfigMap map[string]*TableConfig
+type TableMapConfig struct {
+	TableMap         map[string]TableConfig
+	PermissionConfig PermissionConfig
+}
+
+type PermissionConfig interface {
+	GetTableConfig() (interface{})
+	GetFieldConfig() (interface{})
+}
 
 func IsPrivateKey(key string) bool {
 	return key[:1] == privateKey
@@ -34,53 +41,39 @@ func InitTableConfigMapFromBytes(data []byte) (res map[string]interface{}, err e
 	return
 }
 
-func InitTableConfigFromBytes(data []byte) (fieldTableConfig StructConfig, needAdmin, needSuperAdmin bool, err error) {
-	tablePermission, err := InitTableConfigMapFromBytes(data)
+func (t *TableConfig) InitTableConfig() (err error) {
+	structTable, err := InitTableConfigMapFromBytes(t.TableData)
 	if err != nil {
 		return
 	}
-	for key := range tablePermission {
+	for key := range structTable {
 		if IsPrivateKey(key) {
-			if key == privateKeyAdmin {
-				needAdmin, _ = tablePermission[key].(bool)
-			} else if key == privateKeySuperAdmin {
-				needSuperAdmin, _ = tablePermission[key].(bool)
-			}
-			delete(tablePermission, key)
+			delete(structTable, key)
 		}
 	}
-	tmp, err := json.Marshal(tablePermission)
+	tmp, err := json.Marshal(structTable)
 	if err != nil {
 		return
 	}
-	json.Unmarshal(tmp, &fieldTableConfig)
+	json.Unmarshal(tmp, &t.StructConfig)
 	if err != nil {
 		return
 	}
 	return
 }
 
-func (t TableConfigMap) GetConfigTableFromContext(c *gin.Context) (config *StructConfig, has bool) {
-	table, has := t[c.Param("api")]
-	if has {
-		config = table.StructConfig
-	}
-	return
-}
-
-func (t TableConfigMap) InitTableConfig(data []byte, tableName string) (err error) {
-	fieldTableConfig, needAdmin, needSuperAdmin, err := InitTableConfigFromBytes(data)
-	if err != nil {
-		return
-	}
-	t[tableName] = &TableConfig{
+func (t TableMapConfig) InitTableConfig(data []byte, tableName string) (err error) {
+	var config = TableConfig{
 		tableName + extensionJson,
 		data,
-		&fieldTableConfig,
+		nil,
 		utilsx.BytesToMd5String(data),
-		needAdmin,
-		needSuperAdmin,
+		t.PermissionConfig,
 	}
+	if err = config.InitTableConfig(); err != nil {
+		return
+	}
+	t.TableMap[tableName] = config
 	return
 }
 

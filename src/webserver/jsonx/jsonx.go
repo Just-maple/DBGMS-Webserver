@@ -3,9 +3,9 @@ package jsonx
 import (
 	"encoding/json"
 	"github.com/bitly/go-simplejson"
+	"io"
 	"reflect"
 	"webserver/errorx"
-	"io"
 )
 
 type Json struct {

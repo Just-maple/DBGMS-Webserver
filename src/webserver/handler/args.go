@@ -2,11 +2,12 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
+	"gopkg.in/mgo.v2/bson"
+	"time"
 	"webserver/jsonx"
 	"webserver/session"
-	"time"
 	"webserver/utilsx"
-	"gopkg.in/mgo.v2/bson"
+	"webserver/permission"
 )
 
 type APIArgs struct {
@@ -43,6 +44,21 @@ func (arg *APIArgs) SetUserId(userId bson.ObjectId) {
 	arg.session.SetUserId(userId.Hex())
 }
 
+func (arg *APIArgs) Api() string {
+	return arg.context.Param("api")
+}
+func (arg *APIArgs) ClearSession() {
+	arg.session.Clear()
+	arg.session.Save()
+}
 func (arg *APIArgs) JsonKey(key string) *jsonx.Json {
 	return arg.Json.Get(key)
+}
+
+func (arg *APIArgs) GetConfigTable(t permission.TableMapConfig) (config *permission.StructConfig, has bool) {
+	table, has := t.TableMap[arg.Api()]
+	if has {
+		config = table.StructConfig
+	}
+	return
 }

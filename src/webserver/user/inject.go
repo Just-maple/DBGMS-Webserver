@@ -8,7 +8,7 @@ func InitController(collection *dbx.Collection) (controller *Controller) {
 	return &Controller{collection: collection}
 }
 
-func (c *Controller) Init(){
+func (c *Controller) Init() {
 	c.registerUserPwdLoginApi()
 	c.registerNewUserApi()
 	c.registerSetUserLevelApi()
