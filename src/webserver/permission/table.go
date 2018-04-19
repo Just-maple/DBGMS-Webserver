@@ -52,16 +52,20 @@ func (t *TableConfig) InitTableConfig() (err error) {
 		if IsPrivateKey(key) {
 			delete(structTable, key)
 		} else {
-			tmp, _ := json.Marshal(structTable[key])
-			s := reflect.ValueOf(t.PermissionConfig.GetFieldConfig()).Interface()
-			json.Unmarshal(tmp, s)
-			(*t.StructConfig)[key] = s
-			log.Debug(reflect.ValueOf((*t.StructConfig)[key]))
+			tmp, err := json.Marshal(structTable[key])
+			if err != nil {
+				continue
+			}
+			s := reflect.New(reflect.TypeOf(t.PermissionConfig.GetFieldConfig())).Interface()
+			err = json.Unmarshal(tmp, s)
+			if err != nil {
+				continue
+			}
+			(*t.StructConfig)[key] = reflect.ValueOf(s).Elem().Interface()
 		}
 	}
-	
 	if err != nil {
-		return
+		panic(err)
 	}
 	return
 }
