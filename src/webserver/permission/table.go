@@ -46,16 +46,20 @@ func (t *TableConfig) InitTableConfig() (err error) {
 	if err != nil {
 		return
 	}
+	var tmp = make(StructConfig, len(structTable))
+	t.StructConfig = &tmp
 	for key := range structTable {
 		if IsPrivateKey(key) {
 			delete(structTable, key)
+		} else {
+			tmp, _ := json.Marshal(structTable[key])
+			s := reflect.ValueOf(t.PermissionConfig.GetFieldConfig()).Interface()
+			json.Unmarshal(tmp, s)
+			(*t.StructConfig)[key] = s
+			log.Debug(reflect.ValueOf((*t.StructConfig)[key]))
 		}
 	}
-	tmp, err := json.Marshal(structTable)
-	if err != nil {
-		return
-	}
-	json.Unmarshal(tmp, &t.StructConfig)
+	
 	if err != nil {
 		return
 	}

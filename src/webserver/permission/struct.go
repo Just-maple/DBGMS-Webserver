@@ -35,7 +35,7 @@ func (structConfig *StructConfig) GetFieldList(retType reflect.Type, config Acce
 		if valid {
 			if config.AuthAllPermission() {
 				fieldList = append(fieldList, fn)
-			} else if tmp, has := (*structConfig)[fn]; has && config.AuthFieldPermission(&tmp) {
+			} else if tmp, has := (*structConfig)[fn]; has && config.AuthFieldPermission(tmp) {
 				fieldList = append(fieldList, fn)
 			}
 		}
