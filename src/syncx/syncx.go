@@ -3,11 +3,9 @@ package syncx
 import (
 	"sync"
 	"reflect"
-	"webserver/logger"
 	"github.com/pkg/errors"
 )
 
-var log = logger.Log
 
 func TraverseMapWithFunction(Map interface{}, function interface{}) (err error) {
 	var mt = reflect.ValueOf(Map)
@@ -31,38 +29,20 @@ func TraverseMapWithFunction(Map interface{}, function interface{}) (err error) 
 	wg.Wait()
 	return
 }
-func TraverseSliceWithFunction(slice interface{}, function interface{}) (err error) {
+func TraverseSliceWithFunction(slice interface{}, function func(int)) (err error) {
 	var mt = reflect.ValueOf(slice)
-	var ft = reflect.ValueOf(function)
 	if mt.Kind() != reflect.Slice {
 		return errors.New("invalid slice")
-	}
-	if ft.Type().In(0).Kind() != reflect.Int {
-		return errors.New("invalid function")
 	}
 	var wg = new(sync.WaitGroup)
 	for i := 0; i < mt.Len(); i++ {
 		wg.Add(1)
 		go func(i int) {
 			defer wg.Done()
-			ft.Call([]reflect.Value{reflect.ValueOf(i)})
+			function(i)
 		}(i)
 		
 	}
 	wg.Wait()
 	return
-}
-
-func Test() {
-	var testMap = map[string]string{
-		"test1": "",
-		"test2": "",
-	}
-	err := TraverseMapWithFunction(testMap, func(key string) {
-		testMap[key] = key + "fafssafasffsa"
-	})
-	if err != nil {
-		panic(err)
-	}
-	log.Debug(testMap)
 }

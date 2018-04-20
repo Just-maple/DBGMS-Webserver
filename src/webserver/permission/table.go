@@ -36,8 +36,8 @@ func (t *Table) InitTableConfig(PermissionConfig PermissionConfig) (err error) {
 		return
 	}
 	t.TableConfig = reflect.ValueOf(s).Elem().Interface()
-	var tmp = make(StructConfig, len(structTable))
-	t.StructConfig = &tmp
+	var structConfig = make(StructConfig, len(structTable))
+	t.StructConfig = &structConfig
 	var mapLock = new(sync.RWMutex)
 	err = syncx.TraverseMapWithFunction(
 		structTable, func(key string) {
@@ -52,14 +52,14 @@ func (t *Table) InitTableConfig(PermissionConfig PermissionConfig) (err error) {
 					return
 				}
 				mapLock.Lock()
-				(*t.StructConfig)[key] = reflect.ValueOf(s).Elem().Interface()
+				structConfig[key] = reflect.ValueOf(s).Elem().Interface()
 				mapLock.Unlock()
 			}
 		})
 	return
 }
 
-func (t Config) InitTableConfig(data []byte, tableName string) (err error) {
+func (t *Config) InitTableConfig(data []byte, tableName string) (err error) {
 	var config = Table{
 		tableName + extensionJson,
 		data,
