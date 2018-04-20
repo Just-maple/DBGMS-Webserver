@@ -33,7 +33,7 @@ func TransAjaxQuery(args *APIArgs) (matcherMap map[string]interface{}, keys []st
 
 func (h DefaultApiHandler) GetAjaxQuery(args *APIArgs) (res *dbx.AjaxQuery, err error) {
 	matcherMap, keys, skipCnt, limitCnt, sortKey, reverse, tSTime, tETime, err := TransAjaxQuery(args)
-	pmConfig, _ := args.GetConfigTable(h.TableController.PermissionConfig)
+	pmConfig, _ := args.GetConfigTable(&h.TableController.PermissionConfig)
 	res = &dbx.AjaxQuery{
 		MatcherMap:       matcherMap,
 		SortKey:          sortKey,

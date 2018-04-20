@@ -14,25 +14,6 @@ const (
 	privateKey    = "_"
 )
 
-type TableConfig struct {
-	FilesName    string
-	TableData    []byte
-	StructConfig *StructConfig
-	Md5Hash      string
-	TableConfig  interface{}
-	PermissionConfig
-}
-
-type TableMapConfig struct {
-	TableMap         map[string]TableConfig
-	PermissionConfig PermissionConfig
-}
-
-type PermissionConfig interface {
-	GetTableConfig() (interface{})
-	GetFieldConfig() (interface{})
-}
-
 func IsPrivateKey(key string) bool {
 	return key[:1] == privateKey
 }
@@ -42,12 +23,12 @@ func InitTableConfigMapFromBytes(data []byte) (res map[string]interface{}, err e
 	return
 }
 
-func (t *TableConfig) InitTableConfig() (err error) {
+func (t *Table) InitTableConfig(PermissionConfig PermissionConfig) (err error) {
 	structTable, err := InitTableConfigMapFromBytes(t.TableData)
 	if err != nil {
 		return
 	}
-	var s = reflect.New(reflect.TypeOf(t.PermissionConfig.GetTableConfig())).Interface()
+	var s = reflect.New(reflect.TypeOf(PermissionConfig.GetTableConfig())).Interface()
 	err = json.Unmarshal(t.TableData, s)
 	if err != nil {
 		return
@@ -63,7 +44,7 @@ func (t *TableConfig) InitTableConfig() (err error) {
 			if err != nil {
 				continue
 			}
-			s := reflect.New(reflect.TypeOf(t.PermissionConfig.GetFieldConfig())).Interface()
+			s := reflect.New(reflect.TypeOf(PermissionConfig.GetFieldConfig())).Interface()
 			err = json.Unmarshal(tmp, s)
 			if err != nil {
 				continue
@@ -77,16 +58,15 @@ func (t *TableConfig) InitTableConfig() (err error) {
 	return
 }
 
-func (t TableMapConfig) InitTableConfig(data []byte, tableName string) (err error) {
-	var config = TableConfig{
+func (t Config) InitTableConfig(data []byte, tableName string) (err error) {
+	var config = Table{
 		tableName + extensionJson,
 		data,
 		nil,
 		utilsx.BytesToMd5String(data),
 		nil,
-		t.PermissionConfig,
 	}
-	if err = config.InitTableConfig(); err != nil {
+	if err = config.InitTableConfig(t.PermissionConfig); err != nil {
 		return
 	}
 	t.TableMap[tableName] = config

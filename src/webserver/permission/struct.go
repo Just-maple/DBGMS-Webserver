@@ -5,14 +5,6 @@ import (
 	"sync"
 )
 
-type StructConfig map[string]FieldConfig
-
-type StructFieldList []string
-
-type FieldConfig interface{}
-
-
-
 func (structConfig *StructConfig) InitTablePermissionFieldList(ret interface{}, config AccessConfig) StructFieldList {
 	retType := reflect.TypeOf(ret).Elem()
 	for retType.Kind() == reflect.Ptr {

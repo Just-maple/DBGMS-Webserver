@@ -47,15 +47,17 @@ func (arg *APIArgs) SetUserId(userId bson.ObjectId) {
 func (arg *APIArgs) Api() string {
 	return arg.context.Param("api")
 }
+
 func (arg *APIArgs) ClearSession() {
 	arg.session.Clear()
 	arg.session.Save()
 }
+
 func (arg *APIArgs) JsonKey(key string) *jsonx.Json {
 	return arg.Json.Get(key)
 }
 
-func (arg *APIArgs) GetConfigTable(t permission.TableMapConfig) (config *permission.StructConfig, has bool) {
+func (arg *APIArgs) GetConfigTable(t *permission.Config) (config *permission.StructConfig, has bool) {
 	table, has := t.TableMap[arg.Api()]
 	if has {
 		config = table.StructConfig

@@ -21,7 +21,7 @@ func (db *DataBase) GetAccessConfig(args *handler.APIArgs) permission.AccessConf
 }
 
 func (access *SuperAdminAccess) AuthTablePermission(config permission.TableConfig) bool {
-	return (!config.PermissionConfig.GetTableConfig().(AdminConfig).NeedAdmin || access.isAdmin) && (!config.PermissionConfig.GetTableConfig().(AdminConfig).NeedSuperAdmin || access.isSuper)
+	return (!config.(AdminConfig).NeedAdmin || access.isAdmin) && (!config.(AdminConfig).NeedSuperAdmin || access.isSuper)
 }
 
 type SuperAdminAccess struct {

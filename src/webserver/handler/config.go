@@ -18,7 +18,7 @@ const (
 
 type TableController struct {
 	handler          TableHandler
-	PermissionConfig pm.TableMapConfig
+	PermissionConfig pm.Config
 	path             string
 }
 
@@ -115,7 +115,7 @@ func (c *TableController) ReadAllConfigTableFromServerTableConfig(args *APIArgs)
 	access := c.handler.GetAccessConfig(args)
 	pmConfig := c.PermissionConfig.TableMap
 	for key := range pmConfig {
-		if access.AuthTablePermission(pmConfig[key]) {
+		if access.AuthTablePermission(pmConfig[key].TableConfig) {
 			encodeKey := base64.StdEncoding.EncodeToString([]byte(key))
 			encodeData := BytesToMd5String(pmConfig[key].TableData) + XdEncode(pmConfig[key].TableData)
 			ret[encodeKey] = encodeData
@@ -154,7 +154,7 @@ func (c *TableController) InitAllConfigTableFromFiles(PermissionConfig pm.Permis
 		return
 	}
 	c.PermissionConfig.PermissionConfig = PermissionConfig
-	c.PermissionConfig.TableMap = make(map[string]pm.TableConfig, len(tableFiles))
+	c.PermissionConfig.TableMap = make(map[string]pm.Table, len(tableFiles))
 	for i := range tableFiles {
 		err = c.InitTableConfigFromFileInfo(&(tableFiles[i]))
 		if err != nil {
