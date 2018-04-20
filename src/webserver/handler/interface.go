@@ -2,7 +2,7 @@ package handler
 
 import (
 	"webserver/permission"
-	. "webserver/args"
+	."webserver/args"
 )
 
 type HandlerGetter interface {

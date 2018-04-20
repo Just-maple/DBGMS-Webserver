@@ -3,8 +3,9 @@ package permission
 import "reflect"
 
 type Config struct {
-	TableMap         map[string]Table
-	PermissionConfig PermissionConfig
+	TableMap  map[string]*Table
+	TableType reflect.Type
+	FieldType reflect.Type
 }
 
 type TableConfig interface{}
@@ -12,9 +13,11 @@ type TableConfig interface{}
 type Table struct {
 	FilesName    string
 	TableData    []byte
-	StructConfig *StructConfig
 	Md5Hash      string
+	StructConfig *StructConfig
 	TableConfig  TableConfig
+	TableType    reflect.Type
+	StructType   reflect.Type
 }
 
 type StructConfig map[string]FieldConfig

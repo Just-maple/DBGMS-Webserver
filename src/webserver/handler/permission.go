@@ -12,7 +12,7 @@ func (h *DefaultApiHandler) GetAccessConfigFromArgs(arg *APIArgs) (access permis
 
 func (h *DefaultApiHandler) RenderPermission(args *APIArgs, in interface{}) (out interface{}) {
 	if reflect.ValueOf(in).Kind() == reflect.Slice {
-		config, has := args.GetConfigTable(&h.TableController.PermissionConfig)
+		config, has := args.GetConfigTable(h.TableController.PermissionConfig)
 		if has {
 			access := h.GetAccessConfigFromArgs(args)
 			out = config.InitTablePermission(in, access)

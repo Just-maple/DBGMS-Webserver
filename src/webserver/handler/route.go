@@ -3,8 +3,8 @@ package handler
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"webserver/jsonx"
-	"webserver/session"
+	"webserver/args/jsonx"
+	"webserver/args/session"
 )
 
 type JsonAPIFuncRoute map[string]*DefaultAPI
@@ -23,10 +23,6 @@ func (h *DefaultApiHandler) RegisterJsonAPI() {
 	h.ApiPostHandlers.RegisterAPI("test", h.Test)
 	h.ApiGetHandlers.RegisterAPI("test", h.Test)
 	h.apiHandlers.RegisterAPI()
-}
-
-func NewJsonAPIFuncRoute() JsonAPIFuncRoute {
-	return make(JsonAPIFuncRoute)
 }
 
 func (h *DefaultApiHandler) GetApiHandlersFromMethod(method string) (handler JsonAPIFuncRoute) {

@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"webserver/dbx"
 	"webserver/errorx"
-	"webserver/logger"
+	"logger"
 	"webserver/permission"
 	ws "webserver/server"
 	. "webserver/args"
@@ -42,6 +42,10 @@ type DefaultApiHandler struct {
 	db                DB
 	config            ApiHandlerConfig
 	TableController   *TableController
+}
+
+func NewJsonAPIFuncRoute() JsonAPIFuncRoute {
+	return make(JsonAPIFuncRoute)
 }
 
 func NewDefaultHandlerFromConfig(config ApiHandlerConfig, ah ExtendApiHandler) {

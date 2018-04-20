@@ -46,7 +46,7 @@ const FieldTagBson = "bson"
 type AjaxStructConfig struct {
 	StructSlice interface{}
 	Collection  MgoSearchCollection
-	MiddleWare  interface{}
+	MiddleWare  func(interface{}) error
 	AuthCheck   func(args *args.APIArgs) bool
 }
 
@@ -181,32 +181,15 @@ func (query *AjaxQuery) GetMgoSearch(collection MgoSearchCollection, result inte
 
 func (query *AjaxQuery) AjaxSearch(structConfig *AjaxStructConfig) (res interface{}, count int, err error) {
 	collection := structConfig.Collection
-	st := reflect.New(reflect.SliceOf(reflect.TypeOf(structConfig.StructSlice))).Interface()
-	count, err = query.NewAjaxMgoDBSearcher(collection, st)
+	tmp := reflect.New(reflect.SliceOf(reflect.TypeOf(structConfig.StructSlice))).Interface()
+	count, err = query.NewAjaxMgoDBSearcher(collection, tmp)
 	if err != nil {
 		return
 	}
-	res, err = structConfig.middleWareHandler(st)
-	return
-}
-
-func (config AjaxStructConfig) middleWareHandler(st interface{}) (res interface{}, err error) {
-	stType := reflect.TypeOf(st).Elem().Elem()
-	mw := config.MiddleWare
-	if !isMiddleWareValid(mw, stType) {
-		panic("invalid middle ware")
+	err = structConfig.MiddleWare(tmp)
+	if err != nil {
+		return
 	}
-	mwres := reflect.ValueOf(mw).Call([]reflect.Value{reflect.ValueOf(st)})
-	reflect.ValueOf(&res).Elem().Set(mwres[0])
-	if !mwres[1].IsNil() {
-		reflect.ValueOf(err).Set(mwres[1])
-	}
+	res = reflect.ValueOf(tmp).Elem().Interface()
 	return
-}
-
-func isMiddleWareValid(mw interface{}, inType reflect.Type) bool {
-	return reflect.TypeOf(mw).In(0) != inType &&
-		reflect.TypeOf(mw).In(0).Kind() == reflect.Ptr &&
-		reflect.TypeOf(mw).In(0).Elem().Kind() == reflect.Slice &&
-		reflect.TypeOf(mw).Out(1).Kind() == reflect.Interface
 }

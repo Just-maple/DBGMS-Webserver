@@ -7,7 +7,7 @@ import (
 
 func (h DefaultApiHandler) GetAjaxQuery(args *APIArgs) (res *dbx.AjaxQuery, err error) {
 	matcherMap, keys, skipCnt, limitCnt, sortKey, reverse, tSTime, tETime, err := args.TransAjaxQuery()
-	pmConfig, _ := args.GetConfigTable(&h.TableController.PermissionConfig)
+	pmConfig, _ := args.GetConfigTable(h.TableController.PermissionConfig)
 	res = &dbx.AjaxQuery{
 		MatcherMap:       matcherMap,
 		SortKey:          sortKey,

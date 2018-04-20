@@ -21,14 +21,15 @@ const (
 
 type TableController struct {
 	handler          TableHandler
-	PermissionConfig pm.Config
+	PermissionConfig *pm.Config
 	path             string
 }
 
 func InjectTableController(h TableHandler, PermissionConfig pm.PermissionConfig) (c *TableController, err error) {
 	c = &TableController{
-		handler: h,
-		path:    h.GetTablePath(),
+		handler:          h,
+		path:             h.GetTablePath(),
+		PermissionConfig: new(pm.Config),
 	}
 	c.RegisterAPI()
 	return c, c.InitAllConfigTableFromFiles(PermissionConfig)
@@ -59,11 +60,6 @@ func (c *TableController) SaveAllTableConfig(args *APIArgs) (ret interface{}, er
 	return
 }
 
-func (c *TableController) GetAllConfigTable(args *APIArgs) (ret interface{}, err error) {
-	ret = c.ReadAllConfigTable()
-	return
-}
-
 func (c *TableController) EditTable(args *APIArgs) (ret interface{}, err error) {
 	tableName := args.JsonKey("name").MustString()
 	data := args.JsonKey("table").MustString()
@@ -85,7 +81,7 @@ func (c *TableController) GetConfigTableFromMString(args *APIArgs) (tableConfig 
 	var storeBytes []byte
 	var storeHash map[string]string
 	storeHashString := args.JsonKey("m").MustString("{}")
-	tableConfig = c.ReadAllConfigTableFromServerTableConfig(args)
+	tableConfig = c.GetConfigTableFromArgs(args)
 	storeBytes, err = base64.StdEncoding.DecodeString(storeHashString)
 	if err != nil {
 		log.Error(err)
@@ -104,7 +100,11 @@ func (c *TableController) GetConfigTableFromMString(args *APIArgs) (tableConfig 
 	return
 }
 
-func (c *TableController) ReadAllConfigTable() (ret map[string]string) {
+func (c *TableController) GetAllConfigTable(args *APIArgs) (ret interface{}, err error) {
+	return c.GetConfigTableMap(), nil
+}
+
+func (c *TableController) GetConfigTableMap() (ret map[string]string) {
 	ret = make(map[string]string)
 	pmConfig := c.PermissionConfig.TableMap
 	for key := range pmConfig {
@@ -113,7 +113,7 @@ func (c *TableController) ReadAllConfigTable() (ret map[string]string) {
 	return
 }
 
-func (c *TableController) ReadAllConfigTableFromServerTableConfig(args *APIArgs) (ret map[string]string) {
+func (c *TableController) GetConfigTableFromArgs(args *APIArgs) (ret map[string]string) {
 	ret = make(map[string]string)
 	access := c.handler.GetAccessConfig(args)
 	pmConfig := c.PermissionConfig.TableMap
@@ -158,8 +158,9 @@ func (c *TableController) InitAllConfigTableFromFiles(PermissionConfig pm.Permis
 	if err != nil {
 		return
 	}
-	c.PermissionConfig.PermissionConfig = PermissionConfig
-	c.PermissionConfig.TableMap = make(map[string]pm.Table, len(tableFiles))
+	c.PermissionConfig.TableMap = make(map[string]*pm.Table, len(tableFiles))
+	c.PermissionConfig.TableType = PermissionConfig.GetTableConfig()
+	c.PermissionConfig.FieldType = PermissionConfig.GetFieldConfig()
 	err = syncx.TraverseSliceWithFunction(
 		tableFiles, func(i int) {
 			err = c.InitTableConfigFromFileInfo(&(tableFiles[i]))

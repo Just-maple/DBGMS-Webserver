@@ -6,7 +6,7 @@ import (
 	"net"
 	"net/http"
 	"time"
-	"webserver/logger"
+	"logger"
 )
 
 var log = logger.Log
@@ -44,6 +44,7 @@ func (svr *WebServer) initSession() gin.HandlerFunc {
 }
 
 func (svr *WebServer) initRouter() *gin.Engine {
+	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 	svr.server.Handler = r
 	svr.apiHandlers.SetRouter(r)

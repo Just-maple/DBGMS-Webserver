@@ -3,7 +3,7 @@ package config
 import (
 	"encoding/json"
 	"io/ioutil"
-	"webserver/logger"
+	"logger"
 )
 
 var log = logger.Log

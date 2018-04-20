@@ -2,7 +2,7 @@ package main
 
 import (
 	"webserver/handler"
-	"webserver/logger"
+	"logger"
 	"webserver/user"
 	"webserver/permission"
 	"reflect"
@@ -84,8 +84,9 @@ func (c AdminPermissionConfig) GetFieldConfig() (reflect.Type) {
 }
 
 func (h *ApiHandler) GetPermissionConfig() permission.PermissionConfig {
-	return AdminPermissionConfig{}
+	return new(AdminPermissionConfig)
 }
+
 func (h *ApiHandler) InitMetaConfig() {
 	//implement method InitMetaConfig
 	

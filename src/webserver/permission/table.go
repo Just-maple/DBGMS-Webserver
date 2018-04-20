@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"reflect"
 	"webserver/utilsx"
-	"webserver/logger"
+	"logger"
 	"syncx"
 	"sync"
 )
@@ -25,12 +25,12 @@ func (t *Table) InitTableConfigMapFromBytes(data []byte) (res map[string]interfa
 	return
 }
 
-func (t *Table) InitTableConfig(PermissionConfig PermissionConfig) (err error) {
+func (t *Table) InitTableConfig() (err error) {
 	structTable, err := t.InitTableConfigMapFromBytes(t.TableData)
 	if err != nil {
 		return
 	}
-	var s = reflect.New(PermissionConfig.GetTableConfig()).Interface()
+	var s = reflect.New(t.TableType).Interface()
 	err = json.Unmarshal(t.TableData, s)
 	if err != nil {
 		return
@@ -46,7 +46,7 @@ func (t *Table) InitTableConfig(PermissionConfig PermissionConfig) (err error) {
 				if err != nil {
 					return
 				}
-				s := reflect.New(PermissionConfig.GetFieldConfig()).Interface()
+				s := reflect.New(t.StructType).Interface()
 				err = json.Unmarshal(tmp, s)
 				if err != nil {
 					return
@@ -60,14 +60,14 @@ func (t *Table) InitTableConfig(PermissionConfig PermissionConfig) (err error) {
 }
 
 func (t *Config) InitTableConfig(data []byte, tableName string) (err error) {
-	var config = Table{
-		tableName + extensionJson,
-		data,
-		nil,
-		utilsx.BytesToMd5String(data),
-		nil,
+	var config = &Table{
+		FilesName:  tableName + extensionJson,
+		TableData:  data,
+		Md5Hash:    utilsx.BytesToMd5String(data),
+		TableType:  t.TableType,
+		StructType: t.FieldType,
 	}
-	if err = config.InitTableConfig(t.PermissionConfig); err != nil {
+	if err = config.InitTableConfig(); err != nil {
 		return
 	}
 	t.TableMap[tableName] = config
