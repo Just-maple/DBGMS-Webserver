@@ -10,6 +10,8 @@ import (
 	"strings"
 	pm "webserver/permission"
 	. "webserver/utilsx"
+	"syncx"
+	"sync"
 )
 
 const (
@@ -114,14 +116,16 @@ func (c *TableController) ReadAllConfigTableFromServerTableConfig(args *APIArgs)
 	ret = make(map[string]string)
 	access := c.handler.GetAccessConfig(args)
 	pmConfig := c.PermissionConfig.TableMap
-	for key := range pmConfig {
+	mapLock := new(sync.Mutex)
+	syncx.TraverseMapWithFunction(pmConfig, func(key string) {
 		if access.AuthTablePermission(pmConfig[key].TableConfig) {
 			encodeKey := base64.StdEncoding.EncodeToString([]byte(key))
 			encodeData := BytesToMd5String(pmConfig[key].TableData) + XdEncode(pmConfig[key].TableData)
+			mapLock.Lock()
 			ret[encodeKey] = encodeData
+			mapLock.Unlock()
 		}
-		
-	}
+	})
 	return
 }
 
@@ -155,11 +159,12 @@ func (c *TableController) InitAllConfigTableFromFiles(PermissionConfig pm.Permis
 	}
 	c.PermissionConfig.PermissionConfig = PermissionConfig
 	c.PermissionConfig.TableMap = make(map[string]pm.Table, len(tableFiles))
-	for i := range tableFiles {
-		err = c.InitTableConfigFromFileInfo(&(tableFiles[i]))
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
+	err = syncx.TraverseSliceWithFunction(
+		tableFiles, func(i int) {
+			err = c.InitTableConfigFromFileInfo(&(tableFiles[i]))
+			if err != nil {
+				log.Fatal(err)
+			}
+		})
 	return
 }

@@ -1,5 +1,6 @@
 package permission
 
+import "reflect"
 
 type Config struct {
 	TableMap         map[string]Table
@@ -33,6 +34,6 @@ type AccessConfig interface {
 
 
 type PermissionConfig interface {
-	GetTableConfig() (interface{})
-	GetFieldConfig() (interface{})
+	GetTableConfig() (reflect.Type)
+	GetFieldConfig() (reflect.Type)
 }

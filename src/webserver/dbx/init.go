@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 	"webserver/logger"
+	"sync"
 )
 
 var log = logger.Log
@@ -20,7 +21,7 @@ func NewMgoDataBase(mgoURL, dbName string) (db *mgo.Database, err error) {
 		log.Fatalf("Parse MgoDB Url err(%v)", err)
 		return
 	}
-
+	
 	dbSession, err := mgo.DialWithTimeout(mgoURL, time.Second*60)
 	if err != nil {
 		log.Fatalf("Connect MgoDB Error = (%v)", err)
@@ -48,22 +49,27 @@ func NewMgoDB(mgoURL string, db interface{}) (err error) {
 	if err != nil {
 		return
 	}
+	var wg = new(sync.WaitGroup)
 	for k := 0; k < tFieldNum; k++ {
-		if t.Field(k).Type != cp {
-			continue
-		}
-		fieldName := t.Field(k).Name
-		collection := t.Field(k).Tag.Get("collection")
-		field := s.FieldByName(fieldName)
-		if field.CanSet() {
-			if collection == "" {
-				collection = strings.ToLower(fieldName)
+		wg.Add(1)
+		go func(k int) {
+			defer wg.Done()
+			if t.Field(k).Type != cp {
+				return
 			}
-			var fieldCollection = &Collection{newDB.C(collection)}
-			field.Set(reflect.ValueOf(fieldCollection))
-			//log.Debugf("Success Init Collection [ %v ]", fieldName)MiddleWare
-		}
+			fieldName := t.Field(k).Name
+			collection := t.Field(k).Tag.Get("collection")
+			field := s.FieldByName(fieldName)
+			if field.CanSet() {
+				if collection == "" {
+					collection = strings.ToLower(fieldName)
+				}
+				var fieldCollection = &Collection{newDB.C(collection)}
+				field.Set(reflect.ValueOf(fieldCollection))
+			}
+		}(k)
 	}
+	wg.Wait()
 	log.Debugf("Success Init MgoDB")
 	return
 }

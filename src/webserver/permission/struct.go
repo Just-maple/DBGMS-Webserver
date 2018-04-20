@@ -2,7 +2,7 @@ package permission
 
 import (
 	"reflect"
-	"sync"
+	"syncx"
 )
 
 func (structConfig *StructConfig) InitTablePermissionFieldList(ret interface{}, config AccessConfig) StructFieldList {
@@ -56,25 +56,19 @@ func (fieldList StructFieldList) MakeFieldFilterReturnWithFieldList(in interface
 	}
 	l := v.Len()
 	var retSlice = make([]interface{}, l)
-	var wg sync.WaitGroup
-	for si := 0; si < l; si++ {
-		wg.Add(1)
-		go func(si int) {
-			defer wg.Done()
-			itemV := reflect.ValueOf(v.Index(si).Interface())
-			for itemV.Kind() == reflect.Ptr {
-				itemV = itemV.Elem()
+	syncx.TraverseSliceWithFunction(retSlice, func(si int) {
+		itemV := reflect.ValueOf(v.Index(si).Interface())
+		for itemV.Kind() == reflect.Ptr {
+			itemV = itemV.Elem()
+		}
+		var retMap = make(map[string]interface{}, len(fieldList))
+		for _, field := range fieldList {
+			if itemV.FieldByName(field).IsValid() {
+				s := itemV.FieldByName(field).Interface()
+				retMap[field] = &s
 			}
-			var retMap = make(map[string]interface{}, len(fieldList))
-			for _, field := range fieldList {
-				if itemV.FieldByName(field).IsValid() {
-					s := itemV.FieldByName(field).Interface()
-					retMap[field] = &s
-				}
-			}
-			retSlice[si] = retMap
-		}(si)
-	}
-	wg.Wait()
+		}
+		retSlice[si] = retMap
+	})
 	return retSlice
 }

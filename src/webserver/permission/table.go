@@ -5,6 +5,8 @@ import (
 	"reflect"
 	"webserver/utilsx"
 	"webserver/logger"
+	"syncx"
+	"sync"
 )
 
 var log = logger.Log
@@ -18,17 +20,17 @@ func IsPrivateKey(key string) bool {
 	return key[:1] == privateKey
 }
 
-func InitTableConfigMapFromBytes(data []byte) (res map[string]interface{}, err error) {
+func (t *Table) InitTableConfigMapFromBytes(data []byte) (res map[string]interface{}, err error) {
 	err = json.Unmarshal(data, &res)
 	return
 }
 
 func (t *Table) InitTableConfig(PermissionConfig PermissionConfig) (err error) {
-	structTable, err := InitTableConfigMapFromBytes(t.TableData)
+	structTable, err := t.InitTableConfigMapFromBytes(t.TableData)
 	if err != nil {
 		return
 	}
-	var s = reflect.New(reflect.TypeOf(PermissionConfig.GetTableConfig())).Interface()
+	var s = reflect.New(PermissionConfig.GetTableConfig()).Interface()
 	err = json.Unmarshal(t.TableData, s)
 	if err != nil {
 		return
@@ -36,25 +38,24 @@ func (t *Table) InitTableConfig(PermissionConfig PermissionConfig) (err error) {
 	t.TableConfig = reflect.ValueOf(s).Elem().Interface()
 	var tmp = make(StructConfig, len(structTable))
 	t.StructConfig = &tmp
-	for key := range structTable {
-		if IsPrivateKey(key) {
-			delete(structTable, key)
-		} else {
-			tmp, err := json.Marshal(structTable[key])
-			if err != nil {
-				continue
+	var mapLock = new(sync.RWMutex)
+	err = syncx.TraverseMapWithFunction(
+		structTable, func(key string) {
+			if !IsPrivateKey(key) {
+				tmp, err := json.Marshal(structTable[key])
+				if err != nil {
+					return
+				}
+				s := reflect.New(PermissionConfig.GetFieldConfig()).Interface()
+				err = json.Unmarshal(tmp, s)
+				if err != nil {
+					return
+				}
+				mapLock.Lock()
+				(*t.StructConfig)[key] = reflect.ValueOf(s).Elem().Interface()
+				mapLock.Unlock()
 			}
-			s := reflect.New(reflect.TypeOf(PermissionConfig.GetFieldConfig())).Interface()
-			err = json.Unmarshal(tmp, s)
-			if err != nil {
-				continue
-			}
-			(*t.StructConfig)[key] = reflect.ValueOf(s).Elem().Interface()
-		}
-	}
-	if err != nil {
-		panic(err)
-	}
+		})
 	return
 }
 

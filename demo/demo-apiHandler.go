@@ -5,6 +5,7 @@ import (
 	"webserver/logger"
 	"webserver/user"
 	"webserver/permission"
+	"reflect"
 )
 
 var log = logger.Log
@@ -73,12 +74,12 @@ type AdminStructConfig struct {
 type AdminPermissionConfig struct {
 }
 
-func (c AdminPermissionConfig) GetTableConfig() (interface{}) {
-	return AdminConfig{}
+func (c AdminPermissionConfig) GetTableConfig() (reflect.Type) {
+	return reflect.TypeOf(AdminConfig{})
 }
 
-func (c AdminPermissionConfig) GetFieldConfig() (interface{}) {
-	return AdminStructConfig{}
+func (c AdminPermissionConfig) GetFieldConfig() (reflect.Type) {
+	return reflect.TypeOf(AdminStructConfig{})
 }
 
 func (h *ApiHandler) GetPermissionConfig() permission.PermissionConfig {
