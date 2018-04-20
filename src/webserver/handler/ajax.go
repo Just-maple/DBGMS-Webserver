@@ -41,10 +41,10 @@ func (h *DefaultApiHandler) GetDataByAjaxQuery(args *APIArgs, ajaxConfig *dbx.Aj
 	return
 }
 
-func (h *DefaultApiHandler) RegisterAjaxJsonApi(dataApiAddr, distinctApiAddr string, configMaker func() dbx.AjaxStructConfig) {
+func (h *DefaultApiHandler) RegisterAjaxJsonApi(dataApiAddr, distinctApiAddr string, configMaker func() *dbx.AjaxStructConfig) {
 	config := configMaker()
-	h.ApiPostHandlers.RegisterDefaultAPI(dataApiAddr, h.GetAjaxApi(&config))
-	h.ApiGetHandlers.RegisterDefaultAPI(distinctApiAddr, h.GetAjaxDistinctApi(&config))
+	h.ApiPostHandlers.RegisterDefaultAPI(dataApiAddr, h.GetAjaxApi(config))
+	h.ApiGetHandlers.RegisterDefaultAPI(distinctApiAddr, h.GetAjaxDistinctApi(config))
 }
 
 func (h *DefaultApiHandler) GetAjaxDistinctApi(config *dbx.AjaxStructConfig) DefaultAPIFunc {
