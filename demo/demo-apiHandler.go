@@ -6,6 +6,7 @@ import (
 	"webserver/user"
 	"webserver/permission"
 	"reflect"
+	"webserver/args"
 )
 
 var log = logger.Log
@@ -37,7 +38,7 @@ func (h *ApiHandler) RegisterAPI() {
 	//and will execute before server start
 	
 	h.ApiGetHandlers.RegisterDefaultAPI("test2", h.ApiTest)
-	h.ApiPostHandlers.RegisterDefaultAPI("test3", func(args *handler.APIArgs) (ret interface{}, err error) {
+	h.ApiPostHandlers.RegisterDefaultAPI("test3", func(args *args.APIArgs) (ret interface{}, err error) {
 		d, err := h.db.AnyCollection.GenerateRawStruct()
 		log.Debug(d)
 		return d, err
@@ -47,7 +48,7 @@ func (h *ApiHandler) RegisterAPI() {
 	h.DefaultApiHandler.InjectController(userController)
 }
 
-func (h *ApiHandler) ApiTest(args *handler.APIArgs) (ret interface{}, err error) {
+func (h *ApiHandler) ApiTest(args *args.APIArgs) (ret interface{}, err error) {
 	queryString := args.Query("get query key from url")
 	//return type string
 	log.Debug(queryString)

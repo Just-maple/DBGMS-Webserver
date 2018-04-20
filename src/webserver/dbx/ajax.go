@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 	"webserver/permission"
+	"webserver/args"
 )
 
 const FieldTimeCreate = "t_create"
@@ -46,7 +47,7 @@ type AjaxStructConfig struct {
 	StructSlice interface{}
 	Collection  MgoSearchCollection
 	MiddleWare  interface{}
-	AuthCheck   func(string) bool
+	AuthCheck   func(args *args.APIArgs) bool
 }
 
 func (config *AjaxStructConfig) GetStructFieldDistinct(key string) (ret interface{}, err error) {

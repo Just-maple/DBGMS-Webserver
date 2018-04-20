@@ -1,5 +1,9 @@
 package handler
 
+import (
+	. "webserver/args"
+)
+
 type RegisterGroup struct {
 	Route *JsonAPIFuncRoute
 	pm    *[]PermissionAuth
@@ -19,7 +23,7 @@ func (j *JsonAPIFuncRoute) MakeRegisterGroup(pm ...PermissionAuth) *RegisterGrou
 func (j *JsonAPIFuncRoute) RegisterAPI(name string, function JsonAPIFunc, pm ...PermissionAuth) {
 	j.registerJsonAPI(name,
 		func(args *APIArgs) (i interface{}, e error) {
-			return function(args.context, args.Json, args.session)
+			return function(args.DefaultAPI())
 		}, pm)
 }
 

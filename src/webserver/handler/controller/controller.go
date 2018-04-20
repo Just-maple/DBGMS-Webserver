@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 	"webserver/handler"
+	"webserver/args"
 )
 
 type DefaultController struct {
@@ -30,11 +31,11 @@ func (c *DefaultController) RegisterApi(method, api string, function handler.Def
 	h.RegisterDefaultAPI(api, function, pm...)
 }
 
-func (c *DefaultController) RegisterGetApi(addr string, function func(args *handler.APIArgs) (ret interface{}, err error), pm ...handler.PermissionAuth) {
+func (c *DefaultController) RegisterGetApi(addr string, function func(args *args.APIArgs) (ret interface{}, err error), pm ...handler.PermissionAuth) {
 	c.RegisterApi(http.MethodGet, addr, function, pm...)
 	return
 }
-func (c *DefaultController) RegisterPostApi(addr string, function func(args *handler.APIArgs) (ret interface{}, err error), pm ...handler.PermissionAuth) {
+func (c *DefaultController) RegisterPostApi(addr string, function func(args *args.APIArgs) (ret interface{}, err error), pm ...handler.PermissionAuth) {
 	c.RegisterApi(http.MethodPost, addr, function, pm...)
 	return
 }

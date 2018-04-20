@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"webserver/jsonx"
 	"webserver/session"
+	. "webserver/args"
 )
 
 func (h *DefaultApiHandler) JsonAPI(c *gin.Context) {
@@ -24,7 +25,7 @@ func (h *DefaultApiHandler) JsonAPI(c *gin.Context) {
 			jsonData, err = jsonx.NewFromReader(c.Request.Body)
 		}
 		if err == nil {
-			args = &APIArgs{c, jsonData, userSession}
+			args = New(c, jsonData, userSession)
 			ret, err = function.Run(args)
 		}
 		if h.CheckDataBaseConnection(err); err == nil {

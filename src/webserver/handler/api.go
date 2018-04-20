@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"webserver/jsonx"
 	"webserver/session"
+	. "webserver/args"
 )
 
 type JsonAPIFunc func(g *gin.Context, j *jsonx.Json, s *session.UserSession) (interface{}, error)

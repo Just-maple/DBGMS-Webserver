@@ -8,6 +8,7 @@ import (
 	"webserver/logger"
 	"webserver/permission"
 	ws "webserver/server"
+	. "webserver/args"
 )
 
 var log = logger.Log
@@ -27,7 +28,6 @@ type ExtendApiHandler interface {
 }
 
 type DB interface {
-
 }
 
 var _ ws.ApiHandlers = &DefaultApiHandler{}

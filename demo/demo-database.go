@@ -3,7 +3,7 @@ package main
 import (
 	"webserver/dbx"
 	"webserver/permission"
-	"webserver/handler"
+	"webserver/args"
 )
 
 type DataBase struct {
@@ -14,7 +14,7 @@ type DataBase struct {
 	//collection will init from Collection name in lower case like "anycollection" or tag collection
 }
 
-func (db *DataBase) GetAccessConfig(args *handler.APIArgs) permission.AccessConfig {
+func (db *DataBase) GetAccessConfig(args *args.APIArgs) permission.AccessConfig {
 	//database struct implement auth super admin user
 	//define your logic here
 	return &SuperAdminAccess{args.Query("userid") == "User is Admin", args.Query("userid") == "User is Super"}

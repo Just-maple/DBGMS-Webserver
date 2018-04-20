@@ -1,4 +1,4 @@
-package handler
+package args
 
 import (
 	"github.com/gin-gonic/gin"
@@ -8,6 +8,7 @@ import (
 	"webserver/session"
 	"webserver/utilsx"
 	"webserver/permission"
+	"strconv"
 )
 
 type APIArgs struct {
@@ -16,6 +17,9 @@ type APIArgs struct {
 	session *session.UserSession
 }
 
+func New(c *gin.Context, j *jsonx.Json, s *session.UserSession) (*APIArgs) {
+	return &APIArgs{c, j, s}
+}
 func (arg *APIArgs) Time() (st, et time.Time) {
 	return utilsx.TransTime(arg.context)
 }
@@ -53,6 +57,9 @@ func (arg *APIArgs) ClearSession() {
 	arg.session.Save()
 }
 
+func (arg *APIArgs) DefaultAPI() (*gin.Context, *jsonx.Json, *session.UserSession) {
+	return arg.context, arg.Json, arg.session
+}
 func (arg *APIArgs) JsonKey(key string) *jsonx.Json {
 	return arg.Json.Get(key)
 }
@@ -62,5 +69,27 @@ func (arg *APIArgs) GetConfigTable(t *permission.Config) (config *permission.Str
 	if has {
 		config = table.StructConfig
 	}
+	return
+}
+
+func (arg *APIArgs) TransAjaxQuery() (matcherMap map[string]interface{}, keys []string, skipCnt, limitCnt int, sortKey, reverse string, tSTime, tETime time.Time, err error) {
+	keys = arg.JsonKey("keys").MustStringArray()
+	matcherMap = arg.JsonKey("matcher").MustMap()
+	
+	skip := arg.context.DefaultQuery("skip", "0")
+	skipCnt, err = strconv.Atoi(skip)
+	if err != nil {
+		skipCnt = 0
+		err = nil
+	}
+	limit := arg.context.DefaultQuery("limit", "10")
+	limitCnt, err = strconv.Atoi(limit)
+	if err != nil {
+		limitCnt = 0
+		err = nil
+	}
+	sortKey = arg.context.DefaultQuery("sort", "")
+	reverse = arg.context.DefaultQuery("reverse", "")
+	tSTime, tETime = arg.Time()
 	return
 }

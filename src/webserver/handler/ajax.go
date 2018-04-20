@@ -1,38 +1,12 @@
 package handler
 
 import (
-	"github.com/gin-gonic/gin"
-	"strconv"
-	"time"
 	"webserver/dbx"
-	"webserver/jsonx"
-	"webserver/session"
+	. "webserver/args"
 )
 
-func TransAjaxQuery(args *APIArgs) (matcherMap map[string]interface{}, keys []string, skipCnt, limitCnt int, sortKey, reverse string, tSTime, tETime time.Time, err error) {
-	keys = args.JsonKey("keys").MustStringArray()
-	matcherMap = args.JsonKey("matcher").MustMap()
-	
-	skip := args.context.DefaultQuery("skip", "0")
-	skipCnt, err = strconv.Atoi(skip)
-	if err != nil {
-		skipCnt = 0
-		err = nil
-	}
-	limit := args.context.DefaultQuery("limit", "10")
-	limitCnt, err = strconv.Atoi(limit)
-	if err != nil {
-		limitCnt = 0
-		err = nil
-	}
-	sortKey = args.context.DefaultQuery("sort", "")
-	reverse = args.context.DefaultQuery("reverse", "")
-	tSTime, tETime = args.Time()
-	return
-}
-
 func (h DefaultApiHandler) GetAjaxQuery(args *APIArgs) (res *dbx.AjaxQuery, err error) {
-	matcherMap, keys, skipCnt, limitCnt, sortKey, reverse, tSTime, tETime, err := TransAjaxQuery(args)
+	matcherMap, keys, skipCnt, limitCnt, sortKey, reverse, tSTime, tETime, err := args.TransAjaxQuery()
 	pmConfig, _ := args.GetConfigTable(&h.TableController.PermissionConfig)
 	res = &dbx.AjaxQuery{
 		MatcherMap:       matcherMap,
@@ -70,18 +44,17 @@ func (h *DefaultApiHandler) GetDataByAjaxQuery(args *APIArgs, ajaxConfig *dbx.Aj
 func (h *DefaultApiHandler) RegisterAjaxJsonApi(dataApiAddr, distinctApiAddr string, configMaker func() dbx.AjaxStructConfig) {
 	config := configMaker()
 	h.ApiPostHandlers.RegisterDefaultAPI(dataApiAddr, h.GetAjaxApi(&config))
-	h.ApiGetHandlers.RegisterAPI(distinctApiAddr, h.GetAjaxDistinctApi(&config))
+	h.ApiGetHandlers.RegisterDefaultAPI(distinctApiAddr, h.GetAjaxDistinctApi(&config))
 }
 
-func (h *DefaultApiHandler) GetAjaxDistinctApi(config *dbx.AjaxStructConfig) JsonAPIFunc {
-	return func(c *gin.Context, j *jsonx.Json, us *session.UserSession) (ret interface{}, err error) {
-		valid, userId := us.AuthUserSession()
-		if !valid || (config.AuthCheck != nil && !config.AuthCheck(userId)) {
+func (h *DefaultApiHandler) GetAjaxDistinctApi(config *dbx.AjaxStructConfig) DefaultAPIFunc {
+	return func(args *APIArgs) (ret interface{}, err error) {
+		if config.AuthCheck != nil && !config.AuthCheck(args) {
 			err = ErrAuthFailed
 			return
 		}
-		key, e := c.GetQuery("key")
-		if !e {
+		key := args.Query("key")
+		if key == "" {
 			return
 		}
 		ret, err = config.GetStructFieldDistinct(key)
@@ -91,8 +64,7 @@ func (h *DefaultApiHandler) GetAjaxDistinctApi(config *dbx.AjaxStructConfig) Jso
 
 func (h *DefaultApiHandler) GetAjaxApi(config *dbx.AjaxStructConfig) DefaultAPIFunc {
 	return func(args *APIArgs) (ret interface{}, err error) {
-		valid, userId := args.UserId()
-		if !valid || (config.AuthCheck != nil && !config.AuthCheck(userId)) {
+		if config.AuthCheck != nil && !config.AuthCheck(args) {
 			err = ErrAuthFailed
 			return
 		}
