@@ -70,15 +70,15 @@ func (query *AjaxQuery) MakeAjaxReturnWithSelectKeysAndPermissionControl(in inte
 	return
 }
 
-func (query *AjaxQuery) NewAjaxMgoDBSearcher(collection MgoSearchCollection, result interface{}) (cnt int, err error) {
+func (query *AjaxQuery) newAjaxMgoDBSearcher(collection MgoSearchCollection, result interface{}) (cnt int, err error) {
 	resultv := reflect.ValueOf(result)
 	if resultv.Kind() != reflect.Ptr || resultv.Elem().Kind() != reflect.Slice {
 		panic("result argument must be a slice address")
 	}
-	return query.GetMgoSearch(collection, result)
+	return query.getMgoSearch(collection, result)
 }
 
-func InitAjaxMgoDBSearcher(query *AjaxQuery, collection MgoSearchCollection, result interface{}) (ams *AjaxMgoDBSearcher) {
+func initAjaxMgoDBSearcher(query *AjaxQuery, collection MgoSearchCollection, result interface{}) (ams *AjaxMgoDBSearcher) {
 	ams = &AjaxMgoDBSearcher{
 		Collection:    collection,
 		FieldMatcher:  query.MatcherMap,
@@ -86,13 +86,13 @@ func InitAjaxMgoDBSearcher(query *AjaxQuery, collection MgoSearchCollection, res
 		SortFieldName: query.SortKey,
 		Result:        result,
 	}
-	ams.GetSortKey()
-	ams.GetSortBson(query.Reverse)
-	ams.MakeBsonMatcher(query.TimeStart, query.TimeEnd)
+	ams.getSortKey()
+	ams.getSortBson(query.Reverse)
+	ams.makeBsonMatcher(query.TimeStart, query.TimeEnd)
 	return
 }
 
-func (ams *AjaxMgoDBSearcher) MakeKeySelector() {
+func (ams *AjaxMgoDBSearcher) makeKeySelector() {
 	ams.KeySelector = make(bson.M, len(ams.SelectorKeys))
 	for i := range ams.SelectorKeys {
 		field, e := reflect.TypeOf(ams.Result).Elem().Elem().FieldByName(ams.SelectorKeys[i])
@@ -105,7 +105,7 @@ func (ams *AjaxMgoDBSearcher) MakeKeySelector() {
 	return
 }
 
-func (ams *AjaxMgoDBSearcher) MakeBsonMatcher(st, et time.Time) {
+func (ams *AjaxMgoDBSearcher) makeBsonMatcher(st, et time.Time) {
 	ams.BsonMatcher = []bson.M{{
 		FieldTimeCreate: bson.M{
 			"$lte": et,
@@ -126,7 +126,7 @@ func (ams *AjaxMgoDBSearcher) MakeBsonMatcher(st, et time.Time) {
 	return
 }
 
-func (ams *AjaxMgoDBSearcher) GetSortKey() {
+func (ams *AjaxMgoDBSearcher) getSortKey() {
 	field, e := reflect.TypeOf(ams.Result).Elem().Elem().FieldByName(ams.SortFieldName)
 	if e {
 		ams.SortKey = strings.Split(field.Tag.Get(FieldTagBson), ",")[0]
@@ -137,13 +137,13 @@ func (ams *AjaxMgoDBSearcher) GetSortKey() {
 	return
 }
 
-func (ams *AjaxMgoDBSearcher) GetTotalCount() (count int, err error) {
+func (ams *AjaxMgoDBSearcher) getTotalCount() (count int, err error) {
 	return ams.Collection.Find(bson.M{
 		"$and": ams.BsonMatcher,
 	}).Count()
 }
 
-func (ams *AjaxMgoDBSearcher) GetSortBson(reverse string) {
+func (ams *AjaxMgoDBSearcher) getSortBson(reverse string) {
 	var reverseI = 0
 	if reverse == "" {
 		reverseI = 1
@@ -152,10 +152,10 @@ func (ams *AjaxMgoDBSearcher) GetSortBson(reverse string) {
 	}
 	ams.SortBson = bson.M{ams.SortKey: reverseI}
 }
-func (query *AjaxQuery) GetMgoSearch(collection MgoSearchCollection, result interface{}) (cnt int, err error) {
-	ams := InitAjaxMgoDBSearcher(query, collection, result)
+func (query *AjaxQuery) getMgoSearch(collection MgoSearchCollection, result interface{}) (cnt int, err error) {
+	ams := initAjaxMgoDBSearcher(query, collection, result)
 	if len(ams.SelectorKeys) != 0 {
-		ams.MakeKeySelector()
+		ams.makeKeySelector()
 		err = ams.Collection.Pipe(
 			[]bson.M{
 				{"$match": bson.M{"$and": ams.BsonMatcher}},
@@ -174,13 +174,13 @@ func (query *AjaxQuery) GetMgoSearch(collection MgoSearchCollection, result inte
 	if err != nil {
 		return
 	}
-	return ams.GetTotalCount()
+	return ams.getTotalCount()
 }
 
 func (query *AjaxQuery) AjaxSearch(structConfig *AjaxStructConfig) (res interface{}, count int, err error) {
 	collection := structConfig.Collection
 	tmp := reflect.New(reflect.SliceOf(reflect.TypeOf(structConfig.StructSlice))).Interface()
-	count, err = query.NewAjaxMgoDBSearcher(collection, tmp)
+	count, err = query.newAjaxMgoDBSearcher(collection, tmp)
 	if err != nil {
 		return
 	}

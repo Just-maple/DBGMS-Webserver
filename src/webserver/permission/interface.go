@@ -34,7 +34,14 @@ type AccessConfig interface {
 	AuthAllPermission() bool
 }
 
-type PermissionConfig interface {
-	GetTableConfig() (reflect.Type)
-	GetFieldConfig() (reflect.Type)
+type PermissionConfig struct {
+	TableType reflect.Type
+	FieldType reflect.Type
+}
+
+func NewPemissionConfig(table TableConfig, field FieldConfig) *PermissionConfig {
+	return &PermissionConfig{
+		reflect.TypeOf(table).Elem(),
+		reflect.TypeOf(field).Elem(),
+	}
 }

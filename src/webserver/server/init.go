@@ -3,10 +3,10 @@ package server
 import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"logger"
 	"net"
 	"net/http"
 	"time"
-	"logger"
 )
 
 var log = logger.Log

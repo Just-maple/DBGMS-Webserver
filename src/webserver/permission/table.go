@@ -2,11 +2,9 @@ package permission
 
 import (
 	"encoding/json"
+	"logger"
 	"reflect"
 	"webserver/utilsx"
-	"logger"
-	"syncx"
-	"sync"
 )
 
 var log = logger.Log
@@ -38,24 +36,20 @@ func (t *Table) InitTableConfig() (err error) {
 	t.TableConfig = reflect.ValueOf(s).Interface().(TableConfig)
 	var structConfig = make(StructConfig, len(structTable))
 	t.StructConfig = &structConfig
-	var mapLock = new(sync.RWMutex)
-	err = syncx.TraverseMapWithFunction(
-		structTable, func(key string) {
-			if !IsPrivateKey(key) {
-				tmp, err := json.Marshal(structTable[key])
-				if err != nil {
-					return
-				}
-				s := reflect.New(t.StructType).Interface()
-				err = json.Unmarshal(tmp, s)
-				if err != nil {
-					return
-				}
-				mapLock.Lock()
-				structConfig[key] = reflect.ValueOf(s).Interface().(FieldConfig)
-				mapLock.Unlock()
+	for key := range structConfig {
+		if !IsPrivateKey(key) {
+			tmp, err := json.Marshal(structTable[key])
+			if err != nil {
+				break
 			}
-		})
+			s := reflect.New(t.StructType).Interface()
+			err = json.Unmarshal(tmp, s)
+			if err != nil {
+				break
+			}
+			structConfig[key] = reflect.ValueOf(s).Interface().(FieldConfig)
+		}
+	}
 	return
 }
 

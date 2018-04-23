@@ -8,11 +8,11 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"sync"
+	"syncx"
+	. "webserver/args"
 	pm "webserver/permission"
 	. "webserver/utilsx"
-	"syncx"
-	"sync"
-	. "webserver/args"
 )
 
 const (
@@ -25,7 +25,7 @@ type TableController struct {
 	path             string
 }
 
-func InjectTableController(h TableHandler, PermissionConfig pm.PermissionConfig) (c *TableController, err error) {
+func InjectTableController(h TableHandler, PermissionConfig *pm.PermissionConfig) (c *TableController, err error) {
 	c = &TableController{
 		handler:          h,
 		path:             h.GetTablePath(),
@@ -153,20 +153,19 @@ func (c *TableController) readTableConfigFromFile(fileName string) (data []byte,
 	return ioutil.ReadFile(c.path + fileName)
 }
 
-func (c *TableController) initAllConfigTableFromFiles(PermissionConfig pm.PermissionConfig) (err error) {
+func (c *TableController) initAllConfigTableFromFiles(PermissionConfig *pm.PermissionConfig) (err error) {
 	tableFiles, err := ioutil.ReadDir(c.path)
 	if err != nil {
 		return
 	}
 	c.PermissionConfig.TableMap = make(map[string]*pm.Table, len(tableFiles))
-	c.PermissionConfig.TableType = PermissionConfig.GetTableConfig()
-	c.PermissionConfig.FieldType = PermissionConfig.GetFieldConfig()
-	err = syncx.TraverseSliceWithFunction(
-		tableFiles, func(i int) {
-			err = c.initTableConfigFromFileInfo(&(tableFiles[i]))
-			if err != nil {
-				log.Fatal(err)
-			}
-		})
+	c.PermissionConfig.TableType = PermissionConfig.TableType
+	c.PermissionConfig.FieldType = PermissionConfig.FieldType
+	for i := range tableFiles {
+		err = c.initTableConfigFromFileInfo(&(tableFiles[i]))
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 	return
 }

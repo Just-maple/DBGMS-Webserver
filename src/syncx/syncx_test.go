@@ -17,7 +17,7 @@ func Test(t *testing.T) {
 	if testMap["test1"] != "test1"+testAppend || testMap["test2"] != "test2"+testAppend || err != nil {
 		t.Error("test failed", err)
 	}
-	
+
 }
 
 func BenchmarkTraverseSliceWithFunction(b *testing.B) {
@@ -31,5 +31,5 @@ func BenchmarkTraverseSliceWithFunction(b *testing.B) {
 	if err != nil {
 		b.Error(err)
 	}
-	
+
 }

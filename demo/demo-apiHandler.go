@@ -1,12 +1,10 @@
 package main
 
 import (
-	"webserver/handler"
 	"logger"
-	"webserver/user"
-	"webserver/permission"
-	"reflect"
 	"webserver/args"
+	"webserver/handler"
+	"webserver/user"
 )
 
 var log = logger.Log
@@ -19,7 +17,7 @@ type ApiHandler struct {
 	//must implement default handler
 	db *DataBase
 	//implement singleton DataBase
-	
+
 	MetaData
 	//you can define any extend data
 }
@@ -42,7 +40,7 @@ func (h *ApiHandler) RegisterAPI() {
 		log.Debug(d)
 		return d, err
 	})
-	
+
 	var userController = user.InitController(h.db.WXUser)
 	h.DefaultApiHandler.InjectController(userController)
 }
@@ -57,48 +55,23 @@ func (h *ApiHandler) ApiTest(args *args.APIArgs) (ret interface{}, err error) {
 	isValidUser, userId := args.UserId() //get user Id from session
 	//return bool(is user valid) and string(user Id,must be bson.ObjectId.Hex string)
 	log.Debug(isValidUser, userId)
-	
+
 	return
-}
-
-type AdminConfig struct {
-	NeedAdmin      bool `json:"_admin"`
-	NeedSuperAdmin bool `json:"_superAdmin"`
-}
-
-type AdminStructConfig struct {
-	Admin      bool `json:"admin"`
-	SuperAdmin bool `json:"superAdmin"`
-}
-
-type AdminPermissionConfig struct {
-}
-
-func (c AdminPermissionConfig) GetTableConfig() (reflect.Type) {
-	return reflect.TypeOf(AdminConfig{})
-}
-
-func (c AdminPermissionConfig) GetFieldConfig() (reflect.Type) {
-	return reflect.TypeOf(AdminStructConfig{})
-}
-
-func (h *ApiHandler) GetPermissionConfig() permission.PermissionConfig {
-	return new(AdminPermissionConfig)
 }
 
 func (h *ApiHandler) InitMetaConfig() {
 	//implement method InitMetaConfig
-	
+
 	//you can handle your extend data here
 	//this method will execute after database init
 }
 
 func (h *ApiHandler) NewDataBase() handler.DB {
 	//implement method NewDataBase
-	
+
 	//init your DataBase
 	h.db = new(DataBase)
-	
+
 	return h.db
 	//should return interface implement server.DB
 }

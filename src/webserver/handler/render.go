@@ -3,9 +3,9 @@ package handler
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"webserver/args"
 	"webserver/args/jsonx"
 	"webserver/args/session"
-	"webserver/args"
 )
 
 func (h *DefaultApiHandler) jsonAPI(c *gin.Context) {
@@ -52,7 +52,7 @@ func RenderJson(c *gin.Context, ok bool, data interface{}, err error) {
 				"data": data,
 				"err":  err.Error(),
 			})
-			
+
 		} else {
 			c.IndentedJSON(http.StatusInternalServerError, map[string]interface{}{
 				"ok":   ok,

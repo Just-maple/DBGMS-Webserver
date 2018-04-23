@@ -2,8 +2,8 @@ package handler
 
 import (
 	"reflect"
-	"webserver/permission"
 	. "webserver/args"
+	"webserver/permission"
 )
 
 func (h *DefaultApiHandler) GetAccessConfigFromArgs(arg *APIArgs) (access permission.AccessConfig) {

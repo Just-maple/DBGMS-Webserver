@@ -47,7 +47,7 @@ func (h *DefaultApiHandler) getApiFunc(method, apiName string) (function *Defaul
 func (h *DefaultApiHandler) test(c *gin.Context, j *jsonx.Json, us *session.UserSession) (ret interface{}, err error) {
 	ret = j.Get("test").MustString()
 	if ret == "" {
-		ret = "test success"
+		ret = "test success method:" + c.Request.Method
 	}
 	return
 }

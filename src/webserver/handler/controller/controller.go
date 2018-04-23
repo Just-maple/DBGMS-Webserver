@@ -2,8 +2,8 @@ package controller
 
 import (
 	"net/http"
-	"webserver/handler"
 	"webserver/args"
+	"webserver/handler"
 )
 
 type DefaultController struct {

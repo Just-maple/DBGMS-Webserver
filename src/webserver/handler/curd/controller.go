@@ -1,16 +1,16 @@
 package curd
 
 import (
+	. "webserver/args"
 	"webserver/dbx"
 	. "webserver/handler"
-	. "webserver/args"
 	"webserver/handler/controller"
 )
 
 type CurdController struct {
 	collection *dbx.CollectionController
 	controller.DefaultController
-	handler    HandlerGetter
+	handler HandlerGetter
 }
 
 func (c *CurdController) InjectHandler(h HandlerGetter) {

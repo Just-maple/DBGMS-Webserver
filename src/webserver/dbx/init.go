@@ -3,11 +3,11 @@ package dbx
 import (
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
+	"logger"
 	"reflect"
 	"strings"
-	"time"
-	"logger"
 	"sync"
+	"time"
 )
 
 var log = logger.Log
@@ -21,7 +21,7 @@ func NewMgoDataBase(mgoURL, dbName string) (db *mgo.Database, err error) {
 		log.Fatalf("Parse MgoDB Url err(%v)", err)
 		return
 	}
-	
+
 	dbSession, err := mgo.DialWithTimeout(mgoURL, time.Second*60)
 	if err != nil {
 		log.Fatalf("Connect MgoDB Error = (%v)", err)

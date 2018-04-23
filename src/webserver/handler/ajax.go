@@ -1,8 +1,8 @@
 package handler
 
 import (
-	"webserver/dbx"
 	. "webserver/args"
+	"webserver/dbx"
 )
 
 func (h DefaultApiHandler) getAjaxQuery(args *APIArgs) (res *dbx.AjaxQuery, err error) {

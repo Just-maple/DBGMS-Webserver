@@ -1,11 +1,10 @@
 package syncx
 
 import (
-	"sync"
-	"reflect"
 	"github.com/pkg/errors"
+	"reflect"
+	"sync"
 )
-
 
 func TraverseMapWithFunction(Map interface{}, function interface{}) (err error) {
 	var mt = reflect.ValueOf(Map)
@@ -24,7 +23,7 @@ func TraverseMapWithFunction(Map interface{}, function interface{}) (err error) 
 			defer wg.Done()
 			ft.Call([]reflect.Value{index})
 		}(keys[i])
-		
+
 	}
 	wg.Wait()
 	return
@@ -41,7 +40,7 @@ func TraverseSliceWithFunction(slice interface{}, function func(int)) (err error
 			defer wg.Done()
 			function(i)
 		}(i)
-		
+
 	}
 	wg.Wait()
 	return

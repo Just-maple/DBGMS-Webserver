@@ -3,12 +3,12 @@ package args
 import (
 	"github.com/gin-gonic/gin"
 	"gopkg.in/mgo.v2/bson"
+	"strconv"
 	"time"
 	"webserver/args/jsonx"
 	"webserver/args/session"
-	"webserver/utilsx"
 	"webserver/permission"
-	"strconv"
+	"webserver/utilsx"
 )
 
 type APIArgs struct {
@@ -17,7 +17,7 @@ type APIArgs struct {
 	session *session.UserSession
 }
 
-func New(c *gin.Context, j *jsonx.Json, s *session.UserSession) (*APIArgs) {
+func New(c *gin.Context, j *jsonx.Json, s *session.UserSession) *APIArgs {
 	return &APIArgs{c, j, s}
 }
 func (arg *APIArgs) Time() (st, et time.Time) {
@@ -75,7 +75,7 @@ func (arg *APIArgs) GetConfigTable(t *permission.Config) (config *permission.Str
 func (arg *APIArgs) TransAjaxQuery() (matcherMap map[string]interface{}, keys []string, skipCnt, limitCnt int, sortKey, reverse string, tSTime, tETime time.Time, err error) {
 	keys = arg.JsonKey("keys").MustStringArray()
 	matcherMap = arg.JsonKey("matcher").MustMap()
-	
+
 	skip := arg.context.DefaultQuery("skip", "0")
 	skipCnt, err = strconv.Atoi(skip)
 	if err != nil {

@@ -2,9 +2,9 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
+	. "webserver/args"
 	"webserver/args/jsonx"
 	"webserver/args/session"
-	. "webserver/args"
 )
 
 type JsonAPIFunc func(g *gin.Context, j *jsonx.Json, s *session.UserSession) (interface{}, error)

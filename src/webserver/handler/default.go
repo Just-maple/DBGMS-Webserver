@@ -2,13 +2,13 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
+	"logger"
 	"reflect"
+	. "webserver/args"
 	"webserver/dbx"
 	"webserver/errorx"
-	"logger"
 	"webserver/permission"
 	ws "webserver/server"
-	. "webserver/args"
 )
 
 var log = logger.Log
@@ -23,7 +23,7 @@ type ExtendApiHandler interface {
 	ws.ApiHandlers
 	RegisterAPI()
 	NewDataBase() DB
-	GetPermissionConfig() permission.PermissionConfig
+	GetPermissionConfig() *permission.PermissionConfig
 	GetAccessConfig(args *APIArgs) permission.AccessConfig
 }
 
@@ -90,7 +90,7 @@ func (h *DefaultApiHandler) setDefaultApiHandlerAndMountConfig() {
 				panic("Found More than One Default ApiHandler")
 			}
 		}
-		
+
 	}
 	if !flag {
 		panic("Not Found Default ApiHandler")
