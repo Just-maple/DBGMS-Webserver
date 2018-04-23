@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"webserver/args/jsonx"
 	"webserver/args/session"
-	. "webserver/args"
+	"webserver/args"
 )
 
 func (h *DefaultApiHandler) JsonAPI(c *gin.Context) {
@@ -17,7 +17,7 @@ func (h *DefaultApiHandler) JsonAPI(c *gin.Context) {
 	function, exists := h.getApiFunc(c.Request.Method, apiName)
 	if exists {
 		var jsonData *jsonx.Json
-		var args *APIArgs
+		var arg *args.APIArgs
 		switch c.Request.Method {
 		case http.MethodGet:
 			jsonData = jsonx.New()
@@ -25,11 +25,11 @@ func (h *DefaultApiHandler) JsonAPI(c *gin.Context) {
 			jsonData, err = jsonx.NewFromReader(c.Request.Body)
 		}
 		if err == nil {
-			args = New(c, jsonData, userSession)
-			ret, err = function.Run(args)
+			arg = args.New(c, jsonData, userSession)
+			ret, err = function.Run(arg)
 		}
 		if h.CheckDataBaseConnection(err); err == nil {
-			ret = h.RenderPermission(args, ret)
+			ret = h.RenderPermission(arg, ret)
 			ok = true
 		} else {
 			log.Errorf("JsonAPI(%s) err = %v", apiName, err)
