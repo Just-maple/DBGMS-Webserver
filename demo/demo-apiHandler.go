@@ -36,7 +36,6 @@ func (h *ApiHandler) RegisterAPI() {
 	//implement method RegisterAPI
 	//this method provide Api register
 	//and will execute before server start
-	
 	h.ApiGetHandlers.RegisterDefaultAPI("test2", h.ApiTest)
 	h.ApiPostHandlers.RegisterDefaultAPI("test3", func(args *args.APIArgs) (ret interface{}, err error) {
 		d, err := h.db.AnyCollection.GenerateRawStruct()

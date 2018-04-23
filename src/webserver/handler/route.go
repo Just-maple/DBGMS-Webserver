@@ -18,10 +18,10 @@ func (h *DefaultApiHandler) SetRouter(r *gin.Engine) {
 }
 
 func (h *DefaultApiHandler) RegisterJsonAPI() {
-	h.router.GET("/api/:api", h.JsonAPI)
-	h.router.POST("/api/:api", h.JsonAPI)
-	h.ApiPostHandlers.RegisterAPI("test", h.Test)
-	h.ApiGetHandlers.RegisterAPI("test", h.Test)
+	h.router.GET("/api/:api", h.jsonAPI)
+	h.router.POST("/api/:api", h.jsonAPI)
+	h.ApiPostHandlers.RegisterAPI("test", h.test)
+	h.ApiGetHandlers.RegisterAPI("test", h.test)
 	h.apiHandlers.RegisterAPI()
 }
 
@@ -44,7 +44,7 @@ func (h *DefaultApiHandler) getApiFunc(method, apiName string) (function *Defaul
 	function, exists = h.GetApiHandlersFromMethod(method)[apiName]
 	return
 }
-func (h *DefaultApiHandler) Test(c *gin.Context, j *jsonx.Json, us *session.UserSession) (ret interface{}, err error) {
+func (h *DefaultApiHandler) test(c *gin.Context, j *jsonx.Json, us *session.UserSession) (ret interface{}, err error) {
 	ret = j.Get("test").MustString()
 	if ret == "" {
 		ret = "test success"

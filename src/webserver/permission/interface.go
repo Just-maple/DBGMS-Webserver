@@ -8,7 +8,9 @@ type Config struct {
 	FieldType reflect.Type
 }
 
-type TableConfig interface{}
+type TableConfig interface {
+	AuthTablePermission(AccessConfig) bool
+}
 
 type Table struct {
 	FilesName    string
@@ -24,11 +26,11 @@ type StructConfig map[string]FieldConfig
 
 type StructFieldList []string
 
-type FieldConfig interface{}
+type FieldConfig interface {
+	AuthFieldPermission(AccessConfig) bool
+}
 
 type AccessConfig interface {
-	AuthFieldPermission(FieldConfig) bool
-	AuthTablePermission(TableConfig) bool
 	AuthAllPermission() bool
 }
 

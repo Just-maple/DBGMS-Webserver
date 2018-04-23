@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 	"webserver/permission"
-	"webserver/args"
 )
 
 const FieldTimeCreate = "t_create"
@@ -47,7 +46,6 @@ type AjaxStructConfig struct {
 	StructSlice interface{}
 	Collection  MgoSearchCollection
 	MiddleWare  func(interface{}) error
-	AuthCheck   func(args *args.APIArgs) bool
 }
 
 func (config *AjaxStructConfig) GetStructFieldDistinct(key string) (ret interface{}, err error) {
@@ -186,9 +184,11 @@ func (query *AjaxQuery) AjaxSearch(structConfig *AjaxStructConfig) (res interfac
 	if err != nil {
 		return
 	}
-	err = structConfig.MiddleWare(tmp)
-	if err != nil {
-		return
+	if structConfig.MiddleWare != nil {
+		err = structConfig.MiddleWare(tmp)
+		if err != nil {
+			return
+		}
 	}
 	res = reflect.ValueOf(tmp).Elem().Interface()
 	return

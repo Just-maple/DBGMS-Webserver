@@ -35,7 +35,7 @@ func (t *Table) InitTableConfig() (err error) {
 	if err != nil {
 		return
 	}
-	t.TableConfig = reflect.ValueOf(s).Elem().Interface()
+	t.TableConfig = reflect.ValueOf(s).Interface().(TableConfig)
 	var structConfig = make(StructConfig, len(structTable))
 	t.StructConfig = &structConfig
 	var mapLock = new(sync.RWMutex)
@@ -52,7 +52,7 @@ func (t *Table) InitTableConfig() (err error) {
 					return
 				}
 				mapLock.Lock()
-				structConfig[key] = reflect.ValueOf(s).Elem().Interface()
+				structConfig[key] = reflect.ValueOf(s).Interface().(FieldConfig)
 				mapLock.Unlock()
 			}
 		})

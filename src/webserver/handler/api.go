@@ -17,7 +17,7 @@ type DefaultAPI struct {
 	PermissionAuth []PermissionAuth
 }
 
-func (api *DefaultAPI) Run(args *APIArgs) (ret interface{}, err error) {
+func (api *DefaultAPI) run(args *APIArgs) (ret interface{}, err error) {
 	for i := range api.PermissionAuth {
 		if !api.PermissionAuth[i](args) {
 			return false, ErrAuthFailed

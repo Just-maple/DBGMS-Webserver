@@ -8,7 +8,7 @@ import (
 	"webserver/args"
 )
 
-func (h *DefaultApiHandler) JsonAPI(c *gin.Context) {
+func (h *DefaultApiHandler) jsonAPI(c *gin.Context) {
 	var ok bool
 	var ret interface{}
 	var err error
@@ -26,10 +26,10 @@ func (h *DefaultApiHandler) JsonAPI(c *gin.Context) {
 		}
 		if err == nil {
 			arg = args.New(c, jsonData, userSession)
-			ret, err = function.Run(arg)
+			ret, err = function.run(arg)
 		}
 		if h.CheckDataBaseConnection(err); err == nil {
-			ret = h.RenderPermission(arg, ret)
+			ret = h.renderPermission(arg, ret)
 			ok = true
 		} else {
 			log.Errorf("JsonAPI(%s) err = %v", apiName, err)

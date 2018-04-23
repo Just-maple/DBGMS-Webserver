@@ -44,20 +44,20 @@ type DefaultApiHandler struct {
 	TableController   *TableController
 }
 
-func NewJsonAPIFuncRoute() JsonAPIFuncRoute {
+func newJsonAPIFuncRoute() JsonAPIFuncRoute {
 	return make(JsonAPIFuncRoute)
 }
 
 func NewDefaultHandlerFromConfig(config ApiHandlerConfig, ah ExtendApiHandler) {
 	h := &DefaultApiHandler{
 		config:            config,
-		ApiGetHandlers:    NewJsonAPIFuncRoute(),
-		ApiPostHandlers:   NewJsonAPIFuncRoute(),
-		ApiPutHandlers:    NewJsonAPIFuncRoute(),
-		ApiDeleteHandlers: NewJsonAPIFuncRoute(),
+		ApiGetHandlers:    newJsonAPIFuncRoute(),
+		ApiPostHandlers:   newJsonAPIFuncRoute(),
+		ApiPutHandlers:    newJsonAPIFuncRoute(),
+		ApiDeleteHandlers: newJsonAPIFuncRoute(),
 		apiHandlers:       ah,
 	}
-	h.SetDefaultApiHandlerAndMountConfig()
+	h.setDefaultApiHandlerAndMountConfig()
 	var err error
 	h.TableController, err = InjectTableController(h, ah.GetPermissionConfig())
 	if err != nil {
@@ -69,7 +69,7 @@ func NewDefaultHandlerFromConfig(config ApiHandlerConfig, ah ExtendApiHandler) {
 func (h *DefaultApiHandler) InitMetaConfig() {
 }
 
-func (h *DefaultApiHandler) SetDefaultApiHandlerAndMountConfig() {
+func (h *DefaultApiHandler) setDefaultApiHandlerAndMountConfig() {
 	vi := reflect.ValueOf(h.apiHandlers).Elem()
 	tc := reflect.ValueOf(h.config)
 	fi := vi.NumField()

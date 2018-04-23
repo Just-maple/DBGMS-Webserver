@@ -20,14 +20,14 @@ func (structConfig *StructConfig) InitTablePermission(ret interface{}, config Ac
 	return structConfig.InitTablePermissionFieldList(ret, config).MakeFieldFilterReturnWithFieldList(ret)
 }
 
-func (structConfig *StructConfig) GetFieldList(retType reflect.Type, config AccessConfig) (fieldList StructFieldList) {
+func (structConfig *StructConfig) GetFieldList(retType reflect.Type, access AccessConfig) (fieldList StructFieldList) {
 	allField := GetAllFieldNameFrom(retType)
 	for _, fn := range allField {
 		_, valid := retType.FieldByName(fn)
 		if valid {
-			if config.AuthAllPermission() {
+			if access.AuthAllPermission() {
 				fieldList = append(fieldList, fn)
-			} else if tmp, has := (*structConfig)[fn]; has && config.AuthFieldPermission(tmp) {
+			} else if tmp, has := (*structConfig)[fn]; has && tmp.AuthFieldPermission(access) {
 				fieldList = append(fieldList, fn)
 			}
 		}

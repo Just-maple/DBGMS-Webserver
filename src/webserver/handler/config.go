@@ -31,11 +31,11 @@ func InjectTableController(h TableHandler, PermissionConfig pm.PermissionConfig)
 		path:             h.GetTablePath(),
 		PermissionConfig: new(pm.Config),
 	}
-	c.RegisterAPI()
-	return c, c.InitAllConfigTableFromFiles(PermissionConfig)
+	c.registerAPI()
+	return c, c.initAllConfigTableFromFiles(PermissionConfig)
 }
 
-func (c *TableController) RegisterAPI() {
+func (c *TableController) registerAPI() {
 	postRoute := c.handler.GetApiHandlersFromMethod(http.MethodPost)
 	getRoute := c.handler.GetApiHandlersFromMethod(http.MethodGet)
 	allPermissionApi := postRoute.MakeRegisterGroup(c.AuthAllPermission)
@@ -46,13 +46,13 @@ func (c *TableController) RegisterAPI() {
 
 func (c *TableController) AuthAllPermission(args *APIArgs) bool {
 	access := c.handler.GetAccessConfig(args)
-	return access.AuthAllPermission()
+	return access != nil && access.AuthAllPermission()
 }
 
 func (c *TableController) SaveAllTableConfig(args *APIArgs) (ret interface{}, err error) {
 	tableMap := args.Json.MustMap()
 	for key := range tableMap {
-		err = c.WriteTableAndUpdateServerConfig(key, tableMap[key].(string))
+		err = c.writeTableAndUpdateServerConfig(key, tableMap[key].(string))
 		if err != nil {
 			break
 		}
@@ -63,11 +63,11 @@ func (c *TableController) SaveAllTableConfig(args *APIArgs) (ret interface{}, er
 func (c *TableController) EditTable(args *APIArgs) (ret interface{}, err error) {
 	tableName := args.JsonKey("name").MustString()
 	data := args.JsonKey("table").MustString()
-	err = c.WriteTableAndUpdateServerConfig(tableName, data)
+	err = c.writeTableAndUpdateServerConfig(tableName, data)
 	return
 }
 
-func (c *TableController) WriteTableAndUpdateServerConfig(tableName, data string) (err error) {
+func (c *TableController) writeTableAndUpdateServerConfig(tableName, data string) (err error) {
 	file := c.path + tableName + extensionJson
 	err = ioutil.WriteFile(file, []byte(data), 0600)
 	if err != nil {
@@ -81,7 +81,7 @@ func (c *TableController) GetConfigTableFromMString(args *APIArgs) (tableConfig 
 	var storeBytes []byte
 	var storeHash map[string]string
 	storeHashString := args.JsonKey("m").MustString("{}")
-	tableConfig = c.GetConfigTableFromArgs(args)
+	tableConfig = c.getConfigTableFromArgs(args)
 	storeBytes, err = base64.StdEncoding.DecodeString(storeHashString)
 	if err != nil {
 		log.Error(err)
@@ -113,15 +113,15 @@ func (c *TableController) GetConfigTableMap() (ret map[string]string) {
 	return
 }
 
-func (c *TableController) GetConfigTableFromArgs(args *APIArgs) (ret map[string]string) {
+func (c *TableController) getConfigTableFromArgs(args *APIArgs) (ret map[string]string) {
 	ret = make(map[string]string)
 	access := c.handler.GetAccessConfig(args)
 	pmConfig := c.PermissionConfig.TableMap
 	mapLock := new(sync.Mutex)
 	syncx.TraverseMapWithFunction(pmConfig, func(key string) {
-		if access.AuthTablePermission(pmConfig[key].TableConfig) {
+		if access != nil && pmConfig[key].TableConfig.AuthTablePermission(access) {
 			encodeKey := base64.StdEncoding.EncodeToString([]byte(key))
-			encodeData := BytesToMd5String(pmConfig[key].TableData) + XdEncode(pmConfig[key].TableData)
+			encodeData := BytesToMd5String(pmConfig[key].TableData) + xdEncode(pmConfig[key].TableData)
 			mapLock.Lock()
 			ret[encodeKey] = encodeData
 			mapLock.Unlock()
@@ -130,17 +130,17 @@ func (c *TableController) GetConfigTableFromArgs(args *APIArgs) (ret map[string]
 	return
 }
 
-func XdEncode(data []byte) string {
+func xdEncode(data []byte) string {
 	str := base64.StdEncoding.EncodeToString([]byte(hex.EncodeToString(data)))
 	str = str[0:4] + "NmU2MTZkNjUyMjN" + str[4:]
 	return str
 }
 
-func (c *TableController) InitTableConfigFromFileInfo(file *os.FileInfo) (err error) {
+func (c *TableController) initTableConfigFromFileInfo(file *os.FileInfo) (err error) {
 	if !strings.Contains((*file).Name(), extensionJson) {
 		return
 	}
-	data, err := c.ReadTableConfigFromFile((*file).Name())
+	data, err := c.readTableConfigFromFile((*file).Name())
 	if err != nil {
 		return
 	}
@@ -149,11 +149,11 @@ func (c *TableController) InitTableConfigFromFileInfo(file *os.FileInfo) (err er
 	return
 }
 
-func (c *TableController) ReadTableConfigFromFile(fileName string) (data []byte, err error) {
+func (c *TableController) readTableConfigFromFile(fileName string) (data []byte, err error) {
 	return ioutil.ReadFile(c.path + fileName)
 }
 
-func (c *TableController) InitAllConfigTableFromFiles(PermissionConfig pm.PermissionConfig) (err error) {
+func (c *TableController) initAllConfigTableFromFiles(PermissionConfig pm.PermissionConfig) (err error) {
 	tableFiles, err := ioutil.ReadDir(c.path)
 	if err != nil {
 		return
@@ -163,7 +163,7 @@ func (c *TableController) InitAllConfigTableFromFiles(PermissionConfig pm.Permis
 	c.PermissionConfig.FieldType = PermissionConfig.GetFieldConfig()
 	err = syncx.TraverseSliceWithFunction(
 		tableFiles, func(i int) {
-			err = c.InitTableConfigFromFileInfo(&(tableFiles[i]))
+			err = c.initTableConfigFromFileInfo(&(tableFiles[i]))
 			if err != nil {
 				log.Fatal(err)
 			}

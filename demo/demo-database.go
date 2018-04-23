@@ -20,8 +20,11 @@ func (db *DataBase) GetAccessConfig(args *args.APIArgs) permission.AccessConfig 
 	return &SuperAdminAccess{args.Query("userid") == "User is Admin", args.Query("userid") == "User is Super"}
 }
 
-func (access *SuperAdminAccess) AuthTablePermission(config permission.TableConfig) bool {
-	return (!config.(AdminConfig).NeedAdmin || access.isAdmin) && (!config.(AdminConfig).NeedSuperAdmin || access.isSuper)
+func (config *AdminConfig) AuthTablePermission(access permission.AccessConfig) bool {
+	return (!config.NeedAdmin || access.(*SuperAdminAccess).isAdmin) && (!config.NeedSuperAdmin || access.(*SuperAdminAccess).isSuper)
+}
+func (config *AdminStructConfig) AuthFieldPermission(access permission.AccessConfig) bool {
+	return (!config.SuperAdmin || access.(*SuperAdminAccess).isSuper) && (!config.Admin || access.(*SuperAdminAccess).isAdmin)
 }
 
 type SuperAdminAccess struct {
@@ -31,7 +34,4 @@ type SuperAdminAccess struct {
 
 func (access *SuperAdminAccess) AuthAllPermission() bool {
 	return access.isSuper
-}
-func (access *SuperAdminAccess) AuthFieldPermission(config permission.FieldConfig) bool {
-	return (!config.(AdminStructConfig).SuperAdmin || access.isSuper) && (!config.(AdminStructConfig).Admin || access.isAdmin)
 }
