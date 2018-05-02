@@ -61,7 +61,7 @@ func NewDefaultHandlerFromConfig(config ApiHandlerConfig, ah ExtendApiHandler) {
 	var err error
 	h.TableController, err = InjectTableController(h, ah.GetPermissionConfig())
 	if err != nil {
-		log.Fatal("Init TableConfig FromFiles Error = ", err)
+		log.Fatal("Init TableConfig From Files Error = ", err)
 	}
 	return
 }

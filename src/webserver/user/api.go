@@ -3,7 +3,11 @@ package user
 import (
 	"gopkg.in/mgo.v2/bson"
 	"webserver/args"
+	"logger"
+	"webserver/errorx"
 )
+
+var log = logger.Log
 
 func (c *Controller) CompareUserLevel(args *args.APIArgs) bool {
 	valid, userId := args.UserId()
@@ -16,7 +20,7 @@ func (c *Controller) checkValidUser(args *args.APIArgs) bool {
 	return valid
 }
 
-func (c *Controller) registerUserPwdLoginApi() {
+func (c *Controller) registerUserPwdLoginApi(ApiAddrLogin string) {
 	c.RegisterPostApi(ApiAddrLogin, func(args *args.APIArgs) (ret interface{}, err error) {
 		nickname := args.JsonKey(JsonKeyNickname).MustString()
 		password := args.JsonKey(JsonKeyPassword).MustString()
@@ -29,7 +33,14 @@ func (c *Controller) registerUserPwdLoginApi() {
 	})
 }
 
-func (c *Controller) registerNewUserApi() {
+func (c *Controller) registerLogOutApi(api string) {
+	c.RegisterGetApi(api, func(args *args.APIArgs) (ret interface{}, err error) {
+		args.ClearSession()
+		return
+	}, c.checkValidUser)
+}
+
+func (c *Controller) registerNewUserApi(ApiAddrUser string) {
 	c.RegisterPostApi(ApiAddrUser, func(args *args.APIArgs) (ret interface{}, err error) {
 		_, userId := args.UserId()
 		nickname := args.JsonKey(JsonKeyNickname).MustString()
@@ -40,7 +51,7 @@ func (c *Controller) registerNewUserApi() {
 	}, c.checkValidUser)
 }
 
-func (c *Controller) registerSetUserLevelApi() {
+func (c *Controller) registerSetUserLevelApi(ApiAddrUserLevel string) {
 	c.RegisterPostApi(ApiAddrUserLevel, func(args *args.APIArgs) (ret interface{}, err error) {
 		userId := args.JsonKeyId()
 		level := args.JsonKey(JsonKeyLevel).MustInt()
@@ -49,7 +60,7 @@ func (c *Controller) registerSetUserLevelApi() {
 	}, c.CompareUserLevel)
 }
 
-func (c *Controller) registerChangeUserPasswordApi() {
+func (c *Controller) registerChangeUserPasswordApi(ApiAddrPassword string) {
 	c.RegisterPostApi(ApiAddrPassword, func(args *args.APIArgs) (ret interface{}, err error) {
 		_, userId := args.UserId()
 		oldPassword := args.JsonKey(JsonKeyOldPassword).MustString()
@@ -59,23 +70,27 @@ func (c *Controller) registerChangeUserPasswordApi() {
 	}, c.checkValidUser)
 }
 
-func (c *Controller) registerGetAllUsersApi() {
+func (c *Controller) registerGetAllUsersApi(ApiAddrAllUsers string) {
 	c.RegisterGetApi(ApiAddrAllUsers, func(args *args.APIArgs) (ret interface{}, err error) {
 		ret, err = c.getAllUsers()
 		return
 	}, c.checkValidUser)
 }
 
-func (c *Controller) registerUserSessionLoginApi() {
-	c.RegisterGetApi(ApiAddrLogin, func(args *args.APIArgs) (ret interface{}, err error) {
-		_, userId := args.UserId()
+func (c *Controller) registerUserSessionLoginAuthApi(ApiAuthLogin string) {
+	c.RegisterGetApi(ApiAuthLogin, func(args *args.APIArgs) (ret interface{}, err error) {
+		valid, userId := args.UserId()
+		if !valid {
+			err = errorx.ErrAuthFailed
+			return
+		}
 		user, err := c.getUserById(bson.ObjectIdHex(userId))
 		if err != nil {
 			return
 		}
 		c.updateUserLogin(user.Id, args.IP())
 		user.Password = ""
-		ret = user
+		ret =  user
 		return
 	}, c.checkValidUser)
 }

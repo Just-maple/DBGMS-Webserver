@@ -22,22 +22,23 @@ func (h DefaultApiHandler) getAjaxQuery(args *APIArgs) (res *dbx.AjaxQuery, err 
 	return
 }
 
-func (h *DefaultApiHandler) getDataByAjaxQuery(args *APIArgs, ajaxConfig *dbx.AjaxStructConfig) (res map[string]interface{}, err error) {
+type ajaxResult struct {
+	Data  interface{} `json:"data"`
+	Count int         `json:"cnt"`
+}
+
+func (h *DefaultApiHandler) getDataByAjaxQuery(args *APIArgs, ajaxConfig *dbx.AjaxStructConfig) (res ajaxResult, err error) {
 	query, err := h.getAjaxQuery(args)
 	if err != nil {
 		return
 	}
-	access := h.GetAccessConfigFromArgs(args)
-	data, count, err := query.AjaxSearch(ajaxConfig)
+	res.Data, res.Count, err = query.AjaxSearch(ajaxConfig)
 	if err != nil {
 		log.Error(err)
 		return
 	}
-	data = query.MakeAjaxReturnWithSelectKeysAndPermissionControl(data, access)
-	res = map[string]interface{}{
-		"data": data,
-		"cnt":  count,
-	}
+	access := h.GetAccessConfigFromArgs(args)
+	res.Data = query.MakeAjaxReturnWithSelectKeysAndPermissionControl(res.Data, access)
 	return
 }
 

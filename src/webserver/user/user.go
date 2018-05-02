@@ -16,7 +16,7 @@ type DefaultUser struct {
 	IP           string        `bson:"ip"`
 }
 
-type Level int
+type Level = int
 
 func newUserFromNicknameAndPwd(nickname, hashPassword string, level Level, SuperiorUserId bson.ObjectId) *DefaultUser {
 	return &DefaultUser{

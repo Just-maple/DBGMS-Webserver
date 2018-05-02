@@ -42,6 +42,9 @@ func (c *TableController) registerAPI() {
 	allPermissionApi.RegisterDefaultAPI("saveAllConfig", c.SaveAllTableConfig)
 	allPermissionApi.RegisterDefaultAPI("editTable", c.EditTable)
 	getRoute.RegisterDefaultAPI("table", c.GetAllConfigTable, c.AuthAllPermission)
+	postRoute.RegisterDefaultAPI("table", func(args *APIArgs) (ret interface{}, err error) {
+		return c.GetConfigTableFromMString(args)
+	})
 }
 
 func (c *TableController) AuthAllPermission(args *APIArgs) bool {
@@ -153,7 +156,18 @@ func (c *TableController) readTableConfigFromFile(fileName string) (data []byte,
 	return ioutil.ReadFile(c.path + fileName)
 }
 
+func IsExist(path string) bool {
+	_, err := os.Stat(path)
+	return err == nil || os.IsExist(err)
+}
+
 func (c *TableController) initAllConfigTableFromFiles(PermissionConfig *pm.PermissionConfig) (err error) {
+	if !IsExist(c.path) {
+		err = os.Mkdir(c.path, 0700)
+		if err != nil {
+			return
+		}
+	}
 	tableFiles, err := ioutil.ReadDir(c.path)
 	if err != nil {
 		return

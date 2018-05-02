@@ -3,6 +3,8 @@ package main
 import (
 	"webserver/args"
 	"webserver/permission"
+	"gopkg.in/mgo.v2/bson"
+	"webserver/user"
 )
 
 type AdminTableConfig struct {
@@ -27,9 +29,15 @@ func (h *ApiHandler) GetPermissionConfig() *permission.PermissionConfig {
 func (h *ApiHandler) GetAccessConfig(args *args.APIArgs) permission.AccessConfig {
 	//database struct implement auth super admin user
 	//define your logic here
+	_, userid := args.UserId()
+	var userdata user.DefaultUser
+	err := h.db.WXUser.FindId(bson.ObjectIdHex(userid)).One(&userdata)
+	if err != nil {
+		return nil
+	}
 	return &SuperAdminAccess{
-		args.Query("userid") == "admin userId",
-		args.Query("userid") == "super admin userId",
+		userdata.Level == 0,
+		userdata.Level == 0,
 	}
 }
 

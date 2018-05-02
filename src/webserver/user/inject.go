@@ -9,10 +9,11 @@ func InitController(collection *dbx.Collection) (controller *Controller) {
 }
 
 func (c *Controller) Init() {
-	c.registerUserPwdLoginApi()
-	c.registerNewUserApi()
-	c.registerSetUserLevelApi()
-	c.registerUserSessionLoginApi()
-	c.registerChangeUserPasswordApi()
-	c.registerGetAllUsersApi()
+	c.registerUserPwdLoginApi(ApiAddrLogin)
+	c.registerNewUserApi(ApiAddrUser)
+	c.registerSetUserLevelApi(ApiAddrUserLevel)
+	c.registerUserSessionLoginAuthApi(ApiAuthLogin)
+	c.registerChangeUserPasswordApi(ApiAddrPassword)
+	c.registerLogOutApi(ApiAddrLogout)
+	c.registerGetAllUsersApi(ApiAddrAllUsers)
 }
