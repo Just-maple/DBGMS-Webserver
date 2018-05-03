@@ -39,7 +39,7 @@ type PermissionConfig struct {
 	FieldType reflect.Type
 }
 
-func NewPemissionConfig(table TableConfig, field FieldConfig) *PermissionConfig {
+func NewPermissionConfig(table TableConfig, field FieldConfig) *PermissionConfig {
 	return &PermissionConfig{
 		reflect.TypeOf(table).Elem(),
 		reflect.TypeOf(field).Elem(),

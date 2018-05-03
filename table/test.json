@@ -1,4 +1,5 @@
 {
   "_pageForm": true,
-  "_api": "/api/testdata"
+  "_api": "/api/testdata",
+  "test": {}
 }

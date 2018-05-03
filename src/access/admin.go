@@ -30,7 +30,7 @@ var (
 )
 
 func GetAdminPermissionConfig() *permission.PermissionConfig {
-	return permission.NewPemissionConfig(new(AdminTableConfig), new(AdminStructConfig))
+	return permission.NewPermissionConfig(new(AdminTableConfig), new(AdminStructConfig))
 }
 
 //define how your access config check by permission config

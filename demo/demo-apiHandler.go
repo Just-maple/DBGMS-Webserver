@@ -53,7 +53,7 @@ func (h *ApiHandler) ApiTest(args *args.APIArgs) (ret interface{}, err error) {
 	//return type string
 	log.Debug(queryString)
 	jsonValue := args.JsonKey("get Json Key from Post Context")
-	//return type *simplejson.Json
+	//return type *jsonx.Json
 	log.Debug(jsonValue)
 	isValidUser, userId := args.UserId() //get user Id from session
 	//return bool(is user valid) and string(user Id,must be bson.ObjectId.Hex string)
@@ -65,8 +65,9 @@ func (h *ApiHandler) ApiTest(args *args.APIArgs) (ret interface{}, err error) {
 func (h *ApiHandler) InitMetaConfig() {
 	//implement method InitMetaConfig
 	log.Debug("Init Some Other Custom Config")
-	//you can handle your extend data here
-	//this method will execute after database init and before server start
+	//you can handle your extend config here
+	//this method will execute after database init
+	//and before server start
 }
 
 func (h *ApiHandler) NewDataBase() handler.DB {

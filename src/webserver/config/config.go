@@ -23,7 +23,7 @@ const (
 	defaultMgoUrl             = "mongodb://0.0.0.0:27017"
 	defaultTablePath          = "./table/"
 	defaultServerAddr         = "0.0.0.0:8388"
-	defaultSessionExpiredTime = 2 * 24 * 60 * 60
+	defaultSessionExpiredTime = 2 * 24 * 60 * 60 //two days
 )
 
 func LoadConfigurationFromFile(filename string, config interface{}) {
@@ -83,7 +83,7 @@ func (cfg *DefaultConfig) GetSessionExpiredTime() int {
 	if cfg.SessionExpiredTime == 0 {
 		cfg.SessionExpiredTime = defaultSessionExpiredTime
 		log.Noticef("Undefined SessionExpiredTime,use default [ %v ]",
-			defaultSessionExpiredTime,)
+			defaultSessionExpiredTime, )
 	}
 	return cfg.SessionExpiredTime
 }

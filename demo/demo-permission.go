@@ -9,7 +9,7 @@ import (
 )
 
 func (h *ApiHandler) GetPermissionConfig() *permission.PermissionConfig {
-	return permission.NewPemissionConfig(new(access.AdminTableConfig), new(access.AdminStructConfig))
+	return access.GetAdminPermissionConfig()
 }
 
 //define how user auth by your access config
