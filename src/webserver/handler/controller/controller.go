@@ -10,10 +10,6 @@ type DefaultController struct {
 	handler handler.HandlerGetter
 }
 
-func (c *DefaultController) GetDefaultController() handler.HandlerController {
-	return c
-}
-
 func (c *DefaultController) Init() {
 }
 
@@ -35,6 +31,7 @@ func (c *DefaultController) RegisterGetApi(addr string, function func(args *args
 	c.RegisterApi(http.MethodGet, addr, function, pm...)
 	return
 }
+
 func (c *DefaultController) RegisterPostApi(addr string, function func(args *args.APIArgs) (ret interface{}, err error), pm ...handler.PermissionAuth) {
 	c.RegisterApi(http.MethodPost, addr, function, pm...)
 	return

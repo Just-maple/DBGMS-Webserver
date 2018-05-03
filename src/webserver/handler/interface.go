@@ -18,7 +18,6 @@ type TableHandler interface {
 }
 
 type HandlerController interface {
-	GetDefaultController() HandlerController
 	InjectHandler(handler HandlerGetter)
 	Init()
 }
@@ -31,6 +30,6 @@ func (h *DefaultApiHandler) GetTablePath() string {
 	return h.config.GetTablePath()
 }
 func (h *DefaultApiHandler) InjectController(c HandlerController) {
-	c.GetDefaultController().InjectHandler(h)
+	c.InjectHandler(h)
 	c.Init()
 }

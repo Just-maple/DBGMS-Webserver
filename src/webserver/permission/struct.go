@@ -24,6 +24,7 @@ func (structConfig *StructConfig) GetFieldList(retType reflect.Type, access Acce
 	allField := GetAllFieldNameFrom(retType)
 	for _, fn := range allField {
 		_, valid := retType.FieldByName(fn)
+		
 		if valid {
 			if access.AuthAllPermission() {
 				fieldList = append(fieldList, fn)

@@ -23,6 +23,7 @@ func (h *ApiHandler) GetAccessConfig(args *args.APIArgs) permission.AccessConfig
 	if err != nil {
 		return nil
 	}
+	//define your access adjustment logic
 	return &access.SuperAdminAccess{
 		userdata.Level == 0,
 		userdata.Level == 0,

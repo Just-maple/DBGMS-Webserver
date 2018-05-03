@@ -35,8 +35,7 @@ func (t *Table) InitTableConfig() (err error) {
 	}
 	t.TableConfig = reflect.ValueOf(s).Interface().(TableConfig)
 	var structConfig = make(StructConfig, len(structTable))
-	t.StructConfig = &structConfig
-	for key := range structConfig {
+	for key := range structTable {
 		if !IsPrivateKey(key) {
 			tmp, err := json.Marshal(structTable[key])
 			if err != nil {
@@ -50,6 +49,7 @@ func (t *Table) InitTableConfig() (err error) {
 			structConfig[key] = reflect.ValueOf(s).Interface().(FieldConfig)
 		}
 	}
+	t.StructConfig = &structConfig
 	return
 }
 

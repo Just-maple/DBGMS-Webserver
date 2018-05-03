@@ -25,12 +25,22 @@ type SuperAdminAccess struct {
 	IsSuper bool
 }
 
+var (
+	_ permission.AccessConfig = &SuperAdminAccess{}
+)
+
+func GetAdminPermissionConfig() *permission.PermissionConfig {
+	return permission.NewPemissionConfig(new(AdminTableConfig), new(AdminStructConfig))
+}
+
 //define how your access config check by permission config
 func (config *AdminTableConfig) AuthTablePermission(access permission.AccessConfig) bool {
-	return (!config.NeedAdmin || access.(*SuperAdminAccess).IsAdmin) && (!config.NeedSuperAdmin || access.(*SuperAdminAccess).IsSuper)
+	ac, valid := access.(*SuperAdminAccess)
+	return valid && (!config.NeedAdmin || ac.IsAdmin) && (!config.NeedSuperAdmin || ac.IsSuper)
 }
 func (config *AdminStructConfig) AuthFieldPermission(access permission.AccessConfig) bool {
-	return (!config.SuperAdmin || access.(*SuperAdminAccess).IsSuper) && (!config.Admin || access.(*SuperAdminAccess).IsAdmin)
+	ac, valid := access.(*SuperAdminAccess)
+	return valid && (!config.SuperAdmin || ac.IsSuper) && (!config.Admin || ac.IsAdmin)
 }
 
 //define the all permission adjust

@@ -15,6 +15,7 @@ func NewConfig() *Config {
 			//TablePath:        "./table/",
 			//SessionSecretKey: "secret",
 			//SessionKey:       "session",
+			//SessionExpiredTime:  24 * 60 * 60 ,(in seconds)
 		},
 	}
 }

@@ -75,7 +75,7 @@ func (arg *APIArgs) GetConfigTable(t *permission.Config) (config *permission.Str
 func (arg *APIArgs) TransAjaxQuery() (matcherMap map[string]interface{}, keys []string, skipCnt, limitCnt int, sortKey, reverse string, tSTime, tETime time.Time, err error) {
 	keys = arg.JsonKey("keys").MustStringArray()
 	matcherMap = arg.JsonKey("matcher").MustMap()
-
+	
 	skip := arg.context.DefaultQuery("skip", "0")
 	skipCnt, err = strconv.Atoi(skip)
 	if err != nil {
