@@ -12,7 +12,7 @@ func NewConfig() *Config {
 		config.DefaultConfig{
 			MgoDBUrl: "mongodb://localhost:27017/test",
 			//ServerAddr:       "0.0.0.0:8388",
-			TablePath:        "./table/",
+			//TablePath:        "./table/",
 			//SessionSecretKey: "secret",
 			//SessionKey:       "session",
 		},

@@ -17,7 +17,7 @@ type ApiHandler struct {
 	//must implement default handler
 	db *DataBase
 	//implement singleton DataBase
-
+	
 	MetaData
 	//you can define any extend data
 }
@@ -40,11 +40,13 @@ func (h *ApiHandler) RegisterAPI() {
 		log.Debug(d)
 		return d, err
 	})
-
+	
+	//init default user controller with your user database collection
 	var userController = user.InitController(h.db.WXUser)
 	h.DefaultApiHandler.InjectController(userController)
 }
 
+//default api handler
 func (h *ApiHandler) ApiTest(args *args.APIArgs) (ret interface{}, err error) {
 	queryString := args.Query("get query key from url")
 	//return type string
@@ -55,23 +57,23 @@ func (h *ApiHandler) ApiTest(args *args.APIArgs) (ret interface{}, err error) {
 	isValidUser, userId := args.UserId() //get user Id from session
 	//return bool(is user valid) and string(user Id,must be bson.ObjectId.Hex string)
 	log.Debug(isValidUser, userId)
-
+	
 	return
 }
 
 func (h *ApiHandler) InitMetaConfig() {
 	//implement method InitMetaConfig
-
+	
 	//you can handle your extend data here
 	//this method will execute after database init
 }
 
 func (h *ApiHandler) NewDataBase() handler.DB {
 	//implement method NewDataBase
-
+	
 	//init your DataBase
 	h.db = new(DataBase)
-
+	
 	return h.db
 	//should return interface implement server.DB
 }

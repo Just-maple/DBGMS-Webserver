@@ -20,7 +20,7 @@ const (
 	defaultSecretKey  = "secret-key"
 	defaultSessionKey = "session"
 	defaultMgoUrl     = "mongodb://0.0.0.0:27017"
-	defaultTablePath  = "./"
+	defaultTablePath  = "./table/"
 	defaultServerAddr = "0.0.0.0:8388"
 )
 

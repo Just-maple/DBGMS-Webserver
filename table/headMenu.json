@@ -1,0 +1,6 @@
+{
+  "sys": {
+    "name": "系统管理",
+    "superAdmin": true
+  }
+}
