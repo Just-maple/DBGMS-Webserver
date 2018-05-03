@@ -7,7 +7,7 @@ import (
 
 func (h DefaultApiHandler) getAjaxQuery(args *APIArgs) (res *ajax.AjaxQuery, err error) {
 	matcherMap, keys, skipCnt, limitCnt, sortKey, reverse, tSTime, tETime, err := args.TransAjaxQuery()
-	pmConfig, _ := args.GetConfigTable(h.TableController.PermissionConfig)
+	pmConfig, _ := args.GetConfigTable(h.TableController.GetPermissionConfig())
 	res = &ajax.AjaxQuery{
 		MatcherMap:       matcherMap,
 		SortKey:          sortKey,

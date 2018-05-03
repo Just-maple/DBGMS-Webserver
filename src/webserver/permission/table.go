@@ -10,7 +10,6 @@ import (
 var log = logger.Log
 
 const (
-	extensionJson = ".json"
 	privateKey    = "_"
 )
 

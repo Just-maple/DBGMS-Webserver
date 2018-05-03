@@ -5,6 +5,7 @@ import (
 	"webserver/args"
 	"webserver/handler"
 	"webserver/user"
+	"webserver/handler/table"
 )
 
 var log = logger.Log
@@ -45,6 +46,7 @@ func (h *ApiHandler) RegisterAPI() {
 	//init default user controller with your user database collection
 	var userController = user.InitController(h.db.WXUser)
 	h.InjectController(userController)
+	h.InjectTableController(table.InitTableController(h.GetPermissionConfig()))
 }
 
 //default api handler

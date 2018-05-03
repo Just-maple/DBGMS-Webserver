@@ -1,4 +1,4 @@
-package handler
+package table
 
 import (
 	"encoding/base64"
@@ -15,52 +15,79 @@ import (
 	. "webserver/utilsx"
 	"gopkg.in/mgo.v2/bson"
 	"webserver/dbx"
+	"logger"
+	"webserver/handler/controller"
+	"webserver/args"
+	"webserver/permission"
 )
+
+var log = logger.Log
 
 const (
 	extensionJson = ".json"
 )
 
 type TableController struct {
-	handler          *DefaultApiHandler
+	controller.DefaultController
 	PermissionConfig *pm.Config
-	path             string
-	collection       *dbx.Collection
+	Path             string
+	Collection       *dbx.Collection
+	GetAccessConfig  func(args *args.APIArgs) permission.AccessConfig
 }
 
-func (h *DefaultApiHandler) InjectTableController(cfg *pm.PermissionConfig) (err error) {
-	h.TableController = &TableController{
-		handler: h,
-		path:    h.GetTablePath(),
+type GetAccessApi func(args *args.APIArgs) permission.AccessConfig
+
+func InitTableController(cfg *permission.PermissionConfig) (controller *TableController) {
+	controller = &TableController{
 		PermissionConfig: &pm.Config{
 			TableType: cfg.TableType,
 			FieldType: cfg.FieldType,
 		},
-		collection: cfg.Collection,
+		Collection: cfg.Collection,
 	}
-	if h.TableController.collection != nil {
-		err = h.TableController.initAllConfigTableFromDatabaseCollection()
-	} else {
-		err = h.TableController.initAllConfigTableFromFiles()
-	}
-	h.TableController.registerAPI()
 	return
 }
 
-func (c *TableController) registerAPI() {
-	postRoute := c.handler.GetApiHandlersFromMethod(http.MethodPost)
-	getRoute := c.handler.GetApiHandlersFromMethod(http.MethodGet)
-	allPermissionApi := postRoute.MakeRegisterGroup(c.AuthAllPermission)
+func (c *TableController) Init() {
+	var err error
+	if c.Collection != nil {
+		err = c.InitAllConfigTableFromDatabaseCollection()
+	} else {
+		err = c.InitAllConfigTableFromFiles()
+	}
+	if err != nil {
+		log.Fatal(err)
+	}
+	c.RegisterAPI()
+}
+
+func (c *TableController) SetPath(path string) {
+	c.Path = path
+}
+
+func (c *TableController) SetPermissionConfig(pc *permission.Config) {
+	c.PermissionConfig = pc
+}
+func (c *TableController) SetAccessConfig(config func(args *args.APIArgs) permission.AccessConfig) {
+	c.GetAccessConfig = config
+}
+func (c *TableController) GetPermissionConfig() *permission.Config {
+	return c.PermissionConfig
+}
+
+func (c *TableController) RegisterAPI() {
+	allPermissionApi := c.DefaultController.MakeRegisterGroupByMethod(http.MethodPost, c.AuthAllPermission)
+	getRoute := c.MakeRegisterGroupByMethod(http.MethodGet, c.AuthAllPermission)
 	allPermissionApi.RegisterDefaultAPI("saveAllConfig", c.SaveAllTableConfig)
 	allPermissionApi.RegisterDefaultAPI("editTable", c.EditTable)
-	getRoute.RegisterDefaultAPI("table", c.GetAllConfigTable, c.AuthAllPermission)
-	postRoute.RegisterDefaultAPI("table", func(args *APIArgs) (ret interface{}, err error) {
+	getRoute.RegisterDefaultAPI("table", c.GetAllConfigTable, )
+	c.RegisterPostApi("table", func(args *APIArgs) (ret interface{}, err error) {
 		return c.GetConfigTableFromMString(args)
 	})
 }
 
 func (c *TableController) AuthAllPermission(args *APIArgs) bool {
-	access := c.handler.GetAccessConfig(args)
+	access := c.GetAccessConfig(args)
 	return access != nil && access.AuthAllPermission()
 }
 
@@ -87,10 +114,10 @@ func (c *TableController) writeTableAndUpdateServerConfig(tableName, data string
 	if err != nil {
 		return
 	}
-	if c.collection != nil {
-		_, err = c.collection.UpsertId(tableName, bson.M{"$set": bson.M{"data": data}})
+	if c.Collection != nil {
+		_, err = c.Collection.UpsertId(tableName, bson.M{"$set": bson.M{"data": data}})
 	} else {
-		file := c.path + tableName + extensionJson
+		file := c.Path + tableName + extensionJson
 		err = ioutil.WriteFile(file, []byte(data), 0600)
 	}
 	return
@@ -134,7 +161,7 @@ func (c *TableController) GetConfigTableMap() (ret map[string]string) {
 
 func (c *TableController) getConfigTableFromArgs(args *APIArgs) (ret map[string]string) {
 	ret = make(map[string]string)
-	access := c.handler.GetAccessConfig(args)
+	access := c.GetAccessConfig(args)
 	pmConfig := c.PermissionConfig.TableMap
 	mapLock := new(sync.Mutex)
 	syncx.TraverseMapWithFunction(pmConfig, func(key string) {
@@ -169,7 +196,7 @@ func (c *TableController) initTableConfigFromFileInfo(file *os.FileInfo) (err er
 }
 
 func (c *TableController) readTableConfigFromFile(fileName string) (data []byte, err error) {
-	return ioutil.ReadFile(c.path + fileName)
+	return ioutil.ReadFile(c.Path + fileName)
 }
 
 func IsExist(path string) bool {
@@ -182,9 +209,9 @@ type TableData []struct {
 	Data string `bson:"data"`
 }
 
-func (c *TableController) initAllConfigTableFromDatabaseCollection() (err error) {
+func (c *TableController) InitAllConfigTableFromDatabaseCollection() (err error) {
 	var tableData TableData
-	err = c.collection.Find(nil).All(&tableData)
+	err = c.Collection.Find(nil).All(&tableData)
 	if err != nil {
 		return
 	}
@@ -198,14 +225,14 @@ func (c *TableController) initAllConfigTableFromDatabaseCollection() (err error)
 	return
 }
 
-func (c *TableController) initAllConfigTableFromFiles() (err error) {
-	if !IsExist(c.path) {
-		err = os.Mkdir(c.path, 0700)
+func (c *TableController) InitAllConfigTableFromFiles() (err error) {
+	if !IsExist(c.Path) {
+		err = os.Mkdir(c.Path, 0700)
 		if err != nil {
 			return
 		}
 	}
-	tableFiles, err := ioutil.ReadDir(c.path)
+	tableFiles, err := ioutil.ReadDir(c.Path)
 	if err != nil {
 		return
 	}

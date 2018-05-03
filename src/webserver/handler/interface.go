@@ -26,3 +26,11 @@ func (h *DefaultApiHandler) InjectController(c HandlerController) {
 	c.InjectHandler(h)
 	c.Init()
 }
+
+func (h *DefaultApiHandler) InjectTableController(c TableController) {
+	h.TableController = c
+	c.SetAccessConfig(h.GetAccessConfig)
+	c.InjectHandler(h)
+	c.SetPath(h.GetTablePath())
+	c.Init()
+}
