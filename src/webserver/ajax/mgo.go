@@ -1,4 +1,4 @@
-package dbx
+package ajax
 
 import (
 	"gopkg.in/mgo.v2"
@@ -193,3 +193,4 @@ func (query *AjaxQuery) AjaxSearch(structConfig *AjaxStructConfig) (res interfac
 	res = reflect.ValueOf(tmp).Elem().Interface()
 	return
 }
+

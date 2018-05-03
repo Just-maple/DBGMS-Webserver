@@ -10,13 +10,6 @@ type HandlerGetter interface {
 	InjectController(c HandlerController)
 }
 
-type TableHandler interface {
-	GetApiHandlersFromMethod(method string) (handler JsonAPIFuncRoute)
-	GetAccessConfigFromArgs(args *APIArgs) (access permission.AccessConfig)
-	GetTablePath() string
-	GetAccessConfig(args *APIArgs) permission.AccessConfig
-}
-
 type HandlerController interface {
 	InjectHandler(handler HandlerGetter)
 	Init()

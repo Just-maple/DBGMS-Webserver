@@ -8,8 +8,11 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
-func (h *ApiHandler) GetPermissionConfig() *permission.PermissionConfig {
-	return access.GetAdminPermissionConfig()
+func (h *ApiHandler) GetPermissionConfig() (config *permission.PermissionConfig) {
+	config = access.GetAdminPermissionConfig()
+	//use a collection to save your table in mgo database
+	config.UseCollection(h.db.PermissionTable)
+	return
 }
 
 //define how user auth by your access config
@@ -26,6 +29,6 @@ func (h *ApiHandler) GetAccessConfig(args *args.APIArgs) permission.AccessConfig
 	//define your access adjustment logic
 	return &access.SuperAdminAccess{
 		userdata.Level == 0,
-		userdata.Level == 0,
+		userdata.NickName == "admin",
 	}
 }

@@ -58,11 +58,6 @@ func NewDefaultHandlerFromConfig(config ApiHandlerConfig, ah ExtendApiHandler) {
 		apiHandlers:       ah,
 	}
 	h.setDefaultApiHandlerAndMountConfig()
-	var err error
-	h.TableController, err = InjectTableController(h, ah.GetPermissionConfig())
-	if err != nil {
-		log.Fatal("Init TableConfig From Files Error = ", err)
-	}
 	return
 }
 
@@ -90,7 +85,7 @@ func (h *DefaultApiHandler) setDefaultApiHandlerAndMountConfig() {
 				panic("Found More than One Default ApiHandler")
 			}
 		}
-
+		
 	}
 	if !flag {
 		panic("Not Found Default ApiHandler")
@@ -106,6 +101,10 @@ func (h *DefaultApiHandler) InitDataBase() {
 	if err != nil {
 		log.Fatal("Init MgoDataBase Error = ", err)
 		return
+	}
+	err = h.InjectTableController(h.apiHandlers.GetPermissionConfig())
+	if err != nil {
+		log.Fatal("Init TableConfig From Files Error = ", err)
 	}
 	return
 }

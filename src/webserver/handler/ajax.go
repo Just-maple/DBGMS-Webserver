@@ -2,13 +2,13 @@ package handler
 
 import (
 	. "webserver/args"
-	"webserver/dbx"
+	"webserver/ajax"
 )
 
-func (h DefaultApiHandler) getAjaxQuery(args *APIArgs) (res *dbx.AjaxQuery, err error) {
+func (h DefaultApiHandler) getAjaxQuery(args *APIArgs) (res *ajax.AjaxQuery, err error) {
 	matcherMap, keys, skipCnt, limitCnt, sortKey, reverse, tSTime, tETime, err := args.TransAjaxQuery()
 	pmConfig, _ := args.GetConfigTable(h.TableController.PermissionConfig)
-	res = &dbx.AjaxQuery{
+	res = &ajax.AjaxQuery{
 		MatcherMap:       matcherMap,
 		SortKey:          sortKey,
 		SelectKeys:       keys,
@@ -27,7 +27,7 @@ type ajaxResult struct {
 	Count int         `json:"cnt"`
 }
 
-func (h *DefaultApiHandler) getDataByAjaxQuery(args *APIArgs, ajaxConfig *dbx.AjaxStructConfig) (res ajaxResult, err error) {
+func (h *DefaultApiHandler) getDataByAjaxQuery(args *APIArgs, ajaxConfig *ajax.AjaxStructConfig) (res ajaxResult, err error) {
 	query, err := h.getAjaxQuery(args)
 	if err != nil {
 		return
@@ -42,12 +42,12 @@ func (h *DefaultApiHandler) getDataByAjaxQuery(args *APIArgs, ajaxConfig *dbx.Aj
 	return
 }
 
-func (h *DefaultApiHandler) RegisterAjaxJsonApi(dataApiAddr, distinctApiAddr string, config *dbx.AjaxStructConfig, pm ...PermissionAuth) {
+func (h *DefaultApiHandler) RegisterAjaxJsonApi(dataApiAddr, distinctApiAddr string, config *ajax.AjaxStructConfig, pm ...PermissionAuth) {
 	h.ApiPostHandlers.RegisterDefaultAPI(dataApiAddr, h.getAjaxApi(config), pm...)
 	h.ApiGetHandlers.RegisterDefaultAPI(distinctApiAddr, h.getAjaxDistinctApi(config), pm...)
 }
 
-func (h *DefaultApiHandler) getAjaxDistinctApi(config *dbx.AjaxStructConfig) DefaultAPIFunc {
+func (h *DefaultApiHandler) getAjaxDistinctApi(config *ajax.AjaxStructConfig) DefaultAPIFunc {
 	return func(args *APIArgs) (ret interface{}, err error) {
 		key := args.Query("key")
 		if key == "" {
@@ -58,7 +58,7 @@ func (h *DefaultApiHandler) getAjaxDistinctApi(config *dbx.AjaxStructConfig) Def
 	}
 }
 
-func (h *DefaultApiHandler) getAjaxApi(config *dbx.AjaxStructConfig) DefaultAPIFunc {
+func (h *DefaultApiHandler) getAjaxApi(config *ajax.AjaxStructConfig) DefaultAPIFunc {
 	return func(args *APIArgs) (ret interface{}, err error) {
 		ret, err = h.getDataByAjaxQuery(args, config)
 		return

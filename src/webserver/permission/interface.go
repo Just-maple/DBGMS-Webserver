@@ -1,6 +1,9 @@
 package permission
 
-import "reflect"
+import (
+	"reflect"
+	"webserver/dbx"
+)
 
 type Config struct {
 	TableMap  map[string]*Table
@@ -13,7 +16,7 @@ type TableConfig interface {
 }
 
 type Table struct {
-	FilesName    string
+	Name         string
 	TableData    []byte
 	Md5Hash      string
 	StructConfig *StructConfig
@@ -35,13 +38,19 @@ type AccessConfig interface {
 }
 
 type PermissionConfig struct {
-	TableType reflect.Type
-	FieldType reflect.Type
+	TableType  reflect.Type
+	FieldType  reflect.Type
+	Collection *dbx.Collection
+}
+
+func (config *PermissionConfig) UseCollection(collection *dbx.Collection) {
+	config.Collection = collection
 }
 
 func NewPermissionConfig(table TableConfig, field FieldConfig) *PermissionConfig {
 	return &PermissionConfig{
 		reflect.TypeOf(table).Elem(),
 		reflect.TypeOf(field).Elem(),
+		nil,
 	}
 }

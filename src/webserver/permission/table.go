@@ -55,7 +55,7 @@ func (t *Table) InitTableConfig() (err error) {
 
 func (t *Config) InitTableConfig(data []byte, tableName string) (err error) {
 	var config = &Table{
-		FilesName:  tableName + extensionJson,
+		Name:  tableName,
 		TableData:  data,
 		Md5Hash:    utilsx.BytesToMd5String(data),
 		TableType:  t.TableType,

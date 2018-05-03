@@ -13,6 +13,8 @@ import (
 	. "webserver/args"
 	pm "webserver/permission"
 	. "webserver/utilsx"
+	"gopkg.in/mgo.v2/bson"
+	"webserver/dbx"
 )
 
 const (
@@ -20,19 +22,29 @@ const (
 )
 
 type TableController struct {
-	handler          TableHandler
+	handler          *DefaultApiHandler
 	PermissionConfig *pm.Config
 	path             string
+	collection       *dbx.Collection
 }
 
-func InjectTableController(h TableHandler, PermissionConfig *pm.PermissionConfig) (c *TableController, err error) {
-	c = &TableController{
-		handler:          h,
-		path:             h.GetTablePath(),
-		PermissionConfig: new(pm.Config),
+func (h *DefaultApiHandler) InjectTableController(cfg *pm.PermissionConfig) (err error) {
+	h.TableController = &TableController{
+		handler: h,
+		path:    h.GetTablePath(),
+		PermissionConfig: &pm.Config{
+			TableType: cfg.TableType,
+			FieldType: cfg.FieldType,
+		},
+		collection: cfg.Collection,
 	}
-	c.registerAPI()
-	return c, c.initAllConfigTableFromFiles(PermissionConfig)
+	if h.TableController.collection != nil {
+		err = h.TableController.initAllConfigTableFromDatabaseCollection()
+	} else {
+		err = h.TableController.initAllConfigTableFromFiles()
+	}
+	h.TableController.registerAPI()
+	return
 }
 
 func (c *TableController) registerAPI() {
@@ -71,12 +83,16 @@ func (c *TableController) EditTable(args *APIArgs) (ret interface{}, err error) 
 }
 
 func (c *TableController) writeTableAndUpdateServerConfig(tableName, data string) (err error) {
-	file := c.path + tableName + extensionJson
-	err = ioutil.WriteFile(file, []byte(data), 0600)
+	err = c.PermissionConfig.InitTableConfig([]byte(data), tableName)
 	if err != nil {
 		return
 	}
-	err = c.PermissionConfig.InitTableConfig([]byte(data), tableName)
+	if c.collection != nil {
+		_, err = c.collection.UpsertId(tableName, bson.M{"$set": bson.M{"data": data}})
+	} else {
+		file := c.path + tableName + extensionJson
+		err = ioutil.WriteFile(file, []byte(data), 0600)
+	}
 	return
 }
 
@@ -161,7 +177,28 @@ func IsExist(path string) bool {
 	return err == nil || os.IsExist(err)
 }
 
-func (c *TableController) initAllConfigTableFromFiles(PermissionConfig *pm.PermissionConfig) (err error) {
+type TableData []struct {
+	Name string `bson:"_id"`
+	Data string `bson:"data"`
+}
+
+func (c *TableController) initAllConfigTableFromDatabaseCollection() (err error) {
+	var tableData TableData
+	err = c.collection.Find(nil).All(&tableData)
+	if err != nil {
+		return
+	}
+	c.PermissionConfig.TableMap = make(map[string]*pm.Table, len(tableData))
+	for i := range tableData {
+		err = c.PermissionConfig.InitTableConfig([]byte(tableData[i].Data), tableData[i].Name)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+	return
+}
+
+func (c *TableController) initAllConfigTableFromFiles() (err error) {
 	if !IsExist(c.path) {
 		err = os.Mkdir(c.path, 0700)
 		if err != nil {
@@ -173,8 +210,6 @@ func (c *TableController) initAllConfigTableFromFiles(PermissionConfig *pm.Permi
 		return
 	}
 	c.PermissionConfig.TableMap = make(map[string]*pm.Table, len(tableFiles))
-	c.PermissionConfig.TableType = PermissionConfig.TableType
-	c.PermissionConfig.FieldType = PermissionConfig.FieldType
 	for i := range tableFiles {
 		err = c.initTableConfigFromFileInfo(&(tableFiles[i]))
 		if err != nil {
