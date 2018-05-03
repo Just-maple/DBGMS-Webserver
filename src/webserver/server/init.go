@@ -39,7 +39,9 @@ func (svr *WebServer) Start() (err error) {
 
 func (svr *WebServer) initSession() gin.HandlerFunc {
 	store := sessions.NewCookieStore([]byte(svr.serverConfig.GetSessionSecretKey()))
-	store.Options(sessions.Options{MaxAge: 60 * 60 * 24 * 2})
+	store.Options(sessions.Options{MaxAge: svr.serverConfig.GetSessionExpiredTime()})
+	log.Debugf("Init Session,session expired in [ %v ]",
+		time.Unix(int64(svr.serverConfig.GetSessionExpiredTime()), 0).Sub(time.Unix(0, 0)).String())
 	return sessions.Sessions(svr.serverConfig.GetSessionKey(), store)
 }
 

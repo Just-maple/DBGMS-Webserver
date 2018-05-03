@@ -9,19 +9,21 @@ import (
 var log = logger.Log
 
 type DefaultConfig struct {
-	MgoDBUrl         string
-	ServerAddr       string
-	TablePath        string
-	SessionSecretKey string
-	SessionKey       string
+	MgoDBUrl           string
+	ServerAddr         string
+	TablePath          string
+	SessionSecretKey   string
+	SessionKey         string
+	SessionExpiredTime int
 }
 
 const (
-	defaultSecretKey  = "secret-key"
-	defaultSessionKey = "session"
-	defaultMgoUrl     = "mongodb://0.0.0.0:27017"
-	defaultTablePath  = "./table/"
-	defaultServerAddr = "0.0.0.0:8388"
+	defaultSecretKey          = "secret-key"
+	defaultSessionKey         = "session"
+	defaultMgoUrl             = "mongodb://0.0.0.0:27017"
+	defaultTablePath          = "./table/"
+	defaultServerAddr         = "0.0.0.0:8388"
+	defaultSessionExpiredTime = 2 * 24 * 60 * 60
 )
 
 func LoadConfigurationFromFile(filename string, config interface{}) {
@@ -77,6 +79,14 @@ func (cfg *DefaultConfig) GetTablePath() string {
 	return cfg.TablePath
 }
 
+func (cfg *DefaultConfig) GetSessionExpiredTime() int {
+	if cfg.SessionExpiredTime == 0 {
+		cfg.SessionExpiredTime = defaultSessionExpiredTime
+		log.Noticef("Undefined SessionExpiredTime,use default [ %v ]",
+			defaultSessionExpiredTime,)
+	}
+	return cfg.SessionExpiredTime
+}
 func (cfg *DefaultConfig) GetServerAddr() string {
 	if cfg.ServerAddr == "" {
 		cfg.ServerAddr = defaultServerAddr

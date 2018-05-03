@@ -1,6 +1,15 @@
 {
-  "sys": {
-    "name": "系统管理",
-    "superAdmin": true
+  "菜单": {
+    "name": "",
+    "item": {
+      "sys": {
+        "name": "管理",
+        "superAdmin": true
+      },
+      "test": {
+        "name": "测试",
+        "bindTable": "test"
+      }
+    }
   }
 }

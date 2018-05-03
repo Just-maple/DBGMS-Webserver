@@ -9,6 +9,7 @@ type ServerConfig interface {
 	GetServerAddr() string
 	GetSessionKey() string
 	GetSessionSecretKey() string
+	GetSessionExpiredTime() int
 }
 
 type ApiHandlers interface {

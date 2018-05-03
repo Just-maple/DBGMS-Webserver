@@ -78,7 +78,7 @@ func (query *AjaxQuery) newAjaxMgoDBSearcher(collection MgoSearchCollection, res
 	return query.getMgoSearch(collection, result)
 }
 
-func initAjaxMgoDBSearcher(query *AjaxQuery, collection MgoSearchCollection, result interface{}) (ams *AjaxMgoDBSearcher) {
+func (query *AjaxQuery) initAjaxMgoDBSearcher(collection MgoSearchCollection, result interface{}) (ams *AjaxMgoDBSearcher) {
 	ams = &AjaxMgoDBSearcher{
 		Collection:    collection,
 		FieldMatcher:  query.MatcherMap,
@@ -153,7 +153,7 @@ func (ams *AjaxMgoDBSearcher) getSortBson(reverse string) {
 	ams.SortBson = bson.M{ams.SortKey: reverseI}
 }
 func (query *AjaxQuery) getMgoSearch(collection MgoSearchCollection, result interface{}) (cnt int, err error) {
-	ams := initAjaxMgoDBSearcher(query, collection, result)
+	ams := query.initAjaxMgoDBSearcher(collection, result)
 	if len(ams.SelectorKeys) != 0 {
 		ams.makeKeySelector()
 		err = ams.Collection.Pipe(

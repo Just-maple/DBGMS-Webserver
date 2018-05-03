@@ -34,6 +34,7 @@ func (h *ApiHandler) RegisterAPI() {
 	//implement method RegisterAPI
 	//this method provide Api register
 	//and will execute before server start
+	log.Debug("Register API from Handler")
 	h.ApiGetHandlers.RegisterDefaultAPI("test2", h.ApiTest)
 	h.ApiPostHandlers.RegisterDefaultAPI("test3", func(args *args.APIArgs) (ret interface{}, err error) {
 		d, err := h.db.AnyCollection.GenerateRawStruct()
@@ -43,7 +44,7 @@ func (h *ApiHandler) RegisterAPI() {
 	
 	//init default user controller with your user database collection
 	var userController = user.InitController(h.db.WXUser)
-	h.DefaultApiHandler.InjectController(userController)
+	h.InjectController(userController)
 }
 
 //default api handler
@@ -63,17 +64,16 @@ func (h *ApiHandler) ApiTest(args *args.APIArgs) (ret interface{}, err error) {
 
 func (h *ApiHandler) InitMetaConfig() {
 	//implement method InitMetaConfig
-	
+	log.Debug("Init Some Other Custom Config")
 	//you can handle your extend data here
-	//this method will execute after database init
+	//this method will execute after database init and before server start
 }
 
 func (h *ApiHandler) NewDataBase() handler.DB {
 	//implement method NewDataBase
-	
+	log.Debug("New DataBase From Handler")
 	//init your DataBase
 	h.db = new(DataBase)
-	
 	return h.db
 	//should return interface implement server.DB
 }
