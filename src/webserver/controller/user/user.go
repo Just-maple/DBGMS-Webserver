@@ -12,13 +12,13 @@ type DefaultUser struct {
 	TCreate      time.Time     `bson:"t_create"`
 	TProcess     time.Time     `bson:"t_process"`
 	Level        Level         `bson:"lvl"`
-	SuperiorUser bson.ObjectId `bson:"sp_user"`
+	SuperiorUser string        `bson:"sp_user"`
 	IP           string        `bson:"ip"`
 }
 
 type Level = int
 
-func newUserFromNicknameAndPwd(nickname, hashPassword string, level Level, SuperiorUserId bson.ObjectId) *DefaultUser {
+func newUserFromNicknameAndPwd(nickname, hashPassword string, level Level, SuperiorUserId string) *DefaultUser {
 	return &DefaultUser{
 		Id:           bson.NewObjectId(),
 		NickName:     nickname,

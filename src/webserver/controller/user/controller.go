@@ -10,15 +10,14 @@ import (
 )
 
 type Controller struct {
-	controller.DefaultController
-	collection *dbx.Collection
+	*controller.DefaultController
 }
 
-const userHashSecret = false
+const userHashSecret = true
 
 func (c *Controller) userLogin(nickname, password string) (user DefaultUser, err error) {
 	password = Md5EncodePassword(password)
-	err = c.collection.Find(bson.M{FieldNickName: nickname, FieldPassword: password}).One(&user)
+	err = c.Collection.Find(bson.M{FieldNickName: nickname, FieldPassword: password}).One(&user)
 	if errorx.IsErrorNotFound(err) {
 		err = errorx.ErrAuthFailed
 	}
@@ -28,7 +27,7 @@ func (c *Controller) userLogin(nickname, password string) (user DefaultUser, err
 func (c *Controller) changeUserPassword(Id bson.ObjectId, oldPWD, newPWD string) (err error) {
 	oldPWD = Md5EncodePassword(oldPWD)
 	newPWD = Md5EncodePassword(newPWD)
-	err = c.collection.Update(bson.M{
+	err = c.Collection.Update(bson.M{
 		FieldId:       Id,
 		FieldPassword: oldPWD,
 	}, bson.M{
@@ -48,15 +47,15 @@ func (c *Controller) getUserLevelById(Id bson.ObjectId) (level Level) {
 }
 
 func (c *Controller) removeUserById(Id bson.ObjectId) (err error) {
-	return c.collection.RemoveId(Id)
+	return c.Collection.RemoveId(Id)
 }
 
 func (c *Controller) getUserById(Id bson.ObjectId) (user DefaultUser, err error) {
-	err = c.collection.FindId(Id).One(&user)
+	err = c.Collection.FindId(Id).One(&user)
 	return
 }
 
-func (c *Controller) newUserFromNicknameAndPwd(nickname, password string, level Level, superiorUserId bson.ObjectId) (err error) {
+func (c *Controller) newUserFromNicknameAndPwd(nickname, password string, level Level, superiorUserId string) (err error) {
 	if c.checkUserNickNameValid(nickname) {
 		password = Md5EncodePassword(password)
 		var user = newUserFromNicknameAndPwd(nickname, password, level, superiorUserId)
@@ -69,25 +68,25 @@ func (c *Controller) newUserFromNicknameAndPwd(nickname, password string, level 
 }
 
 func (c *Controller) checkUserNickNameValid(nickname string) bool {
-	err := c.collection.Find(bson.M{FieldNickName: nickname}).One(nil)
+	err := c.Collection.Find(bson.M{FieldNickName: nickname}).One(nil)
 	return errorx.IsErrorNotFound(err)
 }
 
 func (c *Controller) insertUser(user *DefaultUser) (err error) {
-	err = c.collection.Insert(user)
+	err = c.Collection.Insert(user)
 	return
 }
 
 func (c *Controller) setUserLevel(Id bson.ObjectId, level Level) (err error) {
-	return c.collection.UpdateId(Id, bson.M{dbx.BsonSelectorSet: bson.M{FieldLevel: level}})
+	return c.Collection.UpdateId(Id, bson.M{dbx.BsonSelectorSet: bson.M{FieldLevel: level}})
 }
 
 func (c *Controller) updateUserLogin(userId bson.ObjectId, ip string) (err error) {
-	return c.collection.UpdateId(userId, bson.M{dbx.BsonSelectorSet: bson.M{FieldIP: ip, FieldTimeProcess: time.Now()}})
+	return c.Collection.UpdateId(userId, bson.M{dbx.BsonSelectorSet: bson.M{FieldIP: ip, FieldTimeProcess: time.Now()}})
 }
 
 func (c *Controller) getAllUsers() (users []DefaultUser, err error) {
-	err = c.collection.FindAll(nil, &users)
+	err = c.Collection.FindAll(nil, &users)
 	return
 }
 

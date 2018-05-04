@@ -15,7 +15,6 @@ var log = logger.Log
 var ErrAuthFailed = errorx.ErrAuthFailed
 
 type ApiHandlerConfig interface {
-	GetTablePath() string
 	GetMgoDBUrl() string
 }
 

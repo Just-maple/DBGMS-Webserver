@@ -2,4 +2,5 @@
 /pkg/
 /.DS_Store
 /server-debug.log
+/demo/server-debug.log
 

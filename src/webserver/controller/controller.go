@@ -4,10 +4,18 @@ import (
 	"net/http"
 	"webserver/args"
 	"webserver/handler"
+	"webserver/dbx"
 )
 
 type DefaultController struct {
-	handler handler.HandlerGetter
+	handler    handler.HandlerGetter
+	Collection *dbx.Collection
+}
+
+func NewDefaultController(collection *dbx.Collection) (*DefaultController) {
+	return &DefaultController{
+		Collection: collection,
+	}
 }
 
 func (c *DefaultController) Init() {

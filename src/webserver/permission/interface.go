@@ -2,7 +2,6 @@ package permission
 
 import (
 	"reflect"
-	"webserver/dbx"
 )
 
 type Config struct {
@@ -40,17 +39,12 @@ type AccessConfig interface {
 type PermissionConfig struct {
 	TableType  reflect.Type
 	FieldType  reflect.Type
-	Collection *dbx.Collection
 }
 
-func (config *PermissionConfig) UseCollection(collection *dbx.Collection) {
-	config.Collection = collection
-}
 
 func NewPermissionConfig(table TableConfig, field FieldConfig) *PermissionConfig {
 	return &PermissionConfig{
 		reflect.TypeOf(table).Elem(),
 		reflect.TypeOf(field).Elem(),
-		nil,
 	}
 }

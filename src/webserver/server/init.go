@@ -48,9 +48,7 @@ func (svr *WebServer) initSession() gin.HandlerFunc {
 func (svr *WebServer) initRouter() *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
-	r.Static("/static/css", "./static/static/css")
-	r.Static("/static/js", "./static/static/js")
-	r.Static("/static/fonts", "./static/static/fonts")
+	r.Static("/static", "./static/static/")
 	r.StaticFile("/", "./static/index.html")
 	svr.server.Handler = r
 	svr.apiHandlers.SetRouter(r)

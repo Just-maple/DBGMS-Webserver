@@ -7,6 +7,9 @@ import (
 	"reflect"
 	"webserver/errorx"
 )
+const (
+	JsonKeyId = "Id"
+)
 
 type Json struct {
 	*simplejson.Json

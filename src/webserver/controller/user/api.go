@@ -46,7 +46,7 @@ func (c *Controller) registerNewUserApi(ApiAddrUser string) {
 		nickname := args.JsonKey(JsonKeyNickname).MustString()
 		password := args.JsonKey(JsonKeyPassword).MustString()
 		level := args.JsonKey(JsonKeyLevel).MustInt()
-		err = c.newUserFromNicknameAndPwd(nickname, password, Level(level), bson.ObjectIdHex(userId))
+		err = c.newUserFromNicknameAndPwd(nickname, password, Level(level), userId)
 		return
 	}, c.checkValidUser)
 }
@@ -90,7 +90,7 @@ func (c *Controller) registerUserSessionLoginAuthApi(ApiAuthLogin string) {
 		}
 		c.updateUserLogin(user.Id, args.IP())
 		user.Password = ""
-		ret =  user
+		ret = user
 		return
 	}, c.checkValidUser)
 }

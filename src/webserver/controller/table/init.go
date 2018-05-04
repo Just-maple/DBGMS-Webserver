@@ -11,7 +11,7 @@ type TableData []struct {
 	Data string `bson:"data"`
 }
 
-func (c *TableController) InitAllConfigTableFromDatabaseCollection() (err error) {
+func (c *Controller) InitAllConfigTableFromDatabaseCollection() (err error) {
 	var tableData TableData
 	err = c.Collection.Find(nil).All(&tableData)
 	if err != nil {
@@ -27,7 +27,7 @@ func (c *TableController) InitAllConfigTableFromDatabaseCollection() (err error)
 	return
 }
 
-func (c *TableController) InitAllConfigTableFromFiles() (err error) {
+func (c *Controller) InitAllConfigTableFromFiles() (err error) {
 	if !IsExist(c.Path) {
 		err = os.Mkdir(c.Path, 0700)
 		if err != nil {

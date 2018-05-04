@@ -2,12 +2,11 @@ package user
 
 import (
 	"webserver/dbx"
-	"gopkg.in/mgo.v2/bson"
-	"time"
+	"webserver/controller"
 )
 
-func InitController(collection *dbx.Collection) (controller *Controller) {
-	return &Controller{collection: collection}
+func InitController(Collection *dbx.Collection) (*Controller) {
+	return &Controller{DefaultController: controller.NewDefaultController(Collection)}
 }
 
 func (c *Controller) Init() {
@@ -26,20 +25,13 @@ func (c *Controller) initApi() {
 }
 
 func (c *Controller) initUser() {
-	count, err := c.collection.Count()
+	count, err := c.Collection.Count()
 	if err != nil {
 		log.Fatal("Get User Data Error", err)
 	}
 	if count == 0 {
 		log.Debug("Not Found User,Init Default User admin")
-		uid := bson.NewObjectId()
-		err = c.collection.Insert(DefaultUser{
-			Id:           bson.NewObjectId(),
-			NickName:     "admin",
-			Password:     "admin",
-			TCreate:      time.Now(),
-			SuperiorUser: uid,
-		})
+		err = c.newUserFromNicknameAndPwd("admin", "admin", 0, "")
 		if err != nil {
 			log.Fatal(err)
 		}

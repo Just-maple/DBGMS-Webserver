@@ -21,6 +21,8 @@ type ApiHandler struct {
 	
 	MetaData
 	//you can define any extend data
+	UserController  *user.Controller
+	TableController *table.Controller
 }
 
 type MetaData struct {
@@ -39,13 +41,14 @@ func (h *ApiHandler) RegisterAPI() {
 	h.ApiGetHandlers.RegisterDefaultAPI("test2", h.ApiTest)
 	
 	//init default user controller with your user database collection
-	var userController = user.InitController(h.db.WXUser)
-	h.InjectController(userController)
-	//inject your table controller
-	var tableController = table.InitAdminTableController()
-	//use collection to store table
-	tableController.UseCollection(h.db.PermissionTable)
-	h.InjectTableController(tableController)
+	h.UserController = user.InitController(h.db.WXUser)
+	h.InjectController(h.UserController)
+	
+	//inject your table controller by collection store
+	h.TableController = table.InitAdminTableControllerByCollection(h.db.PermissionTable)
+	// or user path to store your table config
+	//h.TableController = table.InitAdminTableControllerByPath(h.Config.GetTablePath())
+	h.InjectTableController(h.TableController)
 }
 
 //default api handler
