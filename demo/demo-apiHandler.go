@@ -39,16 +39,6 @@ func (h *ApiHandler) RegisterAPI() {
 	//and will execute before server start
 	log.Debug("Register API from Handler")
 	h.ApiGetHandlers.RegisterDefaultAPI("test2", h.ApiTest)
-	
-	//init default user controller with your user database collection
-	h.UserController = user.InitController(h.db.WXUser)
-	h.InjectController(h.UserController)
-	
-	//inject your table controller by collection store
-	h.TableController = table.InitAdminTableControllerByCollection(h.db.PermissionTable)
-	// or user path to store your table config
-	//h.TableController = table.InitAdminTableControllerByPath(h.Config.GetTablePath())
-	h.InjectTableController(h.TableController)
 }
 
 //default api handler
@@ -69,6 +59,16 @@ func (h *ApiHandler) ApiTest(args *args.APIArgs) (ret interface{}, err error) {
 func (h *ApiHandler) InitMetaConfig() {
 	//implement method InitMetaConfig
 	log.Debug("Init Some Other Custom Config")
+	
+	//init default user controller with your user database collection
+	h.UserController = user.InitController(h.db.WXUser)
+	h.InjectController(h.UserController)
+	
+	//inject your table controller by collection store
+	h.TableController = table.InitAdminTableControllerByCollection(h.db.PermissionTable)
+	// or user path to store your table config
+	//h.TableController = table.InitAdminTableControllerByPath(h.Config.GetTablePath())
+	h.InjectTableController(h.TableController)
 	//you can handle your extend config here
 	//this method will execute after database init
 	//and before server start
