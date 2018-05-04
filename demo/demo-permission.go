@@ -20,5 +20,5 @@ func (h *ApiHandler) GetAccessConfig(args *args.APIArgs) permission.AccessConfig
 		return nil
 	}
 	//define your access adjustment logic
-	return access.MakeSuperAdminAccess(userdata.Level == 0, userdata.NickName == "admin")
+	return access.MakeSuperAdminAccess(userdata.Level == 0, userdata.NickName == "admin", userid)
 }
