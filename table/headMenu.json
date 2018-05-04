@@ -1,0 +1,7 @@
+{
+  "sys": {
+    "name": "系统设置",
+    "route": "sys",
+    "superAdmin": true
+  }
+}

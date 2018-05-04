@@ -46,7 +46,11 @@ func (h *ApiHandler) RegisterAPI() {
 	//init default user controller with your user database collection
 	var userController = user.InitController(h.db.WXUser)
 	h.InjectController(userController)
-	h.InjectTableController(table.InitTableController(h.GetPermissionConfig()))
+	//inject your table controller
+	var tableController = table.InitAdminTableController()
+	//use collection to store table
+	tableController.UseCollection(h.db.PermissionTable)
+	h.InjectTableController(tableController)
 }
 
 //default api handler

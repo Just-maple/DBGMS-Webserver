@@ -23,7 +23,6 @@ type ExtendApiHandler interface {
 	ws.ApiHandlers
 	RegisterAPI()
 	NewDataBase() DB
-	GetPermissionConfig() *permission.PermissionConfig
 	GetAccessConfig(args *APIArgs) permission.AccessConfig
 }
 
@@ -48,7 +47,7 @@ type TableController interface {
 	HandlerController
 	GetPermissionConfig() *permission.Config
 	SetAccessConfig(func(args *APIArgs) permission.AccessConfig)
-	GetConfigTableFromMString(args *APIArgs)(tableConfig map[string]string, err error)
+	GetConfigTableFromArgs(args *APIArgs)(tableConfig map[string]string, err error)
 	SetPath(string)
 }
 
