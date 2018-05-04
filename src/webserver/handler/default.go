@@ -43,14 +43,6 @@ type DefaultApiHandler struct {
 	TableController   TableController
 }
 
-type TableController interface {
-	HandlerController
-	GetPermissionConfig() *permission.Config
-	SetAccessConfig(func(args *APIArgs) permission.AccessConfig)
-	GetConfigTableFromArgs(args *APIArgs)(tableConfig map[string]string, err error)
-	SetPath(string)
-}
-
 func newJsonAPIFuncRoute() JsonAPIFuncRoute {
 	return make(JsonAPIFuncRoute)
 }
@@ -109,10 +101,6 @@ func (h *DefaultApiHandler) InitDataBase() {
 		log.Fatal("Init MgoDataBase Error = ", err)
 		return
 	}
-	//err = h.InjectTableController(h.apiHandlers.GetPermissionConfig())
-	//if err != nil {
-	//	log.Fatal("Init TableConfig From Files Error = ", err)
-	//}
 	return
 }
 

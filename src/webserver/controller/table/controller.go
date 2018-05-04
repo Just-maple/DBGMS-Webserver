@@ -3,7 +3,7 @@ package table
 import (
 	"webserver/permission"
 	"webserver/args"
-	"webserver/handler/controller"
+	"webserver/controller"
 	"webserver/dbx"
 	"access"
 )

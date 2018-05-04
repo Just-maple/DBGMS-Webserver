@@ -15,6 +15,14 @@ type HandlerController interface {
 	Init()
 }
 
+type TableController interface {
+	HandlerController
+	GetPermissionConfig() *permission.Config
+	SetAccessConfig(func(args *APIArgs) permission.AccessConfig)
+	GetConfigTableFromArgs(args *APIArgs) (tableConfig map[string]string, err error)
+	SetPath(string)
+}
+
 func (h *DefaultApiHandler) GetAccessConfig(args *APIArgs) permission.AccessConfig {
 	return h.apiHandlers.GetAccessConfig(args)
 }

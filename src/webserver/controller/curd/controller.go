@@ -4,17 +4,12 @@ import (
 	. "webserver/args"
 	"webserver/dbx"
 	. "webserver/handler"
-	"webserver/handler/controller"
+	"webserver/controller"
 )
 
 type CurdController struct {
 	collection *dbx.CollectionController
 	controller.DefaultController
-	handler HandlerGetter
-}
-
-func (c *CurdController) InjectHandler(h HandlerGetter) {
-	c.handler = h
 }
 
 func NewCurdController(c *dbx.Collection, in interface{}) *CurdController {

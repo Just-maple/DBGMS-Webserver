@@ -4,8 +4,8 @@ import (
 	"logger"
 	"webserver/args"
 	"webserver/handler"
-	"webserver/user"
-	"webserver/handler/table"
+	"webserver/controller/user"
+	"webserver/controller/table"
 )
 
 var log = logger.Log
@@ -37,11 +37,6 @@ func (h *ApiHandler) RegisterAPI() {
 	//and will execute before server start
 	log.Debug("Register API from Handler")
 	h.ApiGetHandlers.RegisterDefaultAPI("test2", h.ApiTest)
-	h.ApiPostHandlers.RegisterDefaultAPI("test3", func(args *args.APIArgs) (ret interface{}, err error) {
-		d, err := h.db.AnyCollection.GenerateRawStruct()
-		log.Debug(d)
-		return d, err
-	})
 	
 	//init default user controller with your user database collection
 	var userController = user.InitController(h.db.WXUser)

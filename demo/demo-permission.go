@@ -4,10 +4,9 @@ import (
 	"access"
 	"webserver/permission"
 	"webserver/args"
-	"webserver/user"
+	"webserver/controller/user"
 	"gopkg.in/mgo.v2/bson"
 )
-
 
 //define how user auth by your access config
 //and make a access to check by permission config
@@ -21,8 +20,5 @@ func (h *ApiHandler) GetAccessConfig(args *args.APIArgs) permission.AccessConfig
 		return nil
 	}
 	//define your access adjustment logic
-	return &access.SuperAdminAccess{
-		userdata.Level == 0,
-		userdata.NickName == "admin",
-	}
+	return access.MakeSuperAdminAccess(userdata.Level == 0, userdata.NickName == "admin")
 }

@@ -29,6 +29,13 @@ var (
 	_ permission.AccessConfig = &SuperAdminAccess{}
 )
 
+func MakeSuperAdminAccess(IsAdmin, IsSuper bool) *SuperAdminAccess {
+	return &SuperAdminAccess{
+		IsAdmin: IsAdmin,
+		IsSuper: IsSuper,
+	}
+}
+
 func GetAdminPermissionConfig() *permission.PermissionConfig {
 	return permission.NewPermissionConfig(new(AdminTableConfig), new(AdminStructConfig))
 }
