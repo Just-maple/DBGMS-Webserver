@@ -1,18 +1,8 @@
 package table
 
 import (
-	"net/http"
 	. "webserver/args"
 )
-
-func (c *Controller) RegisterAPI() {
-	allPermissionApi := c.DefaultController.MakeRegisterGroupByMethod(http.MethodPost, c.AuthAllPermission)
-	getRoute := c.MakeRegisterGroupByMethod(http.MethodGet, c.AuthAllPermission)
-	allPermissionApi.RegisterDefaultAPI("saveAllConfig", c.SaveAllTableConfig)
-	allPermissionApi.RegisterDefaultAPI("editTable", c.EditTable)
-	getRoute.RegisterDefaultAPI("table", c.GetAllConfigTable, )
-	c.RegisterPostApi("table", c.GetTableFromHashStore)
-}
 
 func (c *Controller) GetTableFromHashStore(args *APIArgs) (ret interface{}, err error) {
 	return c.GetConfigTableFromArgs(args)

@@ -7,7 +7,10 @@ import (
 	"strings"
 	"time"
 	"webserver/permission"
+	"logger"
 )
+
+var log = logger.Log
 
 const FieldTimeCreate = "t_create"
 
@@ -154,23 +157,25 @@ func (ams *AjaxMgoDBSearcher) getSortBson(reverse string) {
 }
 func (query *AjaxQuery) getMgoSearch(collection MgoSearchCollection, result interface{}) (cnt int, err error) {
 	ams := query.initAjaxMgoDBSearcher(collection, result)
+	var tstart = time.Now()
+	var search []bson.M
 	if len(ams.SelectorKeys) != 0 {
 		ams.makeKeySelector()
-		err = ams.Collection.Pipe(
-			[]bson.M{
-				{"$match": bson.M{"$and": ams.BsonMatcher}},
-				{"$sort": ams.SortBson},
-				{"$project": ams.KeySelector},
-			}).All(ams.Result)
+		search = []bson.M{
+			{"$match": bson.M{"$and": ams.BsonMatcher}},
+			{"$sort": ams.SortBson},
+			{"$project": ams.KeySelector},
+		}
 	} else {
-		err = ams.Collection.Pipe(
-			[]bson.M{
-				{"$match": bson.M{"$and": ams.BsonMatcher}},
-				{"$sort": ams.SortBson},
-				{"$skip": query.SkipCount},
-				{"$limit": query.LimitCount},
-			}).All(ams.Result)
+		search = []bson.M{
+			{"$match": bson.M{"$and": ams.BsonMatcher}},
+			{"$sort": ams.SortBson},
+			{"$skip": query.SkipCount},
+			{"$limit": query.LimitCount},
+		}
 	}
+	err = ams.Collection.Pipe(search).All(ams.Result)
+	log.Debugf("mgo search time used: %v", time.Since(tstart))
 	if err != nil {
 		return
 	}
@@ -193,4 +198,3 @@ func (query *AjaxQuery) AjaxSearch(structConfig *AjaxStructConfig) (res interfac
 	res = reflect.ValueOf(tmp).Elem().Interface()
 	return
 }
-

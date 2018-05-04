@@ -37,7 +37,7 @@ func (h *DefaultApiHandler) getDataByAjaxQuery(args *APIArgs, ajaxConfig *ajax.A
 		log.Error(err)
 		return
 	}
-	access := h.GetAccessConfigFromArgs(args)
+	access := h.apiHandlers.GetAccessConfig(args)
 	res.Data = query.MakeAjaxReturnWithSelectKeysAndPermissionControl(res.Data, access)
 	return
 }

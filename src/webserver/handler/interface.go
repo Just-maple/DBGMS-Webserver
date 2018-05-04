@@ -22,9 +22,6 @@ type TableController interface {
 	GetConfigTableFromArgs(args *APIArgs) (tableConfig map[string]string, err error)
 }
 
-func (h *DefaultApiHandler) GetAccessConfig(args *APIArgs) permission.AccessConfig {
-	return h.apiHandlers.GetAccessConfig(args)
-}
 
 func (h *DefaultApiHandler) InjectController(c HandlerController) {
 	c.InjectHandler(h)
@@ -33,7 +30,7 @@ func (h *DefaultApiHandler) InjectController(c HandlerController) {
 
 func (h *DefaultApiHandler) InjectTableController(c TableController) {
 	h.TableController = c
-	c.SetAccessConfig(h.GetAccessConfig)
+	c.SetAccessConfig(h.apiHandlers.GetAccessConfig)
 	c.InjectHandler(h)
 	c.Init()
 }

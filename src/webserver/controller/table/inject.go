@@ -6,6 +6,7 @@ import (
 	"webserver/controller"
 	"webserver/dbx"
 	"access"
+	"net/http"
 )
 
 type Controller struct {
@@ -15,8 +16,15 @@ type Controller struct {
 	OauthAccessConfig func(args *args.APIArgs) permission.AccessConfig
 }
 
-func InitAdminTableController(tablePath string, collection *dbx.Collection) (controller *Controller) {
-	return InitTableController(access.GetAdminPermissionConfig(), tablePath, collection)
+func InitAdminTableController(itf interface{}) (controller *Controller) {
+	switch t := itf.(type) {
+	case string:
+		return InitAdminTableControllerByPath(t)
+	case *dbx.Collection:
+		return InitAdminTableControllerByCollection(t)
+	default:
+		panic("error controller store type (only support string or *dbx.collection)")
+	}
 }
 
 func InitAdminTableControllerByCollection(collection *dbx.Collection) (controller *Controller) {
@@ -50,6 +58,16 @@ func (c *Controller) Init() {
 		log.Fatal(err)
 	}
 	c.RegisterAPI()
+}
+
+func (c *Controller) RegisterAPI() {
+	allPermissionApi := c.DefaultController.MakeRegisterGroupByMethod(http.MethodPost, c.AuthAllPermission)
+	
+	allPermissionApi.RegisterDefaultAPI("saveAllConfig", c.SaveAllTableConfig)
+	allPermissionApi.RegisterDefaultAPI("editTable", c.EditTable)
+	
+	c.RegisterGetApi("table", c.GetAllConfigTable, c.AuthAllPermission)
+	c.RegisterPostApi("table", c.GetTableFromHashStore)
 }
 
 func (c *Controller) SetAccessConfig(config func(args *args.APIArgs) permission.AccessConfig) {
