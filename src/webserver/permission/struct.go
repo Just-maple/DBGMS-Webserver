@@ -42,8 +42,8 @@ func (fieldList StructFieldList) MergeList(in StructFieldList) (out StructFieldL
 		tmpMap[key] = key
 	}
 	for _, key2 := range fieldList {
-		_, h := tmpMap[key2]
-		if h {
+		_, has := tmpMap[key2]
+		if has {
 			out = append(out, key2)
 		}
 	}

@@ -1,0 +1,162 @@
+package xdjson
+
+import "logger"
+
+type Json struct {
+	Map         interface{}
+	Keys        []string
+	string      string
+	parser      parser
+	listParser  listParser
+	tokenParser *tokenParser
+}
+
+type parser struct {
+	tokens    tokens
+	pointer   int
+	key       string
+	subTokens tokens
+	value     interface{}
+	node      map[string]interface{}
+}
+
+type listParser struct {
+	tokens    tokens
+	array     []interface{}
+	subTokens tokens
+	pointer   int
+}
+
+type tokenParser struct {
+	tokens     tokens
+	subTokens  tokens
+	tkStack    string
+	strFlag    bool
+	escapeFlag bool
+	raw        string
+}
+
+type tokens []string
+
+func Init(str string) (j Json) {
+	j.tokenParser = &tokenParser{raw: str}
+	j.tokenParser.parse()
+	j.parse()
+	return
+}
+
+var log = logger.Log
+
+func (j *Json) parse() {
+	var tks = j.tokenParser.tokens[1:]
+	switch {
+	case j.tokenParser.tokens.isJson():
+		j.Map = j.parser.parse(tks).node
+	case j.tokenParser.tokens.isArray():
+		j.Map = j.listParser.parse(tks).array
+	default:
+		panic("invalid json string input")
+	}
+}
+
+func (ps parser) parse(token tokens) (*parser) {
+	ps.tokens = token
+	ps.node = make(map[string]interface{})
+	for ps.pointer < len(ps.tokens) {
+		var tk = ps.tokens[ps.pointer]
+		ps.subTokens = ps.tokens[ps.pointer:]
+		switch {
+		case ps.subTokens.isNewJson():
+			ps.key = ps.subTokens[1]
+			var tnode = new(parser).parse(ps.subTokens[5:])
+			ps.value = tnode.node
+			ps.pointer += tnode.pointer + 5
+		case tk == "{":
+			ps.key = ps.subTokens[2]
+			var tnode = new(parser).parse(ps.subTokens[5:])
+			ps.value = tnode.node
+			ps.pointer += tnode.pointer + 5
+		case tk == "[":
+			var tnode = new(listParser).parse(ps.subTokens[1:])
+			ps.value = tnode.array
+			ps.pointer += tnode.pointer
+		case ps.subTokens.isKey():
+			ps.key = ps.subTokens[1]
+			ps.pointer += 4
+		case ps.subTokens.isNullString():
+			ps.value = ""
+			ps.pointer += 2
+		case tk == ",":
+			ps.pointer += 1
+		case ps.subTokens.isString():
+			ps.value = ps.subTokens[1]
+			ps.pointer += 3
+		case tk == "}":
+			ps.pointer += 1
+			return &ps
+		default:
+			ps.value = tk
+			ps.pointer += 1
+		}
+		if ps.key != "" && ps.value != nil {
+			ps.node[ps.key] = ps.value
+			ps.key = ""
+			ps.value = nil
+		}
+	}
+	panic(ps)
+	return &ps
+}
+
+func (ps listParser) parse(token tokens) (node *listParser) {
+	ps.tokens = token
+	for ps.pointer < len(ps.tokens) {
+		var tk = ps.tokens[ps.pointer]
+		ps.subTokens = ps.tokens[ps.pointer:]
+		switch {
+		case tk == "[":
+			var tnode = new(listParser).parse(ps.subTokens[1:])
+			ps.pointer += tnode.pointer + 1
+			ps.array = append(ps.array, tnode.array)
+		case tk == "]":
+			ps.pointer += 1
+			return &ps
+		case tk == "{":
+			var tnode = new(parser).parse(ps.subTokens[1:])
+			ps.pointer += tnode.pointer + 1
+			ps.array = append(ps.array, tnode.node)
+		case ps.subTokens.isNullString():
+			ps.array = append(ps.array, "")
+		case tk == ",":
+			ps.pointer += 1
+		case ps.subTokens.isString():
+			ps.array = append(ps.array, ps.subTokens[1])
+			ps.pointer += 3
+		default:
+			ps.array = append(ps.array, tk)
+			ps.pointer += 1
+		}
+	}
+	panic(ps)
+	return &ps
+}
+
+func (tk tokens) isJson() bool {
+	return tk[0] == "{" && tk[1] == `"` && tk[3] == `"` && tk[4] == `:`
+}
+
+func (tk tokens) isNullString() bool {
+	return tk[0] == `"` && tk[1] == `"`
+}
+func (tk tokens) isArray() bool {
+	return tk[0] == `[`
+}
+func (tk tokens) isString() bool {
+	return tk[0] == `"` && tk[2] == `"`
+}
+func (tk tokens) isKey() bool {
+	return tk[0] == `"` && tk[2] == `"` && tk[3] == `:`
+}
+func (tk tokens) isNewJson() bool {
+	return tk.isKey() && tk[4:].isJson()
+}
