@@ -141,22 +141,3 @@ func (ps listParser) parse(token tokens) (node *listParser) {
 	return &ps
 }
 
-func (tk tokens) isJson() bool {
-	return tk[0] == "{" && tk[1] == `"` && tk[3] == `"` && tk[4] == `:`
-}
-
-func (tk tokens) isNullString() bool {
-	return tk[0] == `"` && tk[1] == `"`
-}
-func (tk tokens) isArray() bool {
-	return tk[0] == `[`
-}
-func (tk tokens) isString() bool {
-	return tk[0] == `"` && tk[2] == `"`
-}
-func (tk tokens) isKey() bool {
-	return tk[0] == `"` && tk[2] == `"` && tk[3] == `:`
-}
-func (tk tokens) isNewJson() bool {
-	return tk.isKey() && tk[4:].isJson()
-}

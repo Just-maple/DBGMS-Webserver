@@ -1,7 +1,5 @@
 package xdjson
 
-
-
 func (tp *tokenParser) parse() {
 	for _, c := range tp.raw {
 		char := string(c)
@@ -55,4 +53,24 @@ func (tp *tokenParser) pushToken(c string) {
 			tp.strFlag = true
 		}
 	}
+}
+
+func (tk tokens) isJson() bool {
+	return tk[0] == "{" && tk[1] == `"` && tk[3] == `"` && tk[4] == `:`
+}
+
+func (tk tokens) isNullString() bool {
+	return tk[0] == `"` && tk[1] == `"`
+}
+func (tk tokens) isArray() bool {
+	return tk[0] == `[`
+}
+func (tk tokens) isString() bool {
+	return tk[0] == `"` && tk[2] == `"`
+}
+func (tk tokens) isKey() bool {
+	return tk[0] == `"` && tk[2] == `"` && tk[3] == `:`
+}
+func (tk tokens) isNewJson() bool {
+	return tk.isKey() && tk[4:].isJson()
 }
