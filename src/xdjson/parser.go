@@ -4,8 +4,6 @@ import "logger"
 
 type Json struct {
 	Map         interface{}
-	Keys        []string
-	string      string
 	parser      parser
 	listParser  listParser
 	tokenParser *tokenParser
@@ -17,8 +15,14 @@ type parser struct {
 	key       string
 	subTokens tokens
 	value     interface{}
-	node      map[string]interface{}
+	node      jsonNode
 }
+
+type jsonNode struct {
+	Keys []string
+	Map map[string]interface{}
+}
+
 
 type listParser struct {
 	tokens    tokens
@@ -27,14 +31,6 @@ type listParser struct {
 	pointer   int
 }
 
-type tokenParser struct {
-	tokens     tokens
-	subTokens  tokens
-	tkStack    string
-	strFlag    bool
-	escapeFlag bool
-	raw        string
-}
 
 type tokens []string
 
@@ -61,7 +57,7 @@ func (j *Json) parse() {
 
 func (ps parser) parse(token tokens) (*parser) {
 	ps.tokens = token
-	ps.node = make(map[string]interface{})
+	ps.node = jsonNode{Map:make(map[string]interface{})}
 	for ps.pointer < len(ps.tokens) {
 		var tk = ps.tokens[ps.pointer]
 		ps.subTokens = ps.tokens[ps.pointer:]
@@ -99,7 +95,8 @@ func (ps parser) parse(token tokens) (*parser) {
 			ps.pointer += 1
 		}
 		if ps.key != "" && ps.value != nil {
-			ps.node[ps.key] = ps.value
+			ps.node.Map[ps.key] = ps.value
+			ps.node.Keys = append(ps.node.Keys, ps.key)
 			ps.key = ""
 			ps.value = nil
 		}

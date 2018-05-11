@@ -1,5 +1,14 @@
 package xdjson
 
+type tokenParser struct {
+	tokens     tokens
+	subTokens  tokens
+	tkStack    string
+	strFlag    bool
+	escapeFlag bool
+	raw        string
+}
+
 func (tp *tokenParser) parse() {
 	for _, c := range tp.raw {
 		char := string(c)
