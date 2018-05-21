@@ -8,6 +8,6 @@ func TestInit(t *testing.T) {
 	testj := Init(test)
 	var testmap = make(map[string]interface{})
 	json.Unmarshal([]byte(test), &testmap)
-	log.Debug(testj.Map)
-	log.Debug(testmap)
+	t.Log(testj.Map)
+	t.Log(testmap)
 }

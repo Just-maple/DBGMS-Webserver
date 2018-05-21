@@ -1,7 +1,5 @@
 package xdjson
 
-import "logger"
-
 type Json struct {
 	Map         interface{}
 	parser      parser
@@ -40,8 +38,6 @@ func Init(str string) (j Json) {
 	j.parse()
 	return
 }
-
-var log = logger.Log
 
 func (j *Json) parse() {
 	var tks = j.tokenParser.tokens[1:]

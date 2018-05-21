@@ -21,11 +21,8 @@ type ApiHandlerConfig interface {
 type ExtendApiHandler interface {
 	ws.ApiHandlers
 	RegisterAPI()
-	NewDataBase() DB
+	NewDataBase() dbx.DB
 	GetAccessConfig(args *APIArgs) permission.AccessConfig
-}
-
-type DB interface {
 }
 
 var _ ws.ApiHandlers = &DefaultApiHandler{}
@@ -37,7 +34,7 @@ type DefaultApiHandler struct {
 	ApiPostHandlers   JsonAPIFuncRoute
 	ApiPutHandlers    JsonAPIFuncRoute
 	ApiDeleteHandlers JsonAPIFuncRoute
-	db                DB
+	db                dbx.DB
 	config            ApiHandlerConfig
 	TableController   TableController
 }

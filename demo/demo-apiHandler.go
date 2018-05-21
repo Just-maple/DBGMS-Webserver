@@ -6,6 +6,7 @@ import (
 	"webserver/handler"
 	"webserver/controller/user"
 	"webserver/controller/table"
+	"webserver/dbx"
 )
 
 var log = logger.Log
@@ -74,11 +75,17 @@ func (h *ApiHandler) InitMetaConfig() {
 	//and before server start
 }
 
-func (h *ApiHandler) NewDataBase() handler.DB {
+type test struct {
+	Yttt string `json:"yttt" bson:"testb"`
+	Hhh  int `bson:"fff"`
+}
+
+func (h *ApiHandler) NewDataBase() dbx.DB {
 	//implement method NewDataBase
 	log.Debug("New DataBase From Handler")
 	//init your DataBase
 	h.db = new(DataBase)
+	h.db.RegisterStruct("ttt", test{})
 	return h.db
 	//should return interface implement server.DB
 }

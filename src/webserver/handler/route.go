@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"webserver/args/jsonx"
 	"webserver/args/session"
+	"webserver/args"
 )
 
 type JsonAPIFuncRoute map[string]*DefaultAPI
@@ -22,7 +23,39 @@ func (h *DefaultApiHandler) RegisterJsonAPI() {
 	h.router.POST("/api/:api", h.jsonAPI)
 	h.ApiPostHandlers.RegisterAPI("test", h.test)
 	h.ApiGetHandlers.RegisterAPI("test", h.test)
+	h.ApiPostHandlers.RegisterDefaultAPI("newItem", h.addNewItem)
+	h.ApiGetHandlers.RegisterDefaultAPI("getItems", h.getItems)
 	h.apiHandlers.RegisterAPI()
+}
+
+func (h *DefaultApiHandler) getItems(args *args.APIArgs) (ret interface{}, err error) {
+	key := args.Query("table")
+	st, has := h.db.GetNewStructSlice(key)
+	if has {
+		err = h.db.GetCollection(key).Find(nil).All(st)
+		ret = st
+	} else {
+		err = ErrAuthFailed
+		return
+	}
+	return
+}
+
+func (h *DefaultApiHandler) addNewItem(args *args.APIArgs) (ret interface{}, err error) {
+	key := args.JsonKey("table").MustString()
+	st, has := h.db.GetNewStruct(key)
+	if has {
+		item := args.JsonKey("item")
+		err = item.Unmarshal(st)
+		if err != nil {
+			return
+		}
+		err = h.db.GetCollection(key).Insert(st)
+	} else {
+		err = ErrAuthFailed
+		return
+	}
+	return
 }
 
 func (h *DefaultApiHandler) GetApiHandlersFromMethod(method string) (handler JsonAPIFuncRoute) {

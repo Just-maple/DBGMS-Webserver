@@ -5,6 +5,7 @@ import (
 )
 
 type DataBase struct {
+	dbx.Db
 	//database struct interface implement server.DB
 	AnyCollection   *dbx.Collection `collection:""`
 	WXUser          *dbx.Collection
