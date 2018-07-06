@@ -16,12 +16,12 @@ func (c *Controller) Init() {
 
 func (c *Controller) initApi() {
 	c.registerUserPwdLoginApi(ApiAddrLogin)
-	c.registerNewUserApi(ApiAddrUser)
+	//c.registerNewUserApi(ApiAddrUser)
 	c.registerSetUserLevelApi(ApiAddrUserLevel)
 	c.registerUserSessionLoginAuthApi(ApiAuthLogin)
 	c.registerChangeUserPasswordApi(ApiAddrPassword)
 	c.registerLogOutApi(ApiAddrLogout)
-	c.registerGetAllUsersApi(ApiAddrAllUsers)
+	//c.registerGetAllUsersApi(ApiAddrAllUsers)
 }
 
 func (c *Controller) initUser() {
