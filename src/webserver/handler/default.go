@@ -80,7 +80,7 @@ func (h *DefaultApiHandler) setDefaultApiHandlerAndMountConfig() {
 				panic("Found More than One Default ApiHandler")
 			}
 		}
-		
+
 	}
 	if !flag {
 		panic("Not Found Default ApiHandler")

@@ -18,9 +18,8 @@ type parser struct {
 
 type jsonNode struct {
 	Keys []string
-	Map map[string]interface{}
+	Map  map[string]interface{}
 }
-
 
 type listParser struct {
 	tokens    tokens
@@ -28,7 +27,6 @@ type listParser struct {
 	subTokens tokens
 	pointer   int
 }
-
 
 type tokens []string
 
@@ -51,9 +49,9 @@ func (j *Json) parse() {
 	}
 }
 
-func (ps parser) parse(token tokens) (*parser) {
+func (ps parser) parse(token tokens) *parser {
 	ps.tokens = token
-	ps.node = jsonNode{Map:make(map[string]interface{})}
+	ps.node = jsonNode{Map: make(map[string]interface{})}
 	for ps.pointer < len(ps.tokens) {
 		var tk = ps.tokens[ps.pointer]
 		ps.subTokens = ps.tokens[ps.pointer:]
@@ -133,4 +131,3 @@ func (ps listParser) parse(token tokens) (node *listParser) {
 	panic(ps)
 	return &ps
 }
-

@@ -32,7 +32,7 @@ func (tp *tokenParser) parse() {
 		default:
 			tp.tkStack += char
 		}
-		
+
 	}
 	return
 }

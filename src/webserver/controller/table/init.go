@@ -1,8 +1,8 @@
 package table
 
 import (
-	"os"
 	"io/ioutil"
+	"os"
 	pm "webserver/permission"
 )
 

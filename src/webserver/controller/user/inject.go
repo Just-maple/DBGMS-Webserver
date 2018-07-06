@@ -1,11 +1,11 @@
 package user
 
 import (
-	"webserver/dbx"
 	"webserver/controller"
+	"webserver/dbx"
 )
 
-func InitController(Collection *dbx.Collection) (*Controller) {
+func InitController(Collection *dbx.Collection) *Controller {
 	return &Controller{DefaultController: controller.NewDefaultController(Collection)}
 }
 

@@ -1,8 +1,8 @@
 package handler
 
 import (
-	. "webserver/args"
 	"webserver/ajax"
+	. "webserver/args"
 )
 
 func (h DefaultApiHandler) getAjaxQuery(args *APIArgs) (res *ajax.AjaxQuery, err error) {

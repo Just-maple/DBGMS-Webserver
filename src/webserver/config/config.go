@@ -83,7 +83,7 @@ func (cfg *DefaultConfig) GetSessionExpiredTime() int {
 	if cfg.SessionExpiredTime == 0 {
 		cfg.SessionExpiredTime = defaultSessionExpiredTime
 		log.Noticef("Undefined SessionExpiredTime,use default [ %v ]",
-			defaultSessionExpiredTime, )
+			defaultSessionExpiredTime)
 	}
 	return cfg.SessionExpiredTime
 }

@@ -2,6 +2,7 @@ package server
 
 import (
 	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 	"logger"
 	"net"
@@ -38,7 +39,7 @@ func (svr *WebServer) Start() (err error) {
 }
 
 func (svr *WebServer) initSession() gin.HandlerFunc {
-	store := sessions.NewCookieStore([]byte(svr.serverConfig.GetSessionSecretKey()))
+	store := cookie.NewStore([]byte(svr.serverConfig.GetSessionSecretKey()))
 	store.Options(sessions.Options{MaxAge: svr.serverConfig.GetSessionExpiredTime()})
 	log.Debugf("Init Session,session expired in [ %v ]",
 		time.Unix(int64(svr.serverConfig.GetSessionExpiredTime()), 0).Sub(time.Unix(0, 0)).String())

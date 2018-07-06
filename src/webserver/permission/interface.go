@@ -37,10 +37,9 @@ type AccessConfig interface {
 }
 
 type PermissionConfig struct {
-	TableType  reflect.Type
-	FieldType  reflect.Type
+	TableType reflect.Type
+	FieldType reflect.Type
 }
-
 
 func NewPermissionConfig(table TableConfig, field FieldConfig) *PermissionConfig {
 	return &PermissionConfig{

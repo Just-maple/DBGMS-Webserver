@@ -1,12 +1,12 @@
 package table
 
 import (
-	"webserver/permission"
+	"access"
+	"net/http"
 	"webserver/args"
 	"webserver/controller"
 	"webserver/dbx"
-	"access"
-	"net/http"
+	"webserver/permission"
 )
 
 type Controller struct {
@@ -62,10 +62,10 @@ func (c *Controller) Init() {
 
 func (c *Controller) RegisterAPI() {
 	allPermissionApi := c.DefaultController.MakeRegisterGroupByMethod(http.MethodPost, c.AuthAllPermission)
-	
+
 	allPermissionApi.RegisterDefaultAPI("saveAllConfig", c.SaveAllTableConfig)
 	allPermissionApi.RegisterDefaultAPI("editTable", c.EditTable)
-	
+
 	c.RegisterGetApi("table", c.GetAllConfigTable, c.AuthAllPermission)
 	c.RegisterPostApi("table", c.GetTableFromHashStore)
 }

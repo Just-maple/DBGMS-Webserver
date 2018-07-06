@@ -3,10 +3,10 @@ package main
 import (
 	"logger"
 	"webserver/args"
-	"webserver/handler"
-	"webserver/controller/user"
 	"webserver/controller/table"
+	"webserver/controller/user"
 	"webserver/dbx"
+	"webserver/handler"
 )
 
 var log = logger.Log
@@ -19,7 +19,7 @@ type ApiHandler struct {
 	//must implement default handler
 	db *DataBase
 	//implement singleton DataBase
-	
+
 	MetaData
 	//you can define any extend data
 	UserController  *user.Controller
@@ -53,18 +53,18 @@ func (h *ApiHandler) ApiTest(args *args.APIArgs) (ret interface{}, err error) {
 	isValidUser, userId := args.UserId() //get user Id from session
 	//return bool(is user valid) and string(user Id,must be bson.ObjectId.Hex string)
 	log.Debug(isValidUser, userId)
-	
+
 	return
 }
 
 func (h *ApiHandler) InitMetaConfig() {
 	//implement method InitMetaConfig
 	log.Debug("Init Some Other Custom Config")
-	
+
 	//init default user controller with your user database collection
 	h.UserController = user.InitController(h.db.WXUser)
 	h.InjectController(h.UserController)
-	
+
 	//inject your table controller by collection store
 	h.TableController = table.InitAdminTableControllerByCollection(h.db.PermissionTable)
 	// or user path to store your table config
@@ -77,7 +77,7 @@ func (h *ApiHandler) InitMetaConfig() {
 
 type test struct {
 	Yttt string `json:"yttt" bson:"testb"`
-	Hhh  int `bson:"fff"`
+	Hhh  int    `bson:"fff"`
 }
 
 func (h *ApiHandler) NewDataBase() dbx.DB {

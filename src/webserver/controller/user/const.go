@@ -7,7 +7,7 @@ const (
 	MethodPost = http.MethodPost
 
 	ApiAddrLogin     = "login"
-	ApiAddrLogout     = "logout"
+	ApiAddrLogout    = "logout"
 	ApiAuthLogin     = "auth"
 	ApiAddrUserLevel = "userLevel"
 	ApiAddrPassword  = "password"

@@ -44,7 +44,7 @@ func (db *Db) GetNewStructSlice(name string) (interface{}, bool) {
 	}
 	return reflect.New(reflect.SliceOf(st)).Interface(), h
 }
-func (db *Db) RegisterStruct(name string, in interface{}) () {
+func (db *Db) RegisterStruct(name string, in interface{}) {
 	if db.structMap == nil {
 		db.structMap = make(map[string]reflect.Type)
 	}
@@ -61,7 +61,7 @@ type DB interface {
 	SetDB(DB *mgo.Database)
 	GetNewStruct(name string) (interface{}, bool)
 	GetNewStructSlice(name string) (interface{}, bool)
-	RegisterStruct(name string, in interface{}) ()
+	RegisterStruct(name string, in interface{})
 }
 
 func NewMgoDataBase(mgoURL, dbName string) (db *mgo.Database, err error) {
@@ -70,7 +70,7 @@ func NewMgoDataBase(mgoURL, dbName string) (db *mgo.Database, err error) {
 		log.Fatalf("Parse MgoDB Url err(%v)", err)
 		return
 	}
-	
+
 	dbSession, err := mgo.DialWithTimeout(mgoURL, time.Second*60)
 	if err != nil {
 		log.Fatalf("Connect MgoDB Error = (%v)", err)

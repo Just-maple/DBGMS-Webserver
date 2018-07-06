@@ -3,9 +3,9 @@ package user
 import (
 	"gopkg.in/mgo.v2/bson"
 	"time"
+	"webserver/controller"
 	"webserver/dbx"
 	"webserver/errorx"
-	"webserver/controller"
 	"webserver/utilsx"
 )
 

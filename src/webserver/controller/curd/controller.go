@@ -2,9 +2,9 @@ package curd
 
 import (
 	. "webserver/args"
+	"webserver/controller"
 	"webserver/dbx"
 	. "webserver/handler"
-	"webserver/controller"
 )
 
 type CurdController struct {

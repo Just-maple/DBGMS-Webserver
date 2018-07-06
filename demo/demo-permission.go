@@ -2,10 +2,10 @@ package main
 
 import (
 	"access"
-	"webserver/permission"
+	"gopkg.in/mgo.v2/bson"
 	"webserver/args"
 	"webserver/controller/user"
-	"gopkg.in/mgo.v2/bson"
+	"webserver/permission"
 )
 
 //define how user auth by your access config

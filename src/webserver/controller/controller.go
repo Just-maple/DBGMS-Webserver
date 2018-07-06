@@ -3,8 +3,8 @@ package controller
 import (
 	"net/http"
 	"webserver/args"
-	"webserver/handler"
 	"webserver/dbx"
+	"webserver/handler"
 )
 
 type DefaultController struct {
@@ -12,7 +12,7 @@ type DefaultController struct {
 	Collection *dbx.Collection
 }
 
-func NewDefaultController(collection *dbx.Collection) (*DefaultController) {
+func NewDefaultController(collection *dbx.Collection) *DefaultController {
 	return &DefaultController{
 		Collection: collection,
 	}
