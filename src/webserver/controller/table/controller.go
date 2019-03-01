@@ -42,11 +42,7 @@ func (c *Controller) GetConfigTableFromArgs(args *APIArgs) (tableConfig map[stri
 		log.Error(err)
 		return
 	}
-	err = json.Unmarshal(storeBytes, &storeHash)
-	if err != nil {
-		log.Error(err)
-		return
-	}
+	json.Unmarshal(storeBytes, &storeHash)
 	for key := range tableConfig {
 		if storeHash[key] == tableConfig[key][:32] {
 			tableConfig[key] = storeHash[key]

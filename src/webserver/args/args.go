@@ -24,6 +24,10 @@ func (arg *APIArgs) Time() (st, et time.Time) {
 	return utilsx.TransTime(arg.context)
 }
 
+func (arg *APIArgs) Session() *session.UserSession {
+	return arg.session
+}
+
 func (arg *APIArgs) IP() string {
 	return arg.context.ClientIP()
 }

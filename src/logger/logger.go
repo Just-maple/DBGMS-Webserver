@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	DefaultLogFormat = `%{color}%{time:15:04:05} %{shortfile} %{longfunc} ▶ [%{level:.4s}:%{id:03x}%{color:reset}] %{message}`
+	DefaultLogFormat = `%{color}%{time:2006-01-02 15:04:05} %{shortfile} %{longfunc} ▶ [%{level:.4s}:%{id:03x}%{color:reset}] %{message}`
 )
 
 var Log *logging.Logger
